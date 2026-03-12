@@ -1,0 +1,17 @@
+[
+  { "id": 1, "codigo": "17101", "nome": "Secretaria de Fazenda e Planejamento", "tipo": "Secretaria", "sigla": "SEFAZ-PE" },
+  { "id": 2, "codigo": "17201", "nome": "Secretaria de Educação e Esportes", "tipo": "Secretaria", "sigla": "SEE-PE" },
+  { "id": 3, "codigo": "17301", "nome": "Secretaria de Saúde", "tipo": "Secretaria", "sigla": "SES-PE" },
+  { "id": 4, "codigo": "17401", "nome": "Secretaria de Segurança Pública", "tipo": "Secretaria", "sigla": "SSP-PE" },
+  { "id": 5, "codigo": "17501", "nome": "Secretaria de Infraestrutura e Recursos Hídricos", "tipo": "Secretaria", "sigla": "SEIRH-PE" },
+  { "id": 6, "codigo": "17601", "nome": "Secretaria de Desenvolvimento Econômico", "tipo": "Secretaria", "sigla": "SDEC-PE" },
+  { "id": 7, "codigo": "17701", "nome": "Secretaria de Desenvolvimento Social e Direitos Humanos", "tipo": "Secretaria", "sigla": "SDSDH-PE" },
+  { "id": 8, "codigo": "17801", "nome": "Secretaria de Agricultura e Reforma Agrária", "tipo": "Secretaria", "sigla": "SARA-PE" },
+  { "id": 9, "codigo": "17901", "nome": "Secretaria de Meio Ambiente e Sustentabilidade", "tipo": "Secretaria", "sigla": "SEMAS-PE" },
+  { "id": 10, "codigo": "17002", "nome": "Assembleia Legislativa de Pernambuco", "tipo": "Poder Legislativo", "sigla": "ALEPE" },
+  { "id": 11, "codigo": "17003", "nome": "Tribunal de Contas do Estado de Pernambuco", "tipo": "Tribunal de Contas", "sigla": "TCE-PE" },
+  { "id": 12, "codigo": "17004", "nome": "Tribunal de Justiça de Pernambuco", "tipo": "Poder Judiciário", "sigla": "TJPE" },
+  { "id": 13, "codigo": "17005", "nome": "Ministério Público do Estado de Pernambuco", "tipo": "Ministério Público", "sigla": "MPPE" },
+  { "id": 14, "codigo": "17006", "nome": "Defensoria Pública do Estado de Pernambuco", "tipo": "Defensoria Pública", "sigla": "DPPE" },
+  { "id": 15, "codigo": "17007", "nome": "Gabinete do Governador", "tipo": "Governo", "sigla": "GGO-PE" }
+]
