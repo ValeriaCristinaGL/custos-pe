@@ -84,7 +84,6 @@ public class ReceitaService : IReceitaService
         receita.Descricao = dto.Descricao;
 
         await _context.SaveChangesAsync();
-        await _context.Entry(receita).Reference(r => r.Orgao).LoadAsync();
 
         return ToDTO(receita);
     }

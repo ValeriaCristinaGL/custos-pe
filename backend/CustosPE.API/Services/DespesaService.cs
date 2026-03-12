@@ -88,7 +88,6 @@ public class DespesaService : IDespesaService
         despesa.Descricao = dto.Descricao;
 
         await _context.SaveChangesAsync();
-        await _context.Entry(despesa).Reference(d => d.Orgao).LoadAsync();
 
         return ToDTO(despesa);
     }
