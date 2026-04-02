@@ -29,44 +29,50 @@ public class DataSyncService : IDataSyncService
     {
         _logger.LogInformation("Starting empenho sync for year {Ano}", ano);
 
-        var externalData = await _dataClient.GetEmpenhosAsync(ano);
+        var orgaos = await _orgaoRepository.GetAllAsync();
+        if (!orgaos.Any())
+        {
+            _logger.LogWarning("Nenhum orgao encontrado para sincronizar empenhos fatiados.");
+            return 0; // Necessário pelo menos Orgaos base
+        }
+
         var count = 0;
 
-        foreach (var item in externalData)
+        foreach (var orgaoModel in orgaos)
         {
-            var orgao = await GetOrCreateOrgaoAsync(item.CodigoOrgao, item.NomeOrgao, item.SiglaOrgao);
-            var existing = await _unitOfWork.Empenhos.GetByNumeroAsync(item.NumeroEmpenho, item.Ano);
+            var externalData = await _dataClient.GetEmpenhosByOrgaoAsync(ano, orgaoModel.Codigo);
 
-            if (existing is not null)
+            foreach (var item in externalData)
             {
-                // Upsert: Update existing
-                existing.Valor = item.Valor;
-                existing.Credor = item.Credor;
-                existing.CnpjCredor = CnpjHelper.Sanitize(item.CnpjCredor);
-                existing.Descricao = item.Descricao;
-                existing.ClassificacaoMcasp = McaspMapper.MapToClassificacao(item.NaturezaDespesa, item.Descricao);
-                _logger.LogDebug("Updated empenho {NumeroEmpenho}", item.NumeroEmpenho);
-            }
-            else
-            {
-                // Insert new
-                var empenho = new Empenho
+                var orgao = await GetOrCreateOrgaoAsync(item.CodigoOrgao, item.NomeOrgao, item.SiglaOrgao);
+                var existing = await _unitOfWork.Empenhos.GetByNumeroAsync(item.NumeroEmpenho, item.Ano);
+
+                if (existing is not null)
                 {
-                    NumeroEmpenho = item.NumeroEmpenho,
-                    Ano = item.Ano,
-                    OrgaoGovernoId = orgao.Id,
-                    Credor = item.Credor,
-                    CnpjCredor = CnpjHelper.Sanitize(item.CnpjCredor),
-                    Valor = item.Valor,
-                    DataEmpenho = DateTime.SpecifyKind(item.DataEmpenho, DateTimeKind.Utc),
-                    Descricao = item.Descricao,
-                    ClassificacaoMcasp = McaspMapper.MapToClassificacao(item.NaturezaDespesa, item.Descricao)
-                };
-                await _unitOfWork.Empenhos.AddAsync(empenho);
-                _logger.LogDebug("Inserted new empenho {NumeroEmpenho}", item.NumeroEmpenho);
+                    existing.Valor = item.Valor;
+                    existing.Credor = item.Credor;
+                    existing.CnpjCredor = CnpjHelper.Sanitize(item.CnpjCredor);
+                    existing.Descricao = item.Descricao;
+                    existing.ClassificacaoMcasp = McaspMapper.MapToClassificacao(item.NaturezaDespesa, item.Descricao);
+                }
+                else
+                {
+                    var empenho = new Empenho
+                    {
+                        NumeroEmpenho = item.NumeroEmpenho,
+                        Ano = item.Ano,
+                        OrgaoGovernoId = orgao.Id,
+                        Credor = item.Credor,
+                        CnpjCredor = CnpjHelper.Sanitize(item.CnpjCredor),
+                        Valor = item.Valor,
+                        DataEmpenho = DateTime.SpecifyKind(item.DataEmpenho, DateTimeKind.Utc),
+                        Descricao = item.Descricao,
+                        ClassificacaoMcasp = McaspMapper.MapToClassificacao(item.NaturezaDespesa, item.Descricao)
+                    };
+                    await _unitOfWork.Empenhos.AddAsync(empenho);
+                }
+                count++;
             }
-
-            count++;
         }
 
         await _unitOfWork.CommitAsync();

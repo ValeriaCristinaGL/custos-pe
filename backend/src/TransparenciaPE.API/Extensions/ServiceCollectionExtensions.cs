@@ -37,7 +37,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IContratoRepository, ContratoRepository>();
         services.AddScoped<IUnitOfWork, UoW.UnitOfWork>();
         services.AddScoped<IDashboardQueryService, DapperDashboardQueryService>();
-        services.AddScoped<IPEDataClient, FakePEDataClient>();
+        services.AddHttpClient<IPEDataClient, TcePEDataClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://sistemas.tce.pe.gov.br/");
+            client.Timeout = TimeSpan.FromSeconds(60);
+        });
 
         return services;
     }

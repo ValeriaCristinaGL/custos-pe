@@ -36,20 +36,20 @@ public class DashboardController : ControllerBase
     /// <summary>
     /// Returns comparative data across government agencies for a given year (RF001).
     /// </summary>
-    [HttpGet("comparativo-orgaos")]
+    [HttpGet("comparativo")]
     [ProducesResponseType(typeof(ComparativoOrgaosDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ComparativoOrgaosDto>> GetComparativoOrgaos([FromQuery] int ano)
+    public async Task<ActionResult<ComparativoOrgaosDto>> GetComparativo([FromQuery] int ano)
     {
         var result = await _dashboardService.GetComparativoOrgaosAsync(ano);
         return Ok(result);
     }
 
     /// <summary>
-    /// Returns hierarchical drill-down data (Agency → Cost Item) (RF001).
+    /// Returns hierarchical drill-down data (Agency → Cost Item) (RF001) e evolucao.
     /// </summary>
-    [HttpGet("drill-down")]
+    [HttpGet("evolucao")]
     [ProducesResponseType(typeof(DrillDownDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<DrillDownDto>> GetDrillDown(
+    public async Task<ActionResult<DrillDownDto>> GetEvolucao(
         [FromQuery] string codigoOrgao, [FromQuery] int? ano)
     {
         var result = await _dashboardService.GetDrillDownAsync(codigoOrgao, ano);
