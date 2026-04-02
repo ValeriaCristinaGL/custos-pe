@@ -1,3 +1,4 @@
+using FluentAssertions;
 using TransparenciaPE.Application.Helpers;
 
 namespace TransparenciaPE.UnitTests.Helpers;
@@ -5,60 +6,20 @@ namespace TransparenciaPE.UnitTests.Helpers;
 public class McaspMapperTests
 {
     [Theory]
-    [InlineData("3.3.90.30", "Material de Consumo", "3.3.90.30 - Material de Consumo")]
-    [InlineData("3.3.90.39", "Serviços de Terceiros - PJ", "3.3.90.39 - Serviços de Terceiros - PJ")]
-    [InlineData("4.4.90.52", "Equipamentos e Material Permanente", "4.4.90.52 - Equipamentos e Material Permanente")]
-    public void MapToClassificacao_ShouldCombineNaturezaAndDescription(
-        string naturezaDespesa, string descricao, string expected)
+    [InlineData("3.1.90.11", true, false, false)] // Pessoal e Encargos Sociais
+    [InlineData("3.3.90.30", false, true, false)] // Outras Despesas Correntes (Custeio)
+    [InlineData("4.4.90.51", false, false, true)] // Investimentos
+    [InlineData("4.6.90.71", false, false, false)] // Amortização (não é Pessoal, Custeio ou Investimento primário nos dashboards)
+    [InlineData("10.0.00.00", false, false, false)] // Inválido/Outros
+    [InlineData("", false, false, false)] // Vazio
+    public void ClassificarDespesa_Returns_CorrectFlags(string natureza, bool isPessoal, bool isCusteio, bool isInvestimento)
     {
         // Act
-        var result = McaspMapper.MapToClassificacao(naturezaDespesa, descricao);
+        var classificacao = McaspMapper.ClassificarDespesa(natureza);
 
         // Assert
-        Assert.Equal(expected, result);
-    }
-
-    [Fact]
-    public void MapToClassificacao_ShouldHandleEmptyNatureza()
-    {
-        // Act
-        var result = McaspMapper.MapToClassificacao("", "Descricao");
-
-        // Assert
-        Assert.Equal("Não Classificado - Descricao", result);
-    }
-
-    [Fact]
-    public void MapToClassificacao_ShouldHandleEmptyDescription()
-    {
-        // Act
-        var result = McaspMapper.MapToClassificacao("3.3.90.30", "");
-
-        // Assert
-        Assert.Equal("3.3.90.30 - Sem Descrição", result);
-    }
-
-    [Fact]
-    public void MapToClassificacao_ShouldHandleBothEmpty()
-    {
-        // Act
-        var result = McaspMapper.MapToClassificacao("", "");
-
-        // Assert
-        Assert.Equal("Não Classificado", result);
-    }
-
-    [Theory]
-    [InlineData("3", true)]   // Despesas Correntes
-    [InlineData("4", true)]   // Despesas de Capital
-    [InlineData("1", false)]  // Receita (não é despesa)
-    [InlineData("", false)]
-    public void IsDespesa_ShouldIdentifyExpenseCategories(string natureza, bool expected)
-    {
-        // Act
-        var result = McaspMapper.IsDespesa(natureza);
-
-        // Assert
-        Assert.Equal(expected, result);
+        classificacao.IsPessoal.Should().Be(isPessoal);
+        classificacao.IsCusteio.Should().Be(isCusteio);
+        classificacao.IsInvestimento.Should().Be(isInvestimento);
     }
 }
