@@ -97,4 +97,27 @@ public class FakePEDataClient : IPEDataClient
 
         return Task.FromResult<IEnumerable<ExternalContratoData>>(data);
     }
+
+    public Task<IEnumerable<ExternalReceitaData>> GetReceitasAsync(int ano)
+    {
+        var data = new List<ExternalReceitaData>
+        {
+            new() { ValorReceita = 1000000m, Mes = 1, Ano = ano, Origem = "Impostos", CodigoOrgao = "SEE" }
+        };
+        return Task.FromResult<IEnumerable<ExternalReceitaData>>(data);
+    }
+
+    public Task<IEnumerable<ExternalOrcamentoData>> GetOrcamentoAsync(int ano)
+    {
+        var data = new List<ExternalOrcamentoData>
+        {
+            new() { Ano = ano, ValorDotacaoInicial = 5000000m, ValorDotacaoAtualizada = 6000000m, CodigoOrgao = "SEE" }
+        };
+        return Task.FromResult<IEnumerable<ExternalOrcamentoData>>(data);
+    }
+
+    public Task<int> GetTotalServidoresAsync(string codigoOrgao)
+    {
+        return Task.FromResult(1200);
+    }
 }

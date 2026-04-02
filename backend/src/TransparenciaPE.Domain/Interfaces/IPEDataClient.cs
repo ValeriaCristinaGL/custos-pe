@@ -7,6 +7,9 @@ public interface IPEDataClient
 {
     Task<IEnumerable<ExternalEmpenhoData>> GetEmpenhosAsync(int ano);
     Task<IEnumerable<ExternalContratoData>> GetContratosAsync(int ano);
+    Task<IEnumerable<ExternalReceitaData>> GetReceitasAsync(int ano);
+    Task<IEnumerable<ExternalOrcamentoData>> GetOrcamentoAsync(int ano);
+    Task<int> GetTotalServidoresAsync(string codigoOrgao);
 }
 
 /// <summary>
@@ -44,3 +47,21 @@ public class ExternalContratoData
     public DateTime? DataFim { get; set; }
     public string Objeto { get; set; } = string.Empty;
 }
+
+public class ExternalReceitaData
+{
+    public decimal ValorReceita { get; set; }
+    public int Mes { get; set; }
+    public int Ano { get; set; }
+    public string Origem { get; set; } = string.Empty;
+    public string CodigoOrgao { get; set; } = string.Empty;
+}
+
+public class ExternalOrcamentoData
+{
+    public int Ano { get; set; }
+    public decimal ValorDotacaoInicial { get; set; }
+    public decimal ValorDotacaoAtualizada { get; set; }
+    public string CodigoOrgao { get; set; } = string.Empty;
+}
+

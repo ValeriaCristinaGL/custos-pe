@@ -9,4 +9,7 @@ public class OrgaoGoverno : BaseEntity
 
     public ICollection<Empenho> Empenhos { get; set; } = new List<Empenho>();
     public ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
+
+    public int TotalServidores { get; set; }
+    public decimal OrcamentoAtual { get; set; }
 }
