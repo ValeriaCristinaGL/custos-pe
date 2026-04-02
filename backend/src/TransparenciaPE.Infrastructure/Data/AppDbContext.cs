@@ -12,6 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
     public DbSet<Contrato> Contratos => Set<Contrato>();
     public DbSet<OrgaoGoverno> OrgaosGoverno => Set<OrgaoGoverno>();
+    public DbSet<Receita> Receitas => Set<Receita>();
+    public DbSet<Orcamento> Orcamentos => Set<Orcamento>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
