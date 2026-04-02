@@ -2,33 +2,24 @@ namespace TransparenciaPE.Application.Helpers;
 
 public static class McaspMapper
 {
-    public static McaspClassificacao ClassificarDespesa(string naturezaDaDespesa)
+    public static string MapToClassificacao(string naturezaDaDespesa, string descricao = "")
     {
-        var classificacao = new McaspClassificacao();
-
         if (string.IsNullOrWhiteSpace(naturezaDaDespesa))
-            return classificacao;
+            return "Outros";
 
         if (naturezaDaDespesa.StartsWith("3.1"))
         {
-            classificacao.IsPessoal = true;
+            return "Pessoal e Encargos Sociais";
         }
         else if (naturezaDaDespesa.StartsWith("3.3"))
         {
-            classificacao.IsCusteio = true;
+            return "Custeio";
         }
         else if (naturezaDaDespesa.StartsWith("4.4"))
         {
-            classificacao.IsInvestimento = true;
+            return "Investimentos";
         }
 
-        return classificacao;
+        return "Outros";
     }
-}
-
-public class McaspClassificacao
-{
-    public bool IsPessoal { get; set; }
-    public bool IsCusteio { get; set; }
-    public bool IsInvestimento { get; set; }
 }
