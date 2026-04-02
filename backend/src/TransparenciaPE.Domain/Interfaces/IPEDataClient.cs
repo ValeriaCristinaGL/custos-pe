@@ -6,6 +6,7 @@ namespace TransparenciaPE.Domain.Interfaces;
 public interface IPEDataClient
 {
     Task<IEnumerable<ExternalEmpenhoData>> GetEmpenhosAsync(int ano);
+    Task<IEnumerable<ExternalEmpenhoData>> GetEmpenhosByOrgaoAsync(int ano, string codigoOrgao);
     Task<IEnumerable<ExternalContratoData>> GetContratosAsync(int ano);
     Task<IEnumerable<ExternalReceitaData>> GetReceitasAsync(int ano);
     Task<IEnumerable<ExternalOrcamentoData>> GetOrcamentoAsync(int ano);

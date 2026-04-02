@@ -19,6 +19,8 @@ public class TcePEDataClient : IPEDataClient
 
     public Task<IEnumerable<ExternalEmpenhoData>> GetEmpenhosAsync(int ano) => throw new NotImplementedException();
     
+    public Task<IEnumerable<ExternalEmpenhoData>> GetEmpenhosByOrgaoAsync(int ano, string codigoOrgao) => throw new NotImplementedException();
+    
     public Task<IEnumerable<ExternalContratoData>> GetContratosAsync(int ano) => throw new NotImplementedException();
     
     public async Task<IEnumerable<ExternalReceitaData>> GetReceitasAsync(int ano)

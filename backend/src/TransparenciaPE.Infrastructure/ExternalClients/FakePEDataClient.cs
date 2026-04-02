@@ -65,6 +65,11 @@ public class FakePEDataClient : IPEDataClient
         return Task.FromResult<IEnumerable<ExternalEmpenhoData>>(data);
     }
 
+    public Task<IEnumerable<ExternalEmpenhoData>> GetEmpenhosByOrgaoAsync(int ano, string codigoOrgao)
+    {
+        return GetEmpenhosAsync(ano).ContinueWith(t => t.Result.Where(e => e.CodigoOrgao == codigoOrgao));
+    }
+
     public Task<IEnumerable<ExternalContratoData>> GetContratosAsync(int ano)
     {
         var data = new List<ExternalContratoData>
