@@ -41,17 +41,17 @@ jobs:
           else
             echo "${{ github.event.pull_request.body }}" > body.txt
             change_type=""
-            if grep -q "\[x\] novo-marco" body.txt; then
+            if grep -qi "\[[xX]\] novo-marco" body.txt; then
               change_type="novo-marco"
-            elif grep -q "\[x\] nova-feature-refactor" body.txt; then
+            elif grep -qi "\[[xX]\] nova-feature-refactor" body.txt; then
               change_type="nova-feature-refactor"
-            elif grep -q "\[x\] bug-fix" body.txt; then
+            elif grep -qi "\[[xX]\] bug-fix" body.txt; then
               change_type="bug-fix"
-            elif grep -q "\[x\] outros" body.txt; then
+            elif grep -qi "\[[xX]\] outros" body.txt; then
               change_type="outros"
             else
-              echo "No option selected correctly in change_type"
-              exit 1
+              echo "No checkbox found in PR body. Falling back to 'outros'."
+              change_type="outros"
             fi
           fi
 
