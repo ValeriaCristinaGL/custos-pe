@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-<<<<<<< HEAD
 using Npgsql;
-=======
->>>>>>> origin/master
+using Npgsql;
 using TransparenciaPE.API.BackgroundServices;
 using TransparenciaPE.API.Extensions;
 using TransparenciaPE.API.Middlewares;
@@ -46,7 +44,6 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-<<<<<<< HEAD
 
     var maxRetries = 10;
     var delay = TimeSpan.FromSeconds(5);
@@ -63,9 +60,6 @@ using (var scope = app.Services.CreateScope())
             await Task.Delay(delay);
         }
     }
-=======
-    await dbContext.Database.MigrateAsync();
->>>>>>> origin/master
 }
 
 app.Run();
