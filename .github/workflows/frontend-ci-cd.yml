@@ -171,17 +171,6 @@ jobs:
         run: |
           docker tag ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:latest
 
-      - name: Install Docker Scout
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh -o install-scout.sh
-          sh install-scout.sh
-
-      - name: Scan image for critical vulnerabilities
-        continue-on-error: true
-        run: |
-          docker scout cves --only-severity critical ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG || true
-          docker scout quickview ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG || true
-
       - name: Push Docker images (version and latest)
         run: |
           docker push ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG
