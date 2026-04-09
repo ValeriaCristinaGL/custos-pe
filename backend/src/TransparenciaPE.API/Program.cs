@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Npgsql;
 using TransparenciaPE.API.BackgroundServices;
 using TransparenciaPE.API.Extensions;
 using TransparenciaPE.API.Middlewares;
