@@ -180,8 +180,10 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/custos-pe-frontend:latest
 
       - name: Trigger Portainer webhook to update Frontend service
-        if: secrets.PORTAINER_WEBHOOK_FRONTEND != ''
-        run: curl -X POST ${{ secrets.PORTAINER_WEBHOOK_FRONTEND }}
+        if: env.PORTAINER_WEBHOOK_FRONTEND != ''
+        env:
+          PORTAINER_WEBHOOK_FRONTEND: ${{ secrets.PORTAINER_WEBHOOK_FRONTEND }}
+        run: curl -X POST "$PORTAINER_WEBHOOK_FRONTEND"
 
   release-creation:
     name: 3. Automatic Creation Process of New Releases
