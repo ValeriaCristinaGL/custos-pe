@@ -109,6 +109,7 @@ jobs:
     needs: tag-creation
     env:
       CREATED_TAG: ${{ needs.tag-creation.outputs.created_tag }}
+      REGISTRY_OWNER: ${{ github.repository_owner }}
     if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     permissions:
       contents: read
@@ -153,16 +154,22 @@ jobs:
           username: ${{ secrets.GHCR_USER != '' && secrets.GHCR_USER || github.actor }}
           password: ${{ secrets.GHCR_TOKEN != '' && secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
 
+      - name: Convert registry owner to lowercase
+        id: lowercase_owner
+        run: |
+          REGISTRY_OWNER_LOWER=$(echo "$REGISTRY_OWNER" | tr '[:upper:]' '[:lower:]')
+          echo "owner=$REGISTRY_OWNER_LOWER" >> $GITHUB_OUTPUT
+
       - name: Build Docker image
         run: |
           docker build \
             --build-arg NEXT_PUBLIC_APP_VERSION=$CREATED_TAG \
-            -t ghcr.io/${{ github.repository_owner }}/custos-pe-frontend:$CREATED_TAG \
+            -t ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG \
             -f Dockerfile .
 
       - name: Tag image as latest
         run: |
-          docker tag ghcr.io/${{ github.repository_owner }}/custos-pe-frontend:$CREATED_TAG ghcr.io/${{ github.repository_owner }}/custos-pe-frontend:latest
+          docker tag ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:latest
 
       - name: Install Docker Scout
         run: |
@@ -171,13 +178,13 @@ jobs:
 
       - name: Scan image for critical vulnerabilities
         run: |
-          docker scout cves --only-severity critical --exit-code ghcr.io/${{ github.repository_owner }}/custos-pe-frontend:$CREATED_TAG
-          docker scout quickview ghcr.io/${{ github.repository_owner }}/custos-pe-frontend:$CREATED_TAG
+          docker scout cves --only-severity critical --exit-code ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG
+          docker scout quickview ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG
 
       - name: Push Docker images (version and latest)
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/custos-pe-frontend:$CREATED_TAG
-          docker push ghcr.io/${{ github.repository_owner }}/custos-pe-frontend:latest
+          docker push ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:$CREATED_TAG
+          docker push ghcr.io/${{ steps.lowercase_owner.outputs.owner }}/custos-pe-frontend:latest
 
       - name: Trigger Portainer webhook to update Frontend service
         if: env.PORTAINER_WEBHOOK_FRONTEND != ''
