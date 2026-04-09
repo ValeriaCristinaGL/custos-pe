@@ -39,6 +39,10 @@ public class DataSyncServiceTests
     public async Task SyncEmpenhosAsync_ShouldInsertNewEmpenhos()
     {
         // Arrange
+        var orgaosBase = new List<OrgaoGoverno>
+        {
+            new() { Codigo = "001", Nome = "Secretaria Educação", Sigla = "SEDUC", Tipo = "Secretaria" }
+        };
         var externalData = new List<ExternalEmpenhoData>
         {
             new()
@@ -56,10 +60,11 @@ public class DataSyncServiceTests
                 NaturezaDespesa = "3.3.90.30"
             }
         };
-        _mockDataClient.Setup(c => c.GetEmpenhosAsync(2025)).ReturnsAsync(externalData);
+        _mockOrgaoRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(orgaosBase);
+        _mockDataClient.Setup(c => c.GetEmpenhosByOrgaoAsync(2025, "001")).ReturnsAsync(externalData);
         _mockEmpenhoRepo.Setup(r => r.GetByNumeroAsync("EMP-001", 2025)).ReturnsAsync((Empenho?)null);
         _mockOrgaoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<OrgaoGoverno, bool>>>()))
-            .ReturnsAsync(Enumerable.Empty<OrgaoGoverno>());
+            .ReturnsAsync(orgaosBase);
 
         // Act
         var count = await _sut.SyncEmpenhosAsync(2025);
@@ -76,6 +81,10 @@ public class DataSyncServiceTests
     public async Task SyncEmpenhosAsync_ShouldUpdateExistingEmpenho()
     {
         // Arrange
+        var orgaosBase = new List<OrgaoGoverno>
+        {
+            new() { Codigo = "001", Nome = "Secretaria Educação", Sigla = "SEDUC", Tipo = "Secretaria" }
+        };
         var existingEmpenho = new Empenho
         {
             Id = Guid.NewGuid(),
@@ -99,10 +108,11 @@ public class DataSyncServiceTests
                 NaturezaDespesa = "3.3.90.30"
             }
         };
-        _mockDataClient.Setup(c => c.GetEmpenhosAsync(2025)).ReturnsAsync(externalData);
+        _mockOrgaoRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(orgaosBase);
+        _mockDataClient.Setup(c => c.GetEmpenhosByOrgaoAsync(2025, "001")).ReturnsAsync(externalData);
         _mockEmpenhoRepo.Setup(r => r.GetByNumeroAsync("EMP-001", 2025)).ReturnsAsync(existingEmpenho);
         _mockOrgaoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<OrgaoGoverno, bool>>>()))
-            .ReturnsAsync(new List<OrgaoGoverno> { new() { Codigo = "001" } });
+            .ReturnsAsync(orgaosBase);
 
         // Act
         var count = await _sut.SyncEmpenhosAsync(2025);
@@ -118,6 +128,10 @@ public class DataSyncServiceTests
     public async Task SyncEmpenhosAsync_ShouldSanitizeCnpj()
     {
         // Arrange
+        var orgaosBase = new List<OrgaoGoverno>
+        {
+            new() { Codigo = "001", Nome = "Sec Saúde", Sigla = "SES", Tipo = "Secretaria" }
+        };
         var externalData = new List<ExternalEmpenhoData>
         {
             new()
@@ -133,10 +147,11 @@ public class DataSyncServiceTests
                 NaturezaDespesa = "3.3.90.39"
             }
         };
-        _mockDataClient.Setup(c => c.GetEmpenhosAsync(2025)).ReturnsAsync(externalData);
+        _mockOrgaoRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(orgaosBase);
+        _mockDataClient.Setup(c => c.GetEmpenhosByOrgaoAsync(2025, "001")).ReturnsAsync(externalData);
         _mockEmpenhoRepo.Setup(r => r.GetByNumeroAsync("EMP-002", 2025)).ReturnsAsync((Empenho?)null);
         _mockOrgaoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<OrgaoGoverno, bool>>>()))
-            .ReturnsAsync(Enumerable.Empty<OrgaoGoverno>());
+            .ReturnsAsync(orgaosBase);
 
         // Act
         await _sut.SyncEmpenhosAsync(2025);
@@ -150,7 +165,9 @@ public class DataSyncServiceTests
     public async Task SyncAllAsync_ShouldReturnCombinedResult()
     {
         // Arrange
-        _mockDataClient.Setup(c => c.GetEmpenhosAsync(2025))
+        _mockOrgaoRepo.Setup(r => r.GetAllAsync())
+            .ReturnsAsync(new List<OrgaoGoverno> { new() { Codigo = "001", Nome = "Sec", Sigla = "S", Tipo = "Secretaria" } });
+        _mockDataClient.Setup(c => c.GetEmpenhosByOrgaoAsync(2025, "001"))
             .ReturnsAsync(new List<ExternalEmpenhoData>());
         _mockDataClient.Setup(c => c.GetContratosAsync(2025))
             .ReturnsAsync(new List<ExternalContratoData>());

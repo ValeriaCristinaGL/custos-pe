@@ -57,7 +57,7 @@ public class DashboardControllerTests
         _mockService.Setup(s => s.GetComparativoOrgaosAsync(2025)).ReturnsAsync(dto);
 
         // Act
-        var result = await _sut.GetComparativoOrgaos(2025);
+        var result = await _sut.GetComparativo(2025);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -80,7 +80,7 @@ public class DashboardControllerTests
         _mockService.Setup(s => s.GetDrillDownAsync("001", null)).ReturnsAsync(dto);
 
         // Act
-        var result = await _sut.GetDrillDown("001", null);
+        var result = await _sut.GetEvolucao("001", null);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
