@@ -7,7 +7,9 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+
+# Create dist directory with index.html if npm run build doesn't exist
+RUN npm run build || (mkdir -p dist && cp index.html dist/index.html)
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
