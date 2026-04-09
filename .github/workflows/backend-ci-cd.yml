@@ -210,6 +210,8 @@ jobs:
     name: 3. Automatic Creation Process of New Releases
     runs-on: ubuntu-latest
     needs: [tag-creation, backend-docker]
+    permissions:
+      contents: write
     env:
       CREATED_TAG: ${{ needs.tag-creation.outputs.created_tag }}
       CHANGE_TYPE: ${{ needs.tag-creation.outputs.change_type }}
@@ -226,4 +228,4 @@ jobs:
             Release automatically generated from pull request #${{ github.event.pull_request.number || 'manual-dispatch' }}
             Type of change: ${{ env.CHANGE_TYPE }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN != '' && secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
