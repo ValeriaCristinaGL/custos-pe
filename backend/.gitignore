@@ -1,0 +1,42 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.pdb
+*.dll
+*.exe
+
+## NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+## Logs
+logs/
+*.log
+
+## IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+## OS
+Thumbs.db
+.DS_Store
+
+## Secrets
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+## Gemini
+.gemini/
+.especificacao_api_transparencia.md
+.plano_integracao_dados_reais.md
+.sdd_integracao_tce_pe.md
+DOCUMENTACAO_API.md
