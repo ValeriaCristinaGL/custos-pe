@@ -283,7 +283,7 @@ body {
   }
 }
 
-[data-mobile='true'] ~ [data-radix-dialog-overlay] {
+[data-mobile='true']~[data-radix-dialog-overlay] {
   display: none !important;
 }
 
