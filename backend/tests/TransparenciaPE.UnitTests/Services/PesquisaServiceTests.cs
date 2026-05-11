@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Moq;
 using Microsoft.Extensions.Logging;
 using TransparenciaPE.Application.DTOs;
@@ -115,5 +116,55 @@ public class PesquisaServiceTests
         var csv = System.Text.Encoding.UTF8.GetString(result);
         Assert.Contains("EMP-001", csv);
         Assert.Contains("Empresa A", csv);
+    }
+
+    [Fact]
+    public async Task ExportarCsvAsync_ShouldReturnHeaderOnly_WhenNoDataExists()
+    {
+        // Arrange — sem empenhos, CSV deve ter apenas o cabeçalho
+        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
+            .ReturnsAsync(Enumerable.Empty<Empenho>());
+
+        // Act
+        var result = await _sut.ExportarCsvAsync();
+
+        // Assert
+        var csv = System.Text.Encoding.UTF8.GetString(result);
+        csv.Should().Contain("NumeroEmpenho");
+        csv.Split('\n', StringSplitOptions.RemoveEmptyEntries).Should().HaveCount(1); // apenas o header
+    }
+
+    [Fact]
+    public async Task ExportarCsvAsync_ShouldFilter_WhenAnoIsProvided()
+    {
+        // Arrange
+        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
+            .ReturnsAsync(Enumerable.Empty<Empenho>());
+
+        // Act
+        await _sut.ExportarCsvAsync(ano: 2025);
+
+        // Assert — apenas verifica que o filtro é passado ao repositório
+        _mockEmpenhoRepo.Verify(r =>
+            r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task PesquisaGlobalAsync_ShouldDetectCnpj_WhenFormattedWithPunctuation()
+    {
+        // Arrange — CNPJ formatado deve ser sanitizado e tratado como CNPJ
+        var cnpjFormatado = "11.222.333/0001-81";
+        var cnpjLimpo = "11222333000181";
+        _mockContratoRepo.Setup(r => r.SearchByCnpjAsync(cnpjLimpo)).ReturnsAsync(new List<Contrato>());
+        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
+            .ReturnsAsync(Enumerable.Empty<Empenho>());
+
+        // Act
+        var result = await _sut.PesquisaGlobalAsync(cnpjFormatado);
+
+        // Assert
+        Assert.NotNull(result);
+        _mockContratoRepo.Verify(r => r.SearchByCnpjAsync(cnpjLimpo), Times.Once);
+        _mockContratoRepo.Verify(r => r.SearchByFornecedorAsync(It.IsAny<string>()), Times.Never);
     }
 }
