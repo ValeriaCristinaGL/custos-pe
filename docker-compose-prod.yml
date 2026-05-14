@@ -27,6 +27,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=portal-custos-pe;Username=postgres;Password=root
+      - CORS__AllowedOrigins=http://frontend:80
     depends_on:
       postgres:
         condition: service_healthy
