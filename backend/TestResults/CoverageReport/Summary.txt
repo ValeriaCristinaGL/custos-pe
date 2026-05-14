@@ -1,0 +1,75 @@
+Summary
+  Generated on: 11/05/2026 - 00:29:52
+  Parser: OpenCover
+  Assemblies: 4
+  Classes: 48
+  Files: 34
+  Line coverage: 38.1%
+  Covered lines: 186
+  Uncovered lines: 301
+  Coverable lines: 487
+  Total lines: 1627
+  Branch coverage: 83.3% (20 of 24)
+  Covered branches: 20
+  Total branches: 24
+  Method coverage: 47.2% (34 of 72)
+  Full method coverage: 45.8% (33 of 72)
+  Covered methods: 34
+  Fully covered methods: 33
+  Total methods: 72
+
+TransparenciaPE.API                                                              14.1%
+  TransparenciaPE.API.BackgroundServices.DataSyncWorker                             0%
+  TransparenciaPE.API.Controllers.DashboardController                             100%
+  TransparenciaPE.API.Controllers.PesquisaController                              100%
+  TransparenciaPE.API.Extensions.SerilogExtensions                                  0%
+  TransparenciaPE.API.Extensions.ServiceCollectionExtensions                        0%
+  TransparenciaPE.API.Middlewares.GlobalExceptionMiddleware                       100%
+
+TransparenciaPE.Application                                                        99%
+  TransparenciaPE.Application.DTOs.ComparativoOrgaosDto                           100%
+  TransparenciaPE.Application.DTOs.DrillDownDto                                   100%
+  TransparenciaPE.Application.DTOs.DrillDownItem                                  100%
+  TransparenciaPE.Application.DTOs.OrgaoComparativoItem                           100%
+  TransparenciaPE.Application.DTOs.PesquisaItem                                   100%
+  TransparenciaPE.Application.DTOs.PesquisaResultDto                              100%
+  TransparenciaPE.Application.Helpers.CnpjHelper                                 96.5%
+  TransparenciaPE.Application.Helpers.McaspMapper                                 100%
+  TransparenciaPE.Application.Services.DashboardService                           100%
+  TransparenciaPE.Application.Services.DataSyncService                            100%
+  TransparenciaPE.Application.Services.PesquisaService                            100%
+
+TransparenciaPE.Domain                                                           89.4%
+  TransparenciaPE.Domain.Entities.BaseEntity                                      100%
+  TransparenciaPE.Domain.Entities.Contrato                                        100%
+  TransparenciaPE.Domain.Entities.Empenho                                         100%
+  TransparenciaPE.Domain.Entities.Liquidacao                                        0%
+  TransparenciaPE.Domain.Entities.Orcamento                                       100%
+  TransparenciaPE.Domain.Entities.OrgaoGoverno                                    100%
+  TransparenciaPE.Domain.Entities.Pagamento                                         0%
+  TransparenciaPE.Domain.Entities.Receita                                         100%
+  TransparenciaPE.Domain.Exceptions.DomainException                               100%
+  TransparenciaPE.Domain.Exceptions.NotFoundException                             100%
+  TransparenciaPE.Domain.Interfaces.ComparativoOrgaoResult                        100%
+  TransparenciaPE.Domain.Interfaces.DrillDownResult                               100%
+  TransparenciaPE.Domain.Interfaces.ExternalContratoData                          100%
+  TransparenciaPE.Domain.Interfaces.ExternalEmpenhoData                           100%
+  TransparenciaPE.Domain.Interfaces.ExternalOrcamentoData                           0%
+  TransparenciaPE.Domain.Interfaces.ExternalReceitaData                           100%
+
+TransparenciaPE.Infrastructure                                                    4.6%
+  TransparenciaPE.Infrastructure.Data.AppDbContext                                  0%
+  TransparenciaPE.Infrastructure.Data.Configurations.ContratoConfiguration          0%
+  TransparenciaPE.Infrastructure.Data.Configurations.EmpenhoConfiguration           0%
+  TransparenciaPE.Infrastructure.Data.Configurations.LiquidacaoConfiguration        0%
+  TransparenciaPE.Infrastructure.Data.Configurations.OrgaoGovernoConfiguration      0%
+  TransparenciaPE.Infrastructure.Data.Configurations.PagamentoConfiguration         0%
+  TransparenciaPE.Infrastructure.ExternalClients.FakePEDataClient                   0%
+  TransparenciaPE.Infrastructure.ExternalClients.TcePEDataClient                  100%
+  TransparenciaPE.Infrastructure.ExternalClients.TceResposta<T>                   100%
+  TransparenciaPE.Infrastructure.ExternalClients.TceWrapper<T>                    100%
+  TransparenciaPE.Infrastructure.QueryServices.DapperDashboardQueryService          0%
+  TransparenciaPE.Infrastructure.Repositories.ContratoRepository                    0%
+  TransparenciaPE.Infrastructure.Repositories.EmpenhoRepository                     0%
+  TransparenciaPE.Infrastructure.Repositories.Repository<T>                         0%
+  TransparenciaPE.Infrastructure.UnitOfWork.UnitOfWork                              0%
