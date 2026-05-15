@@ -167,7 +167,7 @@ O frontend está configurado para deploy automático na Vercel via `vercel.json`
 | Ítalo Ruan Ribeiro Soares        | Backend           |
 | Kauanne Cavalcante de Andrade    | Frontend          |
 | Pedro Victor da Silva Pereira    | Backend           |
-| Tomás Abias dos Anjos Lima       | QA                |
+| Tomás Abdias dos Anjos Lima       | QA                |
 
 
 ---
