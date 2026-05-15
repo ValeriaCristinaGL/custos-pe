@@ -17,6 +17,19 @@ builder.AddSerilogLogging();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// CORS — permite comunicação frontend → backend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        var allowedOrigins = builder.Configuration.GetSection("CORS:AllowedOrigins").Value?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries) ?? new[] { "http://localhost:5173" };
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // Background Worker for data sync
 builder.Services.AddHostedService<DataSyncWorker>();
 
@@ -36,6 +49,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("FrontendPolicy");
 app.UseRateLimiter();
 app.MapControllers();
 

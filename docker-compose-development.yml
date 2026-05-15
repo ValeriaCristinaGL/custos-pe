@@ -26,6 +26,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=portal-custos-pe;Username=postgres;Password=root
+      - CORS__AllowedOrigins=http://localhost:5173,http://frontend:80
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,12 +36,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
+      - "5173:80"
     depends_on:
       - backend
 
