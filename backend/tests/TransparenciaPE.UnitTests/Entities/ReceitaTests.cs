@@ -6,7 +6,7 @@ namespace TransparenciaPE.UnitTests.Entities;
 public class ReceitaTests
 {
     [Fact]
-    public void Receita_Should_Be_Instantiated_And_Have_Expected_Properties()
+    public void Receita_IsInstantiatedWithExpectedProperties()
     {
         // Act
         var receita = new Receita

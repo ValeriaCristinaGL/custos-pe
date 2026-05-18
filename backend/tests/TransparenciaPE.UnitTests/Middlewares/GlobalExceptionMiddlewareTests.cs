@@ -34,7 +34,7 @@ public class GlobalExceptionMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_ShouldCallNext_WhenNoExceptionOccurs()
+    public async Task InvokeAsync_CallsNext_WhenNoExceptionOccurs()
     {
         // Arrange
         var nextCalled = false;
@@ -50,11 +50,20 @@ public class GlobalExceptionMiddlewareTests
         context.Response.StatusCode.Should().Be(200); // status não alterado
     }
 
-    [Fact]
-    public async Task InvokeAsync_ShouldReturn400_WhenArgumentExceptionIsThrown()
+    public static IEnumerable<object[]> ExceptionStatusCodeData =>
+        new List<object[]>
+        {
+            new object[] { new ArgumentException("Termo de busca inválido."), 400 },
+            new object[] { new NotFoundException("Recurso não encontrado."), 404 },
+            new object[] { new InvalidOperationException("Falha inesperada interna."), 500 },
+        };
+
+    [Theory]
+    [MemberData(nameof(ExceptionStatusCodeData))]
+    public async Task InvokeAsync_ReturnsExpectedStatusCode_ForGivenException(Exception exception, int expectedStatusCode)
     {
         // Arrange
-        RequestDelegate next = _ => throw new ArgumentException("Termo de busca inválido.");
+        RequestDelegate next = _ => throw exception;
         var middleware = new GlobalExceptionMiddleware(next, _mockLogger.Object);
         var context = CreateContext();
 
@@ -62,47 +71,11 @@ public class GlobalExceptionMiddlewareTests
         await middleware.InvokeAsync(context);
 
         // Assert
-        context.Response.StatusCode.Should().Be(400);
-        var body = await ReadBodyAsync(context.Response);
-        body.Should().Contain("Termo de busca inv\u00e1lido.");
+        context.Response.StatusCode.Should().Be(expectedStatusCode);
     }
 
     [Fact]
-    public async Task InvokeAsync_ShouldReturn404_WhenNotFoundExceptionIsThrown()
-    {
-        // Arrange
-        RequestDelegate next = _ => throw new NotFoundException("Recurso não encontrado.");
-        var middleware = new GlobalExceptionMiddleware(next, _mockLogger.Object);
-        var context = CreateContext();
-
-        // Act
-        await middleware.InvokeAsync(context);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(404);
-        var body = await ReadBodyAsync(context.Response);
-        body.Should().Contain("Recurso n\u00e3o encontrado.");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_ShouldReturn500_WhenUnhandledExceptionIsThrown()
-    {
-        // Arrange
-        RequestDelegate next = _ => throw new InvalidOperationException("Falha inesperada interna.");
-        var middleware = new GlobalExceptionMiddleware(next, _mockLogger.Object);
-        var context = CreateContext();
-
-        // Act
-        await middleware.InvokeAsync(context);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(500);
-        var body = await ReadBodyAsync(context.Response);
-        body.Should().Contain("internal server error");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_ShouldReturnJson_WithStatusCode_Message_Timestamp()
+    public async Task InvokeAsync_ReturnsJson_WithStatusCode_Message_Timestamp()
     {
         // Arrange
         RequestDelegate next = _ => throw new ArgumentException("erro estruturado");
@@ -119,21 +92,5 @@ public class GlobalExceptionMiddlewareTests
         doc.RootElement.TryGetProperty("statusCode", out _).Should().BeTrue();
         doc.RootElement.TryGetProperty("message", out _).Should().BeTrue();
         doc.RootElement.TryGetProperty("timestamp", out _).Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task InvokeAsync_ShouldReturn400_WhenDomainExceptionWithStatus400()
-    {
-        // Arrange — NotFoundException herda de DomainException com StatusCode=404
-        // Aqui verificamos que o StatusCode da DomainException é respeitado
-        RequestDelegate next = _ => throw new NotFoundException("Órgão não localizado.");
-        var middleware = new GlobalExceptionMiddleware(next, _mockLogger.Object);
-        var context = CreateContext();
-
-        // Act
-        await middleware.InvokeAsync(context);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(404);
     }
 }

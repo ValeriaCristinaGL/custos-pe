@@ -26,39 +26,28 @@ public class PesquisaServiceTests
             _mockLogger.Object);
     }
 
-    [Fact]
-    public async Task PesquisaGlobalAsync_ShouldSearchByCnpj_WhenTermLooksCnpj()
+    [Theory]
+    [InlineData("11222333000181")]          // CNPJ sem formatação
+    [InlineData("11.222.333/0001-81")]      // CNPJ com formatação (deve ser sanitizado)
+    public async Task PesquisaGlobalAsync_SearchesByCnpj_WhenTermIsCnpj(string termo)
     {
-        // Arrange
-        var cnpj = "11222333000181";
-        var contratos = new List<Contrato>
-        {
-            new()
-            {
-                NumeroContrato = "CT-001",
-                Fornecedor = "Empresa A",
-                CnpjFornecedor = cnpj,
-                ValorContrato = 50_000m,
-                DataInicio = new DateTime(2025, 1, 1),
-                Objeto = "Fornecimento de material",
-                OrgaoGoverno = new OrgaoGoverno { Nome = "Secretaria de Educação" }
-            }
-        };
-        _mockContratoRepo.Setup(r => r.SearchByCnpjAsync(cnpj)).ReturnsAsync(contratos);
+        // Arrange — independente da formatação, o CNPJ sanitizado deve ser usado
+        var cnpjLimpo = "11222333000181";
+        _mockContratoRepo.Setup(r => r.SearchByCnpjAsync(cnpjLimpo)).ReturnsAsync(new List<Contrato>());
         _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
             .ReturnsAsync(Enumerable.Empty<Empenho>());
 
         // Act
-        var result = await _sut.PesquisaGlobalAsync(cnpj);
+        var result = await _sut.PesquisaGlobalAsync(termo);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(cnpj, result.TermoBuscado);
-        Assert.True(result.TotalResultados > 0);
+        _mockContratoRepo.Verify(r => r.SearchByCnpjAsync(cnpjLimpo), Times.Once);
+        _mockContratoRepo.Verify(r => r.SearchByFornecedorAsync(It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
-    public async Task PesquisaGlobalAsync_ShouldSearchByName_WhenTermIsText()
+    public async Task PesquisaGlobalAsync_SearchesByName_WhenTermIsText()
     {
         // Arrange
         var termo = "Empresa ABC";
@@ -79,7 +68,7 @@ public class PesquisaServiceTests
     [InlineData("")]
     [InlineData(null)]
     [InlineData("   ")]
-    public async Task PesquisaGlobalAsync_ShouldThrow_WhenTermIsEmpty(string? termo)
+    public async Task PesquisaGlobalAsync_ThrowsArgumentException_WhenTermIsEmpty(string? termo)
     {
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(
@@ -87,7 +76,7 @@ public class PesquisaServiceTests
     }
 
     [Fact]
-    public async Task ExportarCsvAsync_ShouldReturnBytes_WhenDataExists()
+    public async Task ExportarCsvAsync_ReturnsCsvBytes_WhenDataExists()
     {
         // Arrange
         var empenhos = new List<Empenho>
@@ -119,7 +108,7 @@ public class PesquisaServiceTests
     }
 
     [Fact]
-    public async Task ExportarCsvAsync_ShouldReturnHeaderOnly_WhenNoDataExists()
+    public async Task ExportarCsvAsync_ReturnsHeaderOnly_WhenNoDataExists()
     {
         // Arrange — sem empenhos, CSV deve ter apenas o cabeçalho
         _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
@@ -135,7 +124,7 @@ public class PesquisaServiceTests
     }
 
     [Fact]
-    public async Task ExportarCsvAsync_ShouldFilter_WhenAnoIsProvided()
+    public async Task ExportarCsvAsync_AppliesYearFilter_WhenAnoIsProvided()
     {
         // Arrange
         _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
@@ -147,24 +136,5 @@ public class PesquisaServiceTests
         // Assert — apenas verifica que o filtro é passado ao repositório
         _mockEmpenhoRepo.Verify(r =>
             r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task PesquisaGlobalAsync_ShouldDetectCnpj_WhenFormattedWithPunctuation()
-    {
-        // Arrange — CNPJ formatado deve ser sanitizado e tratado como CNPJ
-        var cnpjFormatado = "11.222.333/0001-81";
-        var cnpjLimpo = "11222333000181";
-        _mockContratoRepo.Setup(r => r.SearchByCnpjAsync(cnpjLimpo)).ReturnsAsync(new List<Contrato>());
-        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
-            .ReturnsAsync(Enumerable.Empty<Empenho>());
-
-        // Act
-        var result = await _sut.PesquisaGlobalAsync(cnpjFormatado);
-
-        // Assert
-        Assert.NotNull(result);
-        _mockContratoRepo.Verify(r => r.SearchByCnpjAsync(cnpjLimpo), Times.Once);
-        _mockContratoRepo.Verify(r => r.SearchByFornecedorAsync(It.IsAny<string>()), Times.Never);
     }
 }

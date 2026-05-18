@@ -6,7 +6,7 @@ namespace TransparenciaPE.UnitTests.Entities;
 public class OrgaoGovernoTests
 {
     [Fact]
-    public void OrgaoGoverno_Should_Generate_UniqueId_OnCreation()
+    public void OrgaoGoverno_GeneratesUniqueId_OnCreation()
     {
         // Act
         var orgao1 = new OrgaoGoverno();
@@ -19,7 +19,7 @@ public class OrgaoGovernoTests
     }
 
     [Fact]
-    public void OrgaoGoverno_Should_Initialize_Collections_AsEmpty()
+    public void OrgaoGoverno_InitializesCollectionsAsEmpty()
     {
         // Act
         var orgao = new OrgaoGoverno();
@@ -30,7 +30,7 @@ public class OrgaoGovernoTests
     }
 
     [Fact]
-    public void OrgaoGoverno_Should_Set_CreatedAt_ToUtcNow_OnCreation()
+    public void OrgaoGoverno_SetsCreatedAtToUtcNow_OnCreation()
     {
         // Arrange
         var antes = DateTime.UtcNow.AddSeconds(-1);
@@ -45,7 +45,7 @@ public class OrgaoGovernoTests
     }
 
     [Fact]
-    public void OrgaoGoverno_Should_Assign_Codigo_Nome_Sigla_Tipo()
+    public void OrgaoGoverno_AssignsCodigoNomeSiglaTipo()
     {
         // Act
         var orgao = new OrgaoGoverno
@@ -64,7 +64,7 @@ public class OrgaoGovernoTests
     }
 
     [Fact]
-    public void OrgaoGoverno_Should_Have_TotalServidores_And_OrcamentoAtual()
+    public void OrgaoGoverno_SetsTotalServidoresAndOrcamentoAtual()
     {
         // Act
         var orgao = new OrgaoGoverno
