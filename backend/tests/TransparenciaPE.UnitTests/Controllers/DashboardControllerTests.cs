@@ -1,5 +1,4 @@
 using Moq;
-using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TransparenciaPE.API.Controllers;
@@ -21,105 +20,177 @@ public class DashboardControllerTests
         _sut = new DashboardController(_mockService.Object, _mockLogger.Object);
     }
 
+    // ─── GetResumo ────────────────────────────────────────────────────────
+
     [Fact]
-    public async Task GetResumo_ShouldReturn200_WithKPIs()
+    public async Task GetResumo_Returns200StatusCode()
     {
         // Arrange
-        var dto = new DashboardResumoDto
-        {
-            TotalEmpenhado = 1_000_000m,
-            TotalLiquidado = 800_000m,
-            TotalPago = 600_000m,
-            PercentualExecutado = 60m
-        };
-        _mockService.Setup(s => s.GetResumoAsync(null)).ReturnsAsync(dto);
+        _mockService.Setup(s => s.GetResumoAsync(null))
+            .ReturnsAsync(new DashboardResumoDto { TotalEmpenhado = 1_000_000m });
 
         // Act
         var result = await _sut.GetResumo(null);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returned = Assert.IsType<DashboardResumoDto>(okResult.Value);
-        Assert.Equal(1_000_000m, returned.TotalEmpenhado);
+        var okResult = result.Result as OkObjectResult;
+        Assert.Equal(200, okResult!.StatusCode);
     }
 
     [Fact]
-    public async Task GetComparativoOrgaos_ShouldReturn200_WithOrgaoList()
+    public async Task GetResumo_ReturnsDashboardResumoDtoAsBody()
     {
         // Arrange
-        var dto = new ComparativoOrgaosDto
-        {
-            Ano = 2025,
-            Orgaos = new List<OrgaoComparativoItem>
-            {
-                new() { NomeOrgao = "Sec. Educação", TotalEmpenhado = 500_000m }
-            }
-        };
-        _mockService.Setup(s => s.GetComparativoOrgaosAsync(2025)).ReturnsAsync(dto);
+        _mockService.Setup(s => s.GetResumoAsync(null))
+            .ReturnsAsync(new DashboardResumoDto());
+
+        // Act
+        var result = await _sut.GetResumo(null);
+
+        // Assert
+        var okResult = result.Result as OkObjectResult;
+        Assert.IsType<DashboardResumoDto>(okResult!.Value);
+    }
+
+    [Fact]
+    public async Task GetResumo_ReturnsTotalEmpenhadoFromService()
+    {
+        // Arrange
+        _mockService.Setup(s => s.GetResumoAsync(null))
+            .ReturnsAsync(new DashboardResumoDto { TotalEmpenhado = 1_000_000m });
+
+        // Act
+        var result = await _sut.GetResumo(null);
+
+        // Assert
+        var returned = (result.Result as OkObjectResult)!.Value as DashboardResumoDto;
+        Assert.Equal(1_000_000m, returned!.TotalEmpenhado);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(2025)]
+    public async Task GetResumo_InvokesServiceWithProvidedYear(int? ano)
+    {
+        // Arrange
+        _mockService.Setup(s => s.GetResumoAsync(ano))
+            .ReturnsAsync(new DashboardResumoDto());
+
+        // Act
+        await _sut.GetResumo(ano);
+
+        // Assert
+        _mockService.Verify(s => s.GetResumoAsync(ano), Times.Once);
+    }
+
+    // ─── GetComparativo ───────────────────────────────────────────────────
+
+    [Fact]
+    public async Task GetComparativo_Returns200StatusCode()
+    {
+        // Arrange
+        _mockService.Setup(s => s.GetComparativoOrgaosAsync(2025))
+            .ReturnsAsync(new ComparativoOrgaosDto { Ano = 2025 });
 
         // Act
         var result = await _sut.GetComparativo(2025);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returned = Assert.IsType<ComparativoOrgaosDto>(okResult.Value);
-        Assert.Equal(2025, returned.Ano);
+        var okResult = result.Result as OkObjectResult;
+        Assert.Equal(200, okResult!.StatusCode);
     }
 
     [Fact]
-    public async Task GetDrillDown_ShouldReturn200_WithHierarchicalData()
+    public async Task GetComparativo_ReturnsComparativoOrgaosDtoAsBody()
     {
         // Arrange
-        var dto = new DrillDownDto
-        {
-            CodigoOrgao = "001",
-            Itens = new List<DrillDownItem>
-            {
-                new() { ClassificacaoMcasp = "3.3.90.30", TotalEmpenhado = 100_000m }
-            }
-        };
-        _mockService.Setup(s => s.GetDrillDownAsync("001", null)).ReturnsAsync(dto);
+        _mockService.Setup(s => s.GetComparativoOrgaosAsync(2025))
+            .ReturnsAsync(new ComparativoOrgaosDto { Ano = 2025 });
+
+        // Act
+        var result = await _sut.GetComparativo(2025);
+
+        // Assert
+        var okResult = result.Result as OkObjectResult;
+        Assert.IsType<ComparativoOrgaosDto>(okResult!.Value);
+    }
+
+    [Fact]
+    public async Task GetComparativo_ReturnsAnoFromService()
+    {
+        // Arrange
+        _mockService.Setup(s => s.GetComparativoOrgaosAsync(2025))
+            .ReturnsAsync(new ComparativoOrgaosDto { Ano = 2025 });
+
+        // Act
+        var result = await _sut.GetComparativo(2025);
+
+        // Assert
+        var returned = (result.Result as OkObjectResult)!.Value as ComparativoOrgaosDto;
+        Assert.Equal(2025, returned!.Ano);
+    }
+
+    // ─── GetEvolucao ──────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task GetEvolucao_Returns200StatusCode()
+    {
+        // Arrange
+        _mockService.Setup(s => s.GetDrillDownAsync("001", null))
+            .ReturnsAsync(new DrillDownDto { CodigoOrgao = "001" });
 
         // Act
         var result = await _sut.GetEvolucao("001", null);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returned = Assert.IsType<DrillDownDto>(okResult.Value);
-        Assert.Equal("001", returned.CodigoOrgao);
+        var okResult = result.Result as OkObjectResult;
+        Assert.Equal(200, okResult!.StatusCode);
     }
 
     [Fact]
-    public async Task GetResumo_ShouldReturn200_WhenYearFilterIsApplied()
+    public async Task GetEvolucao_ReturnsDrillDownDtoAsBody()
     {
         // Arrange
-        var dto = new DashboardResumoDto { TotalEmpenhado = 500_000m, PercentualExecutado = 80m };
-        _mockService.Setup(s => s.GetResumoAsync(2025)).ReturnsAsync(dto);
+        _mockService.Setup(s => s.GetDrillDownAsync("001", null))
+            .ReturnsAsync(new DrillDownDto { CodigoOrgao = "001" });
 
         // Act
-        var result = await _sut.GetResumo(2025);
+        var result = await _sut.GetEvolucao("001", null);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returned = Assert.IsType<DashboardResumoDto>(okResult.Value);
-        returned.TotalEmpenhado.Should().Be(500_000m);
-        _mockService.Verify(s => s.GetResumoAsync(2025), Times.Once);
+        var okResult = result.Result as OkObjectResult;
+        Assert.IsType<DrillDownDto>(okResult!.Value);
     }
 
     [Fact]
-    public async Task GetEvolucao_ShouldReturn200_WhenAnoFilterIsApplied()
+    public async Task GetEvolucao_ReturnsCodigoOrgaoFromService()
     {
         // Arrange
-        var dto = new DrillDownDto { CodigoOrgao = "002", Itens = new List<DrillDownItem>() };
-        _mockService.Setup(s => s.GetDrillDownAsync("002", 2025)).ReturnsAsync(dto);
+        _mockService.Setup(s => s.GetDrillDownAsync("001", null))
+            .ReturnsAsync(new DrillDownDto { CodigoOrgao = "001" });
 
         // Act
-        var result = await _sut.GetEvolucao("002", 2025);
+        var result = await _sut.GetEvolucao("001", null);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returned = Assert.IsType<DrillDownDto>(okResult.Value);
-        returned.CodigoOrgao.Should().Be("002");
-        _mockService.Verify(s => s.GetDrillDownAsync("002", 2025), Times.Once);
+        var returned = (result.Result as OkObjectResult)!.Value as DrillDownDto;
+        Assert.Equal("001", returned!.CodigoOrgao);
+    }
+
+    [Theory]
+    [InlineData("001", null)]
+    [InlineData("002", 2025)]
+    public async Task GetEvolucao_InvokesServiceWithProvidedParameters(string codigoOrgao, int? ano)
+    {
+        // Arrange
+        _mockService.Setup(s => s.GetDrillDownAsync(codigoOrgao, ano))
+            .ReturnsAsync(new DrillDownDto { CodigoOrgao = codigoOrgao });
+
+        // Act
+        await _sut.GetEvolucao(codigoOrgao, ano);
+
+        // Assert
+        _mockService.Verify(s => s.GetDrillDownAsync(codigoOrgao, ano), Times.Once);
     }
 }
+

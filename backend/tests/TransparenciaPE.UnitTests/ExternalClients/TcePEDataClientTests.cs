@@ -48,7 +48,7 @@ public class TcePEDataClientTests
     // ─── Receitas ─────────────────────────────────────────────────────────
 
     [Fact]
-    public async Task GetReceitasAsync_Should_Deserialize_Tce_Json_Format_Correctly()
+    public async Task GetReceitasAsync_DeserializesTceJsonFormat()
     {
         // Arrange
         SetupHttpResponse(HttpStatusCode.OK, new
@@ -73,7 +73,7 @@ public class TcePEDataClientTests
     }
 
     [Fact]
-    public async Task GetReceitasAsync_ShouldThrow_WhenApiReturnsServerError()
+    public async Task GetReceitasAsync_ThrowsHttpRequestException_WhenApiReturnsServerError()
     {
         // Arrange — GetReceitasAsync usa EnsureSuccessStatusCode, então lança exceção
         SetupHttpResponse(HttpStatusCode.InternalServerError);
@@ -86,7 +86,7 @@ public class TcePEDataClientTests
     // ─── EmpenhosByOrgao ─────────────────────────────────────────────────
 
     [Fact]
-    public async Task GetEmpenhosByOrgaoAsync_Should_Deserialize_Correctly()
+    public async Task GetEmpenhosByOrgaoAsync_DeserializesCorrectly()
     {
         // Arrange
         SetupHttpResponse(HttpStatusCode.OK, new
@@ -124,7 +124,7 @@ public class TcePEDataClientTests
     }
 
     [Fact]
-    public async Task GetEmpenhosByOrgaoAsync_ShouldReturnEmpty_WhenApiReturnsError()
+    public async Task GetEmpenhosByOrgaoAsync_ReturnsEmpty_WhenApiReturnsError()
     {
         // Arrange — métodos com verificação manual retornam lista vazia em caso de erro
         SetupHttpResponse(HttpStatusCode.NotFound);
@@ -139,7 +139,7 @@ public class TcePEDataClientTests
     // ─── Contratos ───────────────────────────────────────────────────────
 
     [Fact]
-    public async Task GetContratosAsync_Should_Deserialize_Correctly()
+    public async Task GetContratosAsync_DeserializesCorrectly()
     {
         // Arrange
         SetupHttpResponse(HttpStatusCode.OK, new
@@ -174,7 +174,7 @@ public class TcePEDataClientTests
     }
 
     [Fact]
-    public async Task GetContratosAsync_ShouldReturnEmpty_WhenApiReturnsError()
+    public async Task GetContratosAsync_ReturnsEmpty_WhenApiReturnsError()
     {
         // Arrange
         SetupHttpResponse(HttpStatusCode.ServiceUnavailable);
@@ -189,7 +189,7 @@ public class TcePEDataClientTests
     // ─── Orcamento ───────────────────────────────────────────────────────
 
     [Fact]
-    public async Task GetOrcamentoAsync_ShouldReturnEmpty_WhenApiReturnsError()
+    public async Task GetOrcamentoAsync_ReturnsEmpty_WhenApiReturnsError()
     {
         // Arrange
         SetupHttpResponse(HttpStatusCode.BadGateway);

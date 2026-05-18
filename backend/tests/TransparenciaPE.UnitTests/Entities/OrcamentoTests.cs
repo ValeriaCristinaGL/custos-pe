@@ -6,7 +6,7 @@ namespace TransparenciaPE.UnitTests.Entities;
 public class OrcamentoTests
 {
     [Fact]
-    public void Orcamento_Should_Be_Instantiated_And_Have_Expected_Properties()
+    public void Orcamento_IsInstantiatedWithExpectedProperties()
     {
         // Act
         var orcamento = new Orcamento

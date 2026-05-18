@@ -20,7 +20,7 @@ public class DashboardServiceTests
     }
 
     [Fact]
-    public async Task GetResumoAsync_ShouldReturnKPIs_WhenDataExists()
+    public async Task GetResumoAsync_ReturnsKPIs_WhenDataExists()
     {
         // Arrange
         var queryResult = new DashboardResumoResult
@@ -47,7 +47,7 @@ public class DashboardServiceTests
     }
 
     [Fact]
-    public async Task GetResumoAsync_ShouldReturnZeroPercent_WhenNoEmpenhos()
+    public async Task GetResumoAsync_ReturnsZeroPercentualExecutado_WhenTotalEmpenhadoIsZero()
     {
         // Arrange
         var queryResult = new DashboardResumoResult
@@ -68,7 +68,7 @@ public class DashboardServiceTests
     }
 
     [Fact]
-    public async Task GetResumoAsync_ShouldFilterByYear_WhenYearProvided()
+    public async Task GetResumoAsync_PassesYearParameterToQueryService()
     {
         // Arrange
         var queryResult = new DashboardResumoResult { TotalEmpenhado = 500_000m };
@@ -83,7 +83,7 @@ public class DashboardServiceTests
     }
 
     [Fact]
-    public async Task GetComparativoOrgaosAsync_ShouldReturnOrgaoList()
+    public async Task GetComparativoOrgaosAsync_ReturnsOrgaoList()
     {
         // Arrange
         var queryResults = new List<ComparativoOrgaoResult>
@@ -103,7 +103,7 @@ public class DashboardServiceTests
     }
 
     [Fact]
-    public async Task GetDrillDownAsync_ShouldReturnHierarchicalData()
+    public async Task GetDrillDownAsync_ReturnsHierarchicalData()
     {
         // Arrange
         var queryResults = new List<DrillDownResult>

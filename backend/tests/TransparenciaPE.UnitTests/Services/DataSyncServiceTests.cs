@@ -36,7 +36,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncEmpenhosAsync_ShouldInsertNewEmpenhos()
+    public async Task SyncEmpenhosAsync_InsertsNewEmpenhos()
     {
         // Arrange
         var orgaosBase = new List<OrgaoGoverno>
@@ -78,7 +78,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncEmpenhosAsync_ShouldUpdateExistingEmpenho()
+    public async Task SyncEmpenhosAsync_UpdatesExistingEmpenho()
     {
         // Arrange
         var orgaosBase = new List<OrgaoGoverno>
@@ -125,7 +125,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncEmpenhosAsync_ShouldSanitizeCnpj()
+    public async Task SyncEmpenhosAsync_SanitizesCnpj()
     {
         // Arrange
         var orgaosBase = new List<OrgaoGoverno>
@@ -162,7 +162,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncAllAsync_ShouldReturnCombinedResult()
+    public async Task SyncAllAsync_ReturnsCombinedResult()
     {
         // Arrange
         _mockOrgaoRepo.Setup(r => r.GetAllAsync())
@@ -181,7 +181,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncEmpenhosAsync_ShouldReturnZero_WhenNoOrgaosExist()
+    public async Task SyncEmpenhosAsync_ReturnsZero_WhenNoOrgaosExist()
     {
         // Arrange — sem órgãos cadastrados, não há o que sincronizar
         _mockOrgaoRepo.Setup(r => r.GetAllAsync())
@@ -197,7 +197,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncEmpenhosAsync_ShouldReturnZero_WhenApiReturnsEmpty()
+    public async Task SyncEmpenhosAsync_ReturnsZero_WhenApiReturnsEmpty()
     {
         // Arrange — órgão cadastrado, mas API externa não retorna empenhos
         var orgaos = new List<OrgaoGoverno>
@@ -218,7 +218,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncContratosAsync_ShouldInsertNewContrato()
+    public async Task SyncContratosAsync_InsertsNewContrato()
     {
         // Arrange
         var externalData = new List<ExternalContratoData>
@@ -252,7 +252,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncAllAsync_ShouldCombine_EmpenhosAndContratos_Counts()
+    public async Task SyncAllAsync_CombinesEmpenhosAndContratosCounts()
     {
         // Arrange — 1 empenho + 1 contrato = EmpenhosProcessados=1, ContratosProcessados=1
         var orgaos = new List<OrgaoGoverno>
