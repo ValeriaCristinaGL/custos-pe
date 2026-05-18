@@ -1,3 +1,6 @@
+![Coverage](https://img.shields.io/badge/Coverage-36%25-brightgreen)
+
+<!-- COVERAGE_BADGE -->
 <div align="center">
 
 # 📊 TransparênciaPE
