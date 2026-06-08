@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddSwaggerDocumentation();
-builder.Services.AddRateLimitingPolicies();
+builder.Services.AddRateLimitingPolicies(builder.Configuration);
 builder.AddSerilogLogging();
 
 builder.Services.AddControllers();
@@ -31,7 +31,10 @@ builder.Services.AddCors(options =>
 });
 
 // Background Worker for data sync
-builder.Services.AddHostedService<DataSyncWorker>();
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddHostedService<DataSyncWorker>();
+}
 
 var app = builder.Build();
 
@@ -48,29 +51,36 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseCors("FrontendPolicy");
 app.UseRateLimiter();
 app.MapControllers();
 
 // Apply pending migrations on startup
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    var maxRetries = 10;
-    var delay = TimeSpan.FromSeconds(5);
-
-    for (var attempt = 1; attempt <= maxRetries; attempt++)
+    using (var scope = app.Services.CreateScope())
     {
-        try
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var maxRetries = 10;
+        var delay = TimeSpan.FromSeconds(5);
+
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
         {
-            await dbContext.Database.MigrateAsync();
-            break;
-        }
-        catch (NpgsqlException) when (attempt < maxRetries)
-        {
-            await Task.Delay(delay);
+            try
+            {
+                await dbContext.Database.MigrateAsync();
+                break;
+            }
+            catch (NpgsqlException) when (attempt < maxRetries)
+            {
+                await Task.Delay(delay);
+            }
         }
     }
 }

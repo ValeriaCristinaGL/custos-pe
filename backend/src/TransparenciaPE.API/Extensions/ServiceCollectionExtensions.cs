@@ -71,8 +71,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddRateLimitingPolicies(this IServiceCollection services)
+    public static IServiceCollection AddRateLimitingPolicies(
+        this IServiceCollection services, IConfiguration configuration)
     {
+        var permitLimit = configuration.GetValue<int>("RateLimiting:PermitLimit", 100);
+        var queueLimit = configuration.GetValue<int>("RateLimiting:QueueLimit", 10);
+
         services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -82,11 +86,11 @@ public static class ServiceCollectionExtensions
                     partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                     factory: _ => new SlidingWindowRateLimiterOptions
                     {
-                        PermitLimit = 100,
+                        PermitLimit = permitLimit,
                         Window = TimeSpan.FromMinutes(1),
                         SegmentsPerWindow = 4,
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                        QueueLimit = 10
+                        QueueLimit = queueLimit
                     }));
         });
 

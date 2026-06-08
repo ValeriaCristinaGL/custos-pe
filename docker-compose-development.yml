@@ -21,10 +21,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "5034:5034"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=http://+:5034
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=portal-custos-pe;Username=postgres;Password=root
       - CORS__AllowedOrigins=http://localhost:5173,http://frontend:80
     depends_on:

@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================
-REM  run-tests.bat — Executa testes unitários + gera cobertura
+REM  run-tests.bat — Executa testes automatizados + gera cobertura
 REM  Uso: clique duplo ou execute no terminal: run-tests.bat
 REM ============================================================
 setlocal EnableDelayedExpansion
@@ -8,10 +8,11 @@ setlocal EnableDelayedExpansion
 set SCRIPT_DIR=%~dp0
 set RESULTS_DIR=%SCRIPT_DIR%TestResults
 set REPORT_DIR=%RESULTS_DIR%\CoverageReport
+set SOLUTION_FILE=%SCRIPT_DIR%TransparenciaPE.sln
 
 echo.
 echo ============================================================
-echo   TransparenciaPE -- Testes Unitarios e Cobertura de Codigo
+echo   TransparenciaPE -- Testes Automatizados e Cobertura
 echo ============================================================
 echo.
 
@@ -46,9 +47,9 @@ if exist "%RESULTS_DIR%" rmdir /s /q "%RESULTS_DIR%"
 
 REM ── 4. Executar testes com coleta de cobertura ─────────────
 echo.
-echo [INFO] Executando testes...
+echo [INFO] Executando testes unitarios e de integracao...
 echo ------------------------------------------------------------
-dotnet test "%SCRIPT_DIR%" ^
+dotnet test "%SOLUTION_FILE%" ^
   --collect:"XPlat Code Coverage" ^
   --settings "%SCRIPT_DIR%coverlet.runsettings" ^
   --results-directory "%RESULTS_DIR%"

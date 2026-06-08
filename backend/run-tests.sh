@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  run-tests.sh — Executa testes unitários + gera cobertura
+#  run-tests.sh — Executa testes automatizados + gera cobertura
 #  Uso: bash run-tests.sh
 # ============================================================
 set -e
@@ -8,10 +8,11 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RESULTS_DIR="$SCRIPT_DIR/TestResults"
 REPORT_DIR="$RESULTS_DIR/CoverageReport"
+SOLUTION_FILE="$SCRIPT_DIR/TransparenciaPE.sln"
 
 echo ""
 echo "============================================================"
-echo "  TransparênciaPE — Testes Unitários e Cobertura de Código"
+echo "  TransparênciaPE — Testes Automatizados e Cobertura"
 echo "============================================================"
 echo ""
 
@@ -40,9 +41,9 @@ rm -rf "$RESULTS_DIR"
 
 # ── 4. Executar testes com coleta de cobertura ───────────────
 echo ""
-echo "[INFO] Executando testes..."
+echo "[INFO] Executando testes unitários e de integração..."
 echo "------------------------------------------------------------"
-dotnet test "$SCRIPT_DIR" \
+dotnet test "$SOLUTION_FILE" \
   --collect:"XPlat Code Coverage" \
   --settings "$SCRIPT_DIR/coverlet.runsettings" \
   --results-directory "$RESULTS_DIR"

@@ -24,7 +24,7 @@ public class McaspMapperTests
     // Entradas inválidas/vazias
     [InlineData("", "Outros")]
     [InlineData("   ", "Outros")]
-    public void MapToClassificacao_Returns_CorrectClassification(string natureza, string expected)
+    public void MapToClassificacao_ReturnsCorrectClassification(string natureza, string expected)
     {
         // Act
         var result = McaspMapper.MapToClassificacao(natureza, string.Empty);
@@ -34,7 +34,7 @@ public class McaspMapperTests
     }
 
     [Fact]
-    public void MapToClassificacao_Returns_Outros_WhenNaturezaIsNull()
+    public void MapToClassificacao_ReturnsOutros_WhenNaturezaIsNull()
     {
         // Act
         var result = McaspMapper.MapToClassificacao(null!, string.Empty);

@@ -1,4 +1,4 @@
-![Coverage](https://img.shields.io/badge/Coverage-36%25-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-94.2%25-brightgreen)
 
 <!-- COVERAGE_BADGE -->
 <div align="center">
@@ -41,7 +41,9 @@ custos-pe/
 │   │   ├── TransparenciaPE.Domain         # Entidades, Regras de Negócio
 │   │   └── TransparenciaPE.Infrastructure # Repositórios, Dapper, EF Core, TCE-PE Client
 │   └── tests/
-│       └── TransparenciaPE.UnitTests      # xUnit + Moq + FluentAssertions
+│       ├── TransparenciaPE.UnitTests      # xUnit + Moq + FluentAssertions
+│       └── TransparenciaPE.IntegrationTests # WebApplicationFactory + API HTTP
+├── k6/               # Smoke, load, stress, soak e spike tests
 ├── docker-compose-development.yml
 └── docker-compose-prod.yml
 ```
@@ -54,7 +56,7 @@ custos-pe/
 | Backend        | .NET 8, C#, ASP.NET Core                             |
 | ORM / Queries  | Entity Framework Core + Dapper (CQRS-Lite)           |
 | Banco de dados | PostgreSQL 14                                        |
-| Testes         | xUnit, Moq, FluentAssertions, Coverlet               |
+| Testes         | xUnit, Moq, FluentAssertions, Coverlet, k6           |
 | Infraestrutura | Docker, GitHub Actions CI/CD                         |
 | Logs           | Serilog                                              |
 
@@ -76,8 +78,8 @@ docker compose -f docker-compose-development.yml up --build
 | Serviço     | URL                           |
 | ----------- | ----------------------------- |
 | Frontend    | http://localhost:5173         |
-| Backend API | http://localhost:8080         |
-| Swagger UI  | http://localhost:8080/swagger |
+| Backend API | http://localhost:5034         |
+| Swagger UI  | http://localhost:5034/swagger |
 
 ---
 
@@ -113,7 +115,7 @@ cd frontend
 npm install
 
 # Crie o arquivo de variáveis de ambiente
-echo "VITE_API_URL=http://localhost:8080" > .env.local
+echo "VITE_API_URL=http://localhost:5034" > .env.local
 
 # Inicie o servidor de desenvolvimento
 npm run dev
@@ -123,17 +125,33 @@ npm run dev
 
 ## 🧪 Testes
 
-```bash
-cd backend
+### Backend e cobertura
 
+```bash
 # Executa toda a suíte e gera relatório de cobertura
-./run-tests.sh        # Linux/macOS
-run-tests.bat         # Windows
+bash backend/run-tests.sh        # Linux/macOS
+backend\run-tests.bat            # Windows
 ```
 
 O relatório HTML de cobertura é gerado em `backend/TestResults/CoverageReport/index.html`.
+A pasta `backend/TestResults/` é artefato local/pipeline e não deve ser versionada.
 
-**Cobertura atual:** 83% de Branch Coverage · 38% de Line Coverage (em expansão)
+**Cobertura atual:** 94.2% de Line Coverage · 83.3% de Branch Coverage · 86.1% de Method Coverage.
+
+### Testes de desempenho com k6
+
+```bash
+# Suba a API local com banco de desenvolvimento
+docker compose -f docker-compose-development.yml up -d postgres backend
+
+# Smoke test: valida se a API está respondendo
+./k6/run-k6.sh smoke
+
+# Load test: simula carga normal, com até 50 usuários virtuais
+./k6/run-k6.sh load
+```
+
+Os resultados JSON do k6 são gerados em `k6/results/`, que também é artefato local e fica fora do versionamento. O guia completo fica em `k6/README.md`.
 
 ---
 
