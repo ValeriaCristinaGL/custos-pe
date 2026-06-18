@@ -26,7 +26,7 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[260px] bg-[#142F4B] text-white flex flex-col z-50">
+    <aside className="fixed left-0 top-0 h-screen w-65 bg-[#142F4B] text-white flex flex-col z-50">
       {/* Logo */}
       <Link
         to="/"
@@ -36,7 +36,9 @@ export function Sidebar() {
           <LayoutDashboard className="h-5 w-5 text-white" />
         </span>
         <div>
-          <p className="font-semibold text-sm leading-tight">Transparência PE</p>
+          <p className="font-semibold text-sm leading-tight">
+            Transparência PE
+          </p>
           <p className="text-[11px] text-gray-400">Inteligência Fiscal</p>
         </div>
       </Link>
@@ -46,31 +48,30 @@ export function Sidebar() {
         <p className="text-[11px] uppercase text-gray-400 tracking-wider font-medium px-3 mb-3">
           Navegação
         </p>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-2">
+        <div className="rounded-xl p-2">
           <ul className="flex flex-col gap-1">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <NavLink
-                to={item.path}
-                end={item.path === '/dashboard'}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
-                    isActive
-                      ? 'bg-[#008C6C] text-white shadow-lg shadow-[#008C6C]/25'
-                      : 'text-gray-300 hover:bg-white/8 hover:text-white'
-                  }`
-                }
-              >
-                <item.icon className="h-[18px] w-[18px] shrink-0" />
-                <span className="flex-1">{item.label}</span>
-                <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-              </NavLink>
-            </li>
-          ))}
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  end={item.path === '/dashboard'}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
+                      isActive
+                        ? 'bg-[#008C6C] text-white shadow-lg shadow-[#008C6C]/25'
+                        : 'text-gray-300 hover:bg-white/8 hover:text-white'
+                    }`
+                  }
+                >
+                  <item.icon className="h-[18px] w-[18px] shrink-0" />
+                  <span className="flex-1">{item.label}</span>
+                  <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                </NavLink>
+              </li>
+            ))}
           </ul>
         </div>
       </nav>
-
     </aside>
   )
 }

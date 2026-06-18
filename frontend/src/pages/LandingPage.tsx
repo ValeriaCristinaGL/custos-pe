@@ -79,7 +79,9 @@ export function LandingPage() {
                   text="Conhecer Funcionalidades"
                   variant="delineado"
                   onClick={() => {
-                    document.getElementById('funcionalidades')?.scrollIntoView({ behavior: 'smooth' })
+                    document
+                      .getElementById('funcionalidades')
+                      ?.scrollIntoView({ behavior: 'smooth' })
                   }}
                 />
               </div>
@@ -90,7 +92,7 @@ export function LandingPage() {
               <img
                 src={dashboard2025}
                 alt="Dashboard de despesa total 2025"
-                className="w-full max-w-[520px]"
+                className="w-full max-w-130"
               />
             </div>
           </div>

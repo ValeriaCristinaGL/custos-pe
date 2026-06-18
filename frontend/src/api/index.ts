@@ -50,7 +50,20 @@ type YearKey = `ano${number}`
 
 const BASE_YEAR = 2026
 
-const BASE_MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+const BASE_MONTHS = [
+  'Jan',
+  'Fev',
+  'Mar',
+  'Abr',
+  'Mai',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Set',
+  'Out',
+  'Nov',
+  'Dez',
+]
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value))
@@ -127,9 +140,16 @@ export function buildMonthlyEvolution(year: number): MonthlyData[] {
   })
 }
 
-export function buildCategoryDistribution(year: number): CategoryDistribution[] {
+export function buildCategoryDistribution(
+  year: number
+): CategoryDistribution[] {
   const delta = clamp(year - BASE_YEAR, -2, 2)
-  const adjustments = [delta, -delta, Math.round(delta / 2), -Math.round(delta / 2)]
+  const adjustments = [
+    delta,
+    -delta,
+    Math.round(delta / 2),
+    -Math.round(delta / 2),
+  ]
   const adjusted = MOCK_CATEGORY_DISTRIBUTION.map((item, index) => ({
     ...item,
     value: item.value + adjustments[index],
@@ -142,11 +162,13 @@ export function buildCategoryDistribution(year: number): CategoryDistribution[] 
 }
 
 function isEmptyResumo(resumo: DashboardResumo): boolean {
-  return resumo.totalEmpenhado === 0
-    && resumo.totalLiquidado === 0
-    && resumo.totalPago === 0
-    && resumo.totalEmpenhos === 0
-    && resumo.totalContratos === 0
+  return (
+    resumo.totalEmpenhado === 0 &&
+    resumo.totalLiquidado === 0 &&
+    resumo.totalPago === 0 &&
+    resumo.totalEmpenhos === 0 &&
+    resumo.totalContratos === 0
+  )
 }
 
 function isEmptyComparativo(data: ComparativoOrgaos): boolean {
@@ -171,16 +193,86 @@ const MOCK_RESUMO: DashboardResumo = {
 const MOCK_COMPARATIVO: ComparativoOrgaos = {
   ano: 2026,
   orgaos: [
-    { codigoOrgao: 'SEE', nomeOrgao: 'Secretaria de Educação', siglaOrgao: 'SEE', totalEmpenhado: 13200000000, totalLiquidado: 12450000000, totalPago: 11800000000 },
-    { codigoOrgao: 'SES', nomeOrgao: 'Secretaria de Saúde', siglaOrgao: 'SES', totalEmpenhado: 11500000000, totalLiquidado: 10800000000, totalPago: 10200000000 },
-    { codigoOrgao: 'SDS', nomeOrgao: 'Secretaria de Defesa Social', siglaOrgao: 'SDS', totalEmpenhado: 5800000000, totalLiquidado: 5400000000, totalPago: 5100000000 },
-    { codigoOrgao: 'SEINFRA', nomeOrgao: 'Secretaria de Infraestrutura', siglaOrgao: 'SEINFRA', totalEmpenhado: 4200000000, totalLiquidado: 3900000000, totalPago: 3600000000 },
-    { codigoOrgao: 'SEPLAG', nomeOrgao: 'Secretaria de Planejamento', siglaOrgao: 'SEPLAG', totalEmpenhado: 3100000000, totalLiquidado: 2900000000, totalPago: 2750000000 },
-    { codigoOrgao: 'SEFAZ', nomeOrgao: 'Secretaria da Fazenda', siglaOrgao: 'SEFAZ', totalEmpenhado: 2800000000, totalLiquidado: 2650000000, totalPago: 2500000000 },
-    { codigoOrgao: 'SAD', nomeOrgao: 'Secretaria de Administração', siglaOrgao: 'SAD', totalEmpenhado: 2400000000, totalLiquidado: 2200000000, totalPago: 2050000000 },
-    { codigoOrgao: 'SDSCJ', nomeOrgao: 'Sec. Des. Social, Criança e Juventude', siglaOrgao: 'SDSCJ', totalEmpenhado: 1900000000, totalLiquidado: 1750000000, totalPago: 1600000000 },
-    { codigoOrgao: 'SECID', nomeOrgao: 'Secretaria das Cidades', siglaOrgao: 'SECID', totalEmpenhado: 1700000000, totalLiquidado: 1550000000, totalPago: 1400000000 },
-    { codigoOrgao: 'SECTMA', nomeOrgao: 'Sec. Ciência, Tecnologia e Meio Ambiente', siglaOrgao: 'SECTMA', totalEmpenhado: 1400000000, totalLiquidado: 1300000000, totalPago: 1200000000 },
+    {
+      codigoOrgao: 'SEE',
+      nomeOrgao: 'Secretaria de Educação',
+      siglaOrgao: 'SEE',
+      totalEmpenhado: 13200000000,
+      totalLiquidado: 12450000000,
+      totalPago: 11800000000,
+    },
+    {
+      codigoOrgao: 'SES',
+      nomeOrgao: 'Secretaria de Saúde',
+      siglaOrgao: 'SES',
+      totalEmpenhado: 11500000000,
+      totalLiquidado: 10800000000,
+      totalPago: 10200000000,
+    },
+    {
+      codigoOrgao: 'SDS',
+      nomeOrgao: 'Secretaria de Defesa Social',
+      siglaOrgao: 'SDS',
+      totalEmpenhado: 5800000000,
+      totalLiquidado: 5400000000,
+      totalPago: 5100000000,
+    },
+    {
+      codigoOrgao: 'SEINFRA',
+      nomeOrgao: 'Secretaria de Infraestrutura',
+      siglaOrgao: 'SEINFRA',
+      totalEmpenhado: 4200000000,
+      totalLiquidado: 3900000000,
+      totalPago: 3600000000,
+    },
+    {
+      codigoOrgao: 'SEPLAG',
+      nomeOrgao: 'Secretaria de Planejamento',
+      siglaOrgao: 'SEPLAG',
+      totalEmpenhado: 3100000000,
+      totalLiquidado: 2900000000,
+      totalPago: 2750000000,
+    },
+    {
+      codigoOrgao: 'SEFAZ',
+      nomeOrgao: 'Secretaria da Fazenda',
+      siglaOrgao: 'SEFAZ',
+      totalEmpenhado: 2800000000,
+      totalLiquidado: 2650000000,
+      totalPago: 2500000000,
+    },
+    {
+      codigoOrgao: 'SAD',
+      nomeOrgao: 'Secretaria de Administração',
+      siglaOrgao: 'SAD',
+      totalEmpenhado: 2400000000,
+      totalLiquidado: 2200000000,
+      totalPago: 2050000000,
+    },
+    {
+      codigoOrgao: 'SDSCJ',
+      nomeOrgao: 'Sec. Des. Social, Criança e Juventude',
+      siglaOrgao: 'SDSCJ',
+      totalEmpenhado: 1900000000,
+      totalLiquidado: 1750000000,
+      totalPago: 1600000000,
+    },
+    {
+      codigoOrgao: 'SECID',
+      nomeOrgao: 'Secretaria das Cidades',
+      siglaOrgao: 'SECID',
+      totalEmpenhado: 1700000000,
+      totalLiquidado: 1550000000,
+      totalPago: 1400000000,
+    },
+    {
+      codigoOrgao: 'SECTMA',
+      nomeOrgao: 'Sec. Ciência, Tecnologia e Meio Ambiente',
+      siglaOrgao: 'SECTMA',
+      totalEmpenhado: 1400000000,
+      totalLiquidado: 1300000000,
+      totalPago: 1200000000,
+    },
   ],
 }
 
@@ -188,10 +280,30 @@ const MOCK_DRILLDOWN: DrillDown = {
   codigoOrgao: 'SEE',
   nomeOrgao: 'Secretaria de Educação',
   itens: [
-    { classificacaoMcasp: '3.1.90', descricao: 'Pessoal e Encargos Sociais', totalEmpenhado: 8920000000, quantidadeEmpenhos: 42000 },
-    { classificacaoMcasp: '3.3.90', descricao: 'Outras Despesas Correntes', totalEmpenhado: 2100000000, quantidadeEmpenhos: 18500 },
-    { classificacaoMcasp: '4.4.90', descricao: 'Investimentos', totalEmpenhado: 1350000000, quantidadeEmpenhos: 3200 },
-    { classificacaoMcasp: '3.3.50', descricao: 'Transferências a Instituições', totalEmpenhado: 830000000, quantidadeEmpenhos: 850 },
+    {
+      classificacaoMcasp: '3.1.90',
+      descricao: 'Pessoal e Encargos Sociais',
+      totalEmpenhado: 8920000000,
+      quantidadeEmpenhos: 42000,
+    },
+    {
+      classificacaoMcasp: '3.3.90',
+      descricao: 'Outras Despesas Correntes',
+      totalEmpenhado: 2100000000,
+      quantidadeEmpenhos: 18500,
+    },
+    {
+      classificacaoMcasp: '4.4.90',
+      descricao: 'Investimentos',
+      totalEmpenhado: 1350000000,
+      quantidadeEmpenhos: 3200,
+    },
+    {
+      classificacaoMcasp: '3.3.50',
+      descricao: 'Transferências a Instituições',
+      totalEmpenhado: 830000000,
+      quantidadeEmpenhos: 850,
+    },
   ],
 }
 
@@ -363,7 +475,9 @@ export function buildRadarData(year: number): RadarDataPoint[] {
 export async function getResumo(ano?: number): Promise<DashboardResumo> {
   try {
     const params = ano ? { ano } : {}
-    const { data } = await api.get<DashboardResumo>('/dashboard/resumo', { params })
+    const { data } = await api.get<DashboardResumo>('/dashboard/resumo', {
+      params,
+    })
     if (isEmptyResumo(data)) {
       console.warn('Backend retornou resumo vazio, usando dados mock')
       return buildResumoMock(ano ?? BASE_YEAR)
@@ -377,7 +491,10 @@ export async function getResumo(ano?: number): Promise<DashboardResumo> {
 
 export async function getComparativo(ano: number): Promise<ComparativoOrgaos> {
   try {
-    const { data } = await api.get<ComparativoOrgaos>('/dashboard/comparativo', { params: { ano } })
+    const { data } = await api.get<ComparativoOrgaos>(
+      '/dashboard/comparativo',
+      { params: { ano } }
+    )
     if (isEmptyComparativo(data)) {
       console.warn('Backend retornou comparativo vazio, usando dados mock')
       return buildComparativoMock(ano)
@@ -389,7 +506,10 @@ export async function getComparativo(ano: number): Promise<ComparativoOrgaos> {
   }
 }
 
-export async function getEvolucao(codigoOrgao: string, ano?: number): Promise<DrillDown> {
+export async function getEvolucao(
+  codigoOrgao: string,
+  ano?: number
+): Promise<DrillDown> {
   try {
     const params: Record<string, string | number> = { codigoOrgao }
     if (ano) params.ano = ano

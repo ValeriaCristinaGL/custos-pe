@@ -1,6 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Slot } from '@radix-ui/react-slot'
-import React, { type ReactElement, forwardRef, type ButtonHTMLAttributes } from 'react'
+import React, {
+  type ReactElement,
+  forwardRef,
+  type ButtonHTMLAttributes,
+} from 'react'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   text?: string
