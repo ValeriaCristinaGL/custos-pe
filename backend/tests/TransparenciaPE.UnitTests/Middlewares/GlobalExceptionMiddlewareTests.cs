@@ -75,7 +75,7 @@ public class GlobalExceptionMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_ReturnsJson_WithStatusCode_Message_Timestamp()
+    public async Task InvokeAsync_ReturnsJson_WithRequiredErrorFields()
     {
         // Arrange
         RequestDelegate next = _ => throw new ArgumentException("erro estruturado");

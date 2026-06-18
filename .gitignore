@@ -1,0 +1,11 @@
+# .NET generated artifacts
+**/bin/
+**/obj/
+backend/TestResults/
+
+# k6 generated artifacts
+/k6/results/
+/k6/*.summary.json
+/k6/*.summary.html
+/k6/*.junit.xml
+/k6/*.log
