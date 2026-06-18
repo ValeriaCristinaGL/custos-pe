@@ -168,9 +168,9 @@ a {
   --color-informacao-blue-900: #1e3a8a;
   --color-informacao-blue-950: #172554;
 
-  --color-azul-base: #142F4B;
-  --color-cinza: #7B848C;
-  --color-verde-base: #008C6C;
+  --color-azul-base: #142f4b;
+  --color-cinza: #7b848c;
+  --color-verde-base: #008c6c;
 }
 
 :root {
@@ -283,7 +283,7 @@ body {
   }
 }
 
-[data-mobile='true']~[data-radix-dialog-overlay] {
+[data-mobile='true'] ~ [data-radix-dialog-overlay] {
   display: none !important;
 }
 
@@ -371,7 +371,7 @@ body {
   display: inline-block;
   position: relative;
   border: 3px solid;
-  border-color: #efa903 #efa903 transparent #efa903;
+  border-color: #142f4b #142f4b transparent #142f4b;
   box-sizing: border-box;
   animation: rotation 1.5s linear infinite;
 }
@@ -387,7 +387,7 @@ body {
   bottom: 0;
   margin: auto;
   border: 3px solid;
-  border-color: transparent transparent #006ec7 #006ec7;
+  border-color: transparent transparent #008c6c #008c6c;
   width: calc(var(--loader-size) - 15px);
   height: calc(var(--loader-size) - 15px);
   border-radius: 50%;
@@ -399,7 +399,7 @@ body {
 .loader::before {
   width: calc(var(--loader-size) - 30px);
   height: calc(var(--loader-size) - 30px);
-  border-color: #ffbf31 #ffbf31 transparent transparent;
+  border-color: #14385fc9 #14385fc9 transparent transparent;
   animation: rotation 2s linear infinite;
 }
 

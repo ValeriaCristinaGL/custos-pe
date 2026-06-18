@@ -1,10 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  PieChart, Pie, Cell,
-  BarChart, Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
 } from 'recharts'
-import { TrendingUp, DollarSign, PiggyBank, Info } from 'lucide-react'
+import {
+  TrendingUp,
+  DollarSign,
+  PiggyBank,
+  Info,
+  Download,
+  ChevronDown,
+} from 'lucide-react'
 import { DashboardHeader } from './Dashboard'
 import { KpiCard } from '../components/KpiCard'
 import {
@@ -15,9 +32,24 @@ import {
   type DashboardResumo,
   type ComparativoOrgaos,
 } from '../api'
+import * as XLSX from 'xlsx'
+
+type ExportYear = 2026 | 2025 | 2024
+
+const exportYears: ExportYear[] = [2026, 2025, 2024]
+
+type ExportOption = 'resumo' | 'evolucaoMensal' | 'categorias' | 'orgaos'
+
+const exportOptions: { label: string; value: ExportOption }[] = [
+  { label: 'Resumo geral', value: 'resumo' },
+  { label: 'Evolução mensal', value: 'evolucaoMensal' },
+  { label: 'Categorias', value: 'categorias' },
+  { label: 'Órgãos', value: 'orgaos' },
+]
 
 function formatCurrency(value: number): string {
-  if (value >= 1_000_000_000) return `R$ ${(value / 1_000_000_000).toFixed(1)} bi`
+  if (value >= 1_000_000_000)
+    return `R$ ${(value / 1_000_000_000).toFixed(1)} bi`
   if (value >= 1_000_000) return `R$ ${(value / 1_000_000).toFixed(1)} mi`
   if (value >= 1_000) return `R$ ${(value / 1_000).toFixed(1)} mil`
   return `R$ ${value.toFixed(2)}`
@@ -30,15 +62,79 @@ function formatTooltipNumber(value: unknown, suffix: string): [string, string] {
 }
 
 export function PainelGeral() {
+  const exportDropdownRef = useRef<HTMLDivElement | null>(null)
   const [resumo, setResumo] = useState<DashboardResumo | null>(null)
   const [comparativo, setComparativo] = useState<ComparativoOrgaos | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedYear, setSelectedYear] = useState(2026)
+  const [selectedExportYears, setSelectedExportYears] = useState<ExportYear[]>(
+    []
+  )
+  const [selectedExportOptions, setSelectedExportOptions] = useState<
+    ExportOption[]
+  >([])
+  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        exportDropdownRef.current &&
+        !exportDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsExportDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  function toggleExportOption(option: ExportOption) {
+    setSelectedExportOptions((prev) => {
+      if (prev.includes(option)) {
+        return prev.filter((item) => item !== option)
+      }
+
+      return [...prev, option]
+    })
+  }
+
+  function toggleExportYear(year: ExportYear) {
+    setSelectedExportYears((prev) => {
+      if (prev.includes(year)) {
+        return prev.filter((item) => item !== year)
+      }
+
+      return [...prev, year]
+    })
+  }
+
+  function selectAllExportYears() {
+    setSelectedExportYears(exportYears)
+  }
+
+  function clearExportYears() {
+    setSelectedExportYears([])
+  }
+
+  function selectAllExportOptions() {
+    setSelectedExportOptions(exportOptions.map((option) => option.value))
+  }
+
+  function clearExportOptions() {
+    setSelectedExportOptions([])
+  }
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true)
-      const [r, c] = await Promise.all([getResumo(selectedYear), getComparativo(selectedYear)])
+      const [r, c] = await Promise.all([
+        getResumo(selectedYear),
+        getComparativo(selectedYear),
+      ])
       setResumo(r)
       setComparativo(c)
       setLoading(false)
@@ -53,7 +149,7 @@ export function PainelGeral() {
           title="Visão Geral de Custos"
           subtitle="Visão consolidada das despesas do estado de Pernambuco"
         />
-        <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <div className="p-8 flex items-center justify-center min-h-100">
           <div className="loader" />
         </div>
       </>
@@ -70,24 +166,317 @@ export function PainelGeral() {
   const currentKey = `ano${selectedYear}`
   const previousKey = `ano${selectedYear - 1}`
 
+  function handleExportExcel() {
+    if (
+      !resumo ||
+      selectedExportOptions.length === 0 ||
+      selectedExportYears.length === 0
+    ) {
+      return
+    }
+
+    const rows: Array<Array<string | number>> = []
+    const currencyCells: string[] = []
+    const currencyFormat = '"R$" #,##0.00'
+
+    const addEmptyLine = () => {
+      rows.push([])
+    }
+
+    const addTitle = (title: string) => {
+      rows.push([title])
+    }
+
+    const addCurrencyCell = (rowIndex: number, columnIndex: number) => {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: rowIndex,
+        c: columnIndex,
+      })
+
+      currencyCells.push(cellAddress)
+    }
+
+    if (selectedExportOptions.includes('resumo')) {
+      addTitle('Resumo geral')
+      rows.push(['Indicador', 'Valor', 'Ano'])
+
+      selectedExportYears.forEach((year) => {
+        let rowIndex = rows.length
+        rows.push(['Despesa Total', resumo.totalEmpenhado, year])
+        addCurrencyCell(rowIndex, 1)
+
+        rowIndex = rows.length
+        rows.push(['Receita Total', resumo.totalLiquidado, year])
+        addCurrencyCell(rowIndex, 1)
+
+        rowIndex = rows.length
+        rows.push(['Investimentos', resumo.totalPago, year])
+        addCurrencyCell(rowIndex, 1)
+      })
+
+      addEmptyLine()
+    }
+
+    if (selectedExportOptions.includes('evolucaoMensal')) {
+      addTitle('Evolução mensal')
+      rows.push(['Mês', 'Despesa', 'Ano'])
+
+      selectedExportYears.forEach((year) => {
+        const currentKeyByYear = `ano${year}`
+
+        monthlyData.forEach((item) => {
+          const value = Number(item[currentKeyByYear as keyof typeof item] ?? 0)
+          const rowIndex = rows.length
+
+          rows.push([item.mes, value * 1_000_000, year])
+
+          addCurrencyCell(rowIndex, 1)
+        })
+      })
+
+      addEmptyLine()
+    }
+
+    if (selectedExportOptions.includes('categorias')) {
+      addTitle('Categorias')
+      rows.push(['Categoria', 'Percentual', 'Ano'])
+
+      selectedExportYears.forEach((year) => {
+        categoryData.forEach((item) => {
+          rows.push([item.name, `${item.value}%`, year])
+        })
+      })
+
+      addEmptyLine()
+    }
+
+    if (selectedExportOptions.includes('orgaos')) {
+      addTitle('Órgãos')
+      rows.push([
+        'Posição',
+        'Sigla',
+        'Órgão',
+        'Código do Órgão',
+        'Total Empenhado',
+        'Total Liquidado',
+        'Total Pago',
+        'Ano',
+      ])
+
+      selectedExportYears.forEach((year) => {
+        topOrgaos.forEach((orgao, index) => {
+          const rowIndex = rows.length
+
+          rows.push([
+            index + 1,
+            orgao.siglaOrgao,
+            orgao.nomeOrgao,
+            orgao.codigoOrgao,
+            orgao.totalEmpenhado,
+            orgao.totalLiquidado,
+            orgao.totalPago,
+            year,
+          ])
+
+          addCurrencyCell(rowIndex, 4)
+          addCurrencyCell(rowIndex, 5)
+          addCurrencyCell(rowIndex, 6)
+        })
+      })
+
+      addEmptyLine()
+    }
+
+    const workbook = XLSX.utils.book_new()
+    const worksheet = XLSX.utils.aoa_to_sheet(rows)
+
+    currencyCells.forEach((cellAddress) => {
+      if (worksheet[cellAddress]) {
+        worksheet[cellAddress].t = 'n'
+        worksheet[cellAddress].z = currencyFormat
+      }
+    })
+
+    worksheet['!cols'] = [
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 45 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 12 },
+    ]
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório')
+
+    XLSX.writeFile(workbook, `custos-pe-${selectedExportYears.join('-')}.xlsx`)
+  }
+
   return (
-    <>
+    <div className="pt-15 space-y-6">
       <DashboardHeader
         title="Visão Geral de Custos"
         subtitle="Visão consolidada das despesas do estado de Pernambuco"
       />
       <div className="p-8 space-y-6">
-        <div className="flex items-center justify-end gap-3">
-          <label className="text-xs text-gray-500">Ano</label>
-          <select
-            value={selectedYear}
-            onChange={(event) => setSelectedYear(Number(event.target.value))}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
-          >
-            {[2026, 2025, 2024].map((year) => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
+        <div className="flex justify-between">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-500">Ano</label>
+            <select
+              value={selectedYear}
+              onChange={(event) => setSelectedYear(Number(event.target.value))}
+              className="h-9 w-30 rounded-lg border border-gray-200 bg-white px-2 text-sm text-gray-700 outline-none transition focus:border-[#142F4B] focus:ring-2 focus:ring-[#142F4B]/10"
+            >
+              {[2026, 2025, 2024].map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-end gap-2">
+            {/* Exportação */}
+            <div
+              ref={exportDropdownRef}
+              className="relative flex flex-col gap-1"
+            >
+              <label className="text-xs font-medium text-gray-500">
+                Exportação
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setIsExportDropdownOpen((prev) => !prev)}
+                className="flex h-9 min-w-50 items-center justify-between rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition hover:bg-gray-50 focus:border-[#142F4B] focus:ring-2 focus:ring-[#142F4B]/10"
+              >
+                <span className="truncate">
+                  {selectedExportOptions.length === 0 ||
+                  selectedExportYears.length === 0
+                    ? 'Selecionar exportação'
+                    : `${selectedExportOptions.length} info(s) • ${selectedExportYears.length} ano(s)`}
+                </span>
+
+                <span className="ml-2">
+                  <ChevronDown className="w-4 text-gray-700" />
+                </span>
+              </button>
+
+              {isExportDropdownOpen && (
+                <div
+                  className="absolute right-0 top-full z-9999 mt-2 w-[320px] rounded-xl border border-gray-200 bg-white p-4 shadow-lg"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <div className="mb-3 flex items-center justify-between border-b border-gray-100 pb-2">
+                    <p className="text-sm font-semibold text-gray-900">
+                      Exportar informações
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clearExportOptions()
+                        clearExportYears()
+                      }}
+                      className="text-xs font-medium text-red-500 hover:text-red-600"
+                    >
+                      Limpar
+                    </button>
+                  </div>
+
+                  <div className="mb-4">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Anos do relatório
+                    </p>
+
+                    <div className="space-y-1">
+                      {exportYears.map((year) => (
+                        <button
+                          key={year}
+                          type="button"
+                          onClick={() => toggleExportYear(year)}
+                          className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <span>{year}</span>
+
+                          <span
+                            className={`flex h-4 w-4 items-center justify-center rounded border text-[10px] ${
+                              selectedExportYears.includes(year)
+                                ? 'border-[#142F4B] bg-[#142F4B] text-white'
+                                : 'border-gray-300 bg-white'
+                            }`}
+                          >
+                            {selectedExportYears.includes(year) ? '✓' : ''}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={selectAllExportYears}
+                      className="mt-2 text-xs font-medium text-[#142F4B] hover:underline"
+                    >
+                      Selecionar todos os anos
+                    </button>
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-4">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Informações
+                    </p>
+
+                    <div className="space-y-1">
+                      {exportOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => toggleExportOption(option.value)}
+                          className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <span>{option.label}</span>
+
+                          <span
+                            className={`flex h-4 w-4 items-center justify-center rounded border text-[10px] ${
+                              selectedExportOptions.includes(option.value)
+                                ? 'border-[#142F4B] bg-[#142F4B] text-white'
+                                : 'border-gray-300 bg-white'
+                            }`}
+                          >
+                            {selectedExportOptions.includes(option.value)
+                              ? '✓'
+                              : ''}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={selectAllExportOptions}
+                      className="mt-2 text-xs font-medium text-[#142F4B] hover:underline"
+                    >
+                      Selecionar todas as informações
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Botão Exportar */}
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              disabled={
+                selectedExportOptions.length === 0 ||
+                selectedExportYears.length === 0
+              }
+              className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#142F4B] px-4 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              <Download className="h-4 w-4" />
+              Exportar
+            </button>
+          </div>
         </div>
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -96,6 +485,7 @@ export function PainelGeral() {
             value={formatCurrency(resumo.totalEmpenhado)}
             icon={<TrendingUp className="h-5 w-5" />}
             trend={{ value: '+ 7,5%', positive: true }}
+            info="Mostra quanto o governo se comprometeu a gastar no período selecionado. Esse valor inclui despesas planejadas ou já registradas, mas nem sempre significa que o dinheiro já foi pago."
             subtitle="vs ano anterior"
           />
           <KpiCard
@@ -103,6 +493,7 @@ export function PainelGeral() {
             value={formatCurrency(resumo.totalLiquidado)}
             icon={<DollarSign className="h-5 w-5" />}
             trend={{ value: '+ 7,5%', positive: true }}
+            info="Mostra quanto o governo arrecadou ou registrou como entrada de dinheiro no período selecionado. Esse valor ajuda a entender os recursos disponíveis para manter serviços e realizar ações públicas."
             subtitle="vs ano anterior"
           />
           <KpiCard
@@ -110,6 +501,7 @@ export function PainelGeral() {
             value={formatCurrency(resumo.totalPago)}
             icon={<PiggyBank className="h-5 w-5" />}
             trend={{ value: '+ 7,5%', positive: true }}
+            info="Mostra quanto foi destinado para melhorias e ações que podem gerar benefícios para a população, como obras, infraestrutura, equipamentos, tecnologia, saúde, educação e outros projetos públicos."
             subtitle="vs ano anterior"
           />
         </div>
@@ -120,19 +512,52 @@ export function PainelGeral() {
           <div className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-1">
               <div>
-                <h3 className="font-semibold text-gray-900">Evolução mensal de despesas</h3>
-                <p className="text-sm text-gray-500">Comparativo do ano atual (em milhões R$)</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-gray-900">
+                    Evolução mensal de despesas
+                  </h3>
+
+                  <div className="group relative inline-flex">
+                    <button
+                      type="button"
+                      className="text-gray-400 transition-colors hover:text-gray-600"
+                      aria-label="Informação sobre evolução mensal de despesas"
+                    >
+                      <Info className="h-4 w-4" />
+                    </button>
+
+                    <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-64 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                      Mostra como as despesas mudaram mês a mês. A linha do ano
+                      atual permite acompanhar a evolução dos gastos ao longo do
+                      tempo, enquanto a linha do ano anterior ajuda a comparar
+                      se os valores estão maiores, menores ou parecidos.
+                      <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500">
+                  Comparativo do ano atual (em milhões R$)
+                </p>
               </div>
-              <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                <Info className="h-4 w-4" />
-              </button>
             </div>
-            <div className="h-[280px] mt-4">
+            <div className="h-70 mt-4">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <LineChart
+                  data={monthlyData}
+                  margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <XAxis
+                    dataKey="mes"
+                    tick={{ fontSize: 11, fill: '#94a3b8' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#94a3b8' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <Tooltip
                     contentStyle={{
                       background: 'white',
@@ -142,9 +567,40 @@ export function PainelGeral() {
                       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                     }}
                   />
-                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px' }} />
-                  <Line type="monotone" dataKey={currentKey} name={String(selectedYear)} stroke="#008C6C" strokeWidth={2} dot={{ r: 4, fill: '#008C6C', strokeWidth: 2, stroke: 'white' }} activeDot={{ r: 6 }} />
-                  <Line type="monotone" dataKey={previousKey} name={String(selectedYear - 1)} stroke="#3B82F6" strokeWidth={2} dot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: 'white' }} activeDot={{ r: 6 }} strokeDasharray="6 3" />
+                  <Legend
+                    iconType="circle"
+                    iconSize={8}
+                    wrapperStyle={{ fontSize: '12px' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey={currentKey}
+                    name={String(selectedYear)}
+                    stroke="#008C6C"
+                    strokeWidth={2}
+                    dot={{
+                      r: 4,
+                      fill: '#008C6C',
+                      strokeWidth: 2,
+                      stroke: 'white',
+                    }}
+                    activeDot={{ r: 6 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey={previousKey}
+                    name={String(selectedYear - 1)}
+                    stroke="#3B82F6"
+                    strokeWidth={2}
+                    dot={{
+                      r: 4,
+                      fill: '#3B82F6',
+                      strokeWidth: 2,
+                      stroke: 'white',
+                    }}
+                    activeDot={{ r: 6 }}
+                    strokeDasharray="6 3"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -154,11 +610,35 @@ export function PainelGeral() {
           <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-1">
               <div>
-                <h3 className="font-semibold text-gray-900">Distribuição por categorias</h3>
-                <p className="text-sm text-gray-500">Composição das despesas no ano atual</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-gray-900">
+                    Distribuição por categorias
+                  </h3>
+
+                  <div className="group relative inline-flex">
+                    <button
+                      type="button"
+                      className="text-gray-400 transition-colors hover:text-gray-600"
+                      aria-label="Informação sobre distribuição por categorias"
+                    >
+                      <Info className="h-4 w-4" />
+                    </button>
+
+                    <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-64 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                      Mostra como as despesas estão divididas entre as
+                      principais categorias. Cada parte do gráfico representa
+                      uma área de gasto, ajudando a entender onde está a maior
+                      concentração dos recursos.
+                      <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500">
+                  Composição das despesas no ano atual
+                </p>
               </div>
             </div>
-            <div className="h-[200px] mt-4">
+            <div className="h-50 mt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -189,12 +669,20 @@ export function PainelGeral() {
             </div>
             <div className="space-y-2 mt-2">
               {categoryData.map((cat) => (
-                <div key={cat.name} className="flex items-center justify-between text-sm">
+                <div
+                  key={cat.name}
+                  className="flex items-center justify-between text-sm"
+                >
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                    <span
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{ backgroundColor: cat.color }}
+                    />
                     <span className="text-gray-600">{cat.name}</span>
                   </div>
-                  <span className="text-gray-500 font-medium">{cat.value}%</span>
+                  <span className="text-gray-500 font-medium">
+                    {cat.value}%
+                  </span>
                 </div>
               ))}
             </div>
@@ -204,18 +692,62 @@ export function PainelGeral() {
         {/* Maiores Órgãos por Despesa */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-1">
-            <h3 className="font-semibold text-gray-900">Maiores Órgãos por Despesa</h3>
-            <p className="text-sm text-gray-500">Top 10 órgão com maior volume de despesas no ano atual</p>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-gray-900">
+                Maiores Órgãos por Despesa
+              </h3>
+
+              <div className="group relative inline-flex">
+                <button
+                  type="button"
+                  className="text-gray-400 transition-colors hover:text-gray-600"
+                  aria-label="Informação sobre maiores órgãos por despesa"
+                >
+                  <Info className="h-4 w-4" />
+                </button>
+
+                <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-72 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                  Mostra os órgãos públicos com maior volume de despesas no ano
+                  selecionado. Esse gráfico ajuda a identificar quais áreas
+                  concentram mais gastos dentro do orçamento.
+                  <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500">
+              Top 10 órgão com maior volume de despesas no ano atual
+            </p>
           </div>
-          <div className="h-[380px] mt-4">
+          <div className="h-95 mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={orgaoBars} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="sigla" tick={{ fontSize: 12, fill: '#475569', fontWeight: 500 }} axisLine={false} tickLine={false} width={60} />
+              <BarChart
+                data={orgaoBars}
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#f0f0f0"
+                  horizontal={false}
+                />
+                <XAxis
+                  type="number"
+                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="sigla"
+                  tick={{ fontSize: 12, fill: '#475569', fontWeight: 500 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={60}
+                />
                 <Tooltip
                   formatter={(value) => {
-                    const numericValue = typeof value === 'number' ? value : Number(value)
+                    const numericValue =
+                      typeof value === 'number' ? value : Number(value)
                     const formatted = Number.isNaN(numericValue)
                       ? '-'
                       : `R$ ${numericValue.toFixed(1)} bi`
@@ -229,13 +761,23 @@ export function PainelGeral() {
                     boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   }}
                 />
-                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: '12px' }} />
-                <Bar dataKey="valor" name="Órgãos" fill="#2d4a63" radius={[0, 4, 4, 0]} barSize={18} />
+                <Legend
+                  iconType="square"
+                  iconSize={10}
+                  wrapperStyle={{ fontSize: '12px' }}
+                />
+                <Bar
+                  dataKey="valor"
+                  name="Órgãos"
+                  fill="#2d4a63"
+                  radius={[0, 4, 4, 0]}
+                  barSize={18}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
