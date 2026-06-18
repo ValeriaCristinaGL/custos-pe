@@ -371,7 +371,7 @@ body {
   display: inline-block;
   position: relative;
   border: 3px solid;
-  border-color: #142F4B #142F4B transparent #142F4B;
+  border-color: #142f4b #142f4b transparent #142f4b;
   box-sizing: border-box;
   animation: rotation 1.5s linear infinite;
 }
@@ -387,7 +387,7 @@ body {
   bottom: 0;
   margin: auto;
   border: 3px solid;
-  border-color: transparent transparent #008C6C #008C6C;
+  border-color: transparent transparent #008c6c #008c6c;
   width: calc(var(--loader-size) - 15px);
   height: calc(var(--loader-size) - 15px);
   border-radius: 50%;
