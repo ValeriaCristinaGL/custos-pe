@@ -36,7 +36,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncEmpenhosAsync_InsertsNewEmpenhos()
+    public async Task SyncEmpenhosAsync_AddsEmpenho_WhenEmpenhoDoesNotExist()
     {
         // Arrange
         var orgaosBase = new List<OrgaoGoverno>
@@ -73,12 +73,12 @@ public class DataSyncServiceTests
         Assert.Equal(1, count);
         _mockEmpenhoRepo.Verify(r => r.AddAsync(It.Is<Empenho>(e =>
             e.NumeroEmpenho == "EMP-001" &&
-            e.CnpjCredor == "11222333000181")), Times.Once); // CNPJ sanitizado!
+            e.CnpjCredor == "11222333000181")), Times.Once);
         _mockUnitOfWork.Verify(u => u.CommitAsync(), Times.Once);
     }
 
     [Fact]
-    public async Task SyncEmpenhosAsync_UpdatesExistingEmpenho()
+    public async Task SyncEmpenhosAsync_UpdatesEmpenho_WhenEmpenhoExists()
     {
         // Arrange
         var orgaosBase = new List<OrgaoGoverno>
@@ -103,7 +103,7 @@ public class DataSyncServiceTests
                 SiglaOrgao = "SEDUC",
                 Credor = "Empresa A",
                 CnpjCredor = "11222333000181",
-                Valor = 50_000m, // valor atualizado
+                Valor = 50_000m,
                 DataEmpenho = new DateTime(2025, 3, 15),
                 NaturezaDespesa = "3.3.90.30"
             }
@@ -119,13 +119,13 @@ public class DataSyncServiceTests
 
         // Assert
         Assert.Equal(1, count);
-        Assert.Equal(50_000m, existingEmpenho.Valor); // Upsert: valor atualizado
-        _mockEmpenhoRepo.Verify(r => r.AddAsync(It.IsAny<Empenho>()), Times.Never); // Não insere novo
+        Assert.Equal(50_000m, existingEmpenho.Valor);
+        _mockEmpenhoRepo.Verify(r => r.AddAsync(It.IsAny<Empenho>()), Times.Never);
         _mockUnitOfWork.Verify(u => u.CommitAsync(), Times.Once);
     }
 
     [Fact]
-    public async Task SyncEmpenhosAsync_SanitizesCnpj()
+    public async Task SyncEmpenhosAsync_SanitizesCnpj_WhenAddingEmpenho()
     {
         // Arrange
         var orgaosBase = new List<OrgaoGoverno>
@@ -141,7 +141,7 @@ public class DataSyncServiceTests
                 CodigoOrgao = "001",
                 NomeOrgao = "Sec Saúde",
                 SiglaOrgao = "SES",
-                CnpjCredor = "11.222.333/0001-81", // Com pontuação
+                CnpjCredor = "11.222.333/0001-81",
                 Valor = 10_000m,
                 DataEmpenho = DateTime.UtcNow,
                 NaturezaDespesa = "3.3.90.39"
@@ -162,7 +162,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncAllAsync_ReturnsCombinedResult()
+    public async Task SyncAllAsync_ReturnsSyncedAt_WhenSyncCompletes()
     {
         // Arrange
         _mockOrgaoRepo.Setup(r => r.GetAllAsync())
@@ -183,7 +183,7 @@ public class DataSyncServiceTests
     [Fact]
     public async Task SyncEmpenhosAsync_ReturnsZero_WhenNoOrgaosExist()
     {
-        // Arrange — sem órgãos cadastrados, não há o que sincronizar
+        // Arrange
         _mockOrgaoRepo.Setup(r => r.GetAllAsync())
             .ReturnsAsync(new List<OrgaoGoverno>());
 
@@ -199,7 +199,7 @@ public class DataSyncServiceTests
     [Fact]
     public async Task SyncEmpenhosAsync_ReturnsZero_WhenApiReturnsEmpty()
     {
-        // Arrange — órgão cadastrado, mas API externa não retorna empenhos
+        // Arrange
         var orgaos = new List<OrgaoGoverno>
         {
             new() { Codigo = "001", Nome = "Sec. Educação", Sigla = "SEDUC", Tipo = "Secretaria" }
@@ -218,7 +218,7 @@ public class DataSyncServiceTests
     }
 
     [Fact]
-    public async Task SyncContratosAsync_InsertsNewContrato()
+    public async Task SyncContratosAsync_AddsContrato_WhenContratoDoesNotExist()
     {
         // Arrange
         var externalData = new List<ExternalContratoData>
@@ -247,14 +247,14 @@ public class DataSyncServiceTests
         Assert.Equal(1, count);
         _mockContratoRepo.Verify(r => r.AddAsync(It.Is<Contrato>(c =>
             c.NumeroContrato == "CT-2025-001" &&
-            c.CnpjFornecedor == "22333444000155")), Times.Once); // CNPJ sanitizado
+            c.CnpjFornecedor == "22333444000155")), Times.Once);
         _mockUnitOfWork.Verify(u => u.CommitAsync(), Times.Once);
     }
 
     [Fact]
-    public async Task SyncAllAsync_CombinesEmpenhosAndContratosCounts()
+    public async Task SyncAllAsync_ReturnsProcessedCounts_WhenEmpenhosAndContratosExist()
     {
-        // Arrange — 1 empenho + 1 contrato = EmpenhosProcessados=1, ContratosProcessados=1
+        // Arrange
         var orgaos = new List<OrgaoGoverno>
         {
             new() { Codigo = "001", Nome = "Sec", Sigla = "S", Tipo = "Secretaria" }

@@ -1,764 +1,335 @@
-# Roteiro de Casos de Testes — TransparênciaPE Backend
-
-**Projeto:** TransparênciaPE — API de Dados Fiscais do Estado de Pernambuco  
-**Disciplina:** Verificação e Validação de Software  
-**Tipo de Teste:** Testes Unitários  
-**Framework:** xUnit + Moq + FluentAssertions  
-**Cobertura Alvo:** Camadas Application, Domain, Infrastructure (ExternalClients), API (Controllers, Middlewares)  
-**Data:** 10/05/2026
+# Roteiro de Casos de Testes - TransparenciaPE Backend
 
----
-
-## Sumário
-
-> **Casos de Teste (CTs)** correspondem a métodos de teste — um cenário de comportamento por método.  
-> **Execuções xUnit** é o número real reportado ao rodar `dotnet test`: métodos `[Theory]` com múltiplos `[InlineData]` são executados uma vez por dado, gerando mais execuções que CTs.
-
-| Módulo                                  | CTs (métodos) | Execuções xUnit | Observação                     |
-| --------------------------------------- | :-----------: | :-------------: | ------------------------------ |
-| Helpers — CnpjHelper                    |       4       |       15        | 4 `[Theory]` com InlineData    |
-| Helpers — McaspMapper                   |       2       |       14        | 1 `[Theory]` com 13 InlineData |
-| Entidades — OrgaoGoverno                |       5       |        5        | —                              |
-| Entidades — Receita                     |       1       |        1        | —                              |
-| Entidades — Orcamento                   |       1       |        1        | —                              |
-| Services — DashboardService             |       5       |        5        | —                              |
-| Services — PesquisaService              |       7       |        9        | 1 `[Theory]` com 3 InlineData  |
-| Services — DataSyncService              |       8       |        8        | —                              |
-| Controllers — DashboardController       |       5       |        5        | —                              |
-| Controllers — PesquisaController        |       3       |        3        | —                              |
-| ExternalClients — TcePEDataClient       |       7       |        7        | —                              |
-| Middlewares — GlobalExceptionMiddleware |       6       |        6        | —                              |
-| **Total**                               |    **54**     |     **79**      | +25 via `[InlineData]`         |
-
----
-
-## Módulo: Helpers — CnpjHelper
-
-> Classe utilitária estática para sanitização e validação de CNPJs.
-
----
-
-### CT-001 — Sanitize remove pontuação de CNPJ formatado
-
-**Arquivo:** `Helpers/CnpjHelperTests.cs`  
-**Método em teste:** `CnpjHelper.Sanitize(string?)`  
-**Pré-condições:** Nenhuma. Método estático, sem dependências externas.  
-**Dados de Entrada:**
-
-| Entrada                    | Saída Esperada     |
-| -------------------------- | ------------------ |
-| `"11.222.333/0001-81"`     | `"11222333000181"` |
-| `"11222333000181"`         | `"11222333000181"` |
-| `"00.000.000/0000-00"`     | `"00000000000000"` |
-| `"  11.222.333/0001-81  "` | `"11222333000181"` |
-
-**Passos:**
-
-1. Chamar `CnpjHelper.Sanitize(input)` para cada valor de entrada acima.
-2. Comparar o retorno com o valor esperado.
-
-**Resultado Esperado:** Todos os caracteres não-numéricos e espaços são removidos; o CNPJ retorna apenas com 14 dígitos numéricos.  
-**Status:** ✅ Passou
-
----
-
-### CT-002 — Sanitize retorna string vazia para entrada nula ou branca
-
-**Arquivo:** `Helpers/CnpjHelperTests.cs`  
-**Método em teste:** `CnpjHelper.Sanitize(string?)`  
-**Pré-condições:** Nenhuma.  
-**Dados de Entrada:** `null`, `""`, `"   "`
-
-**Passos:**
-
-1. Chamar `CnpjHelper.Sanitize(input)` para cada valor.
-2. Verificar que o retorno é `string.Empty`.
-
-**Resultado Esperado:** Método retorna `""` sem lançar exceção para entradas nulas ou apenas com espaços.  
-**Status:** ✅ Passou
-
----
-
-### CT-003 — IsValid retorna true para CNPJs válidos
-
-**Arquivo:** `Helpers/CnpjHelperTests.cs`  
-**Método em teste:** `CnpjHelper.IsValid(string?)`  
-**Pré-condições:** Nenhuma.  
-**Dados de Entrada:** `"11222333000181"`, `"11.222.333/0001-81"`
-
-**Passos:**
-
-1. Chamar `CnpjHelper.IsValid(cnpj)` para cada valor.
-2. Verificar que retorna `true`.
-
-**Resultado Esperado:** Retorna `true` para CNPJs numericamente válidos (dígitos verificadores corretos).  
-**Status:** ✅ Passou
-
----
-
-### CT-004 — IsValid retorna false para CNPJs inválidos
-
-**Arquivo:** `Helpers/CnpjHelperTests.cs`  
-**Método em teste:** `CnpjHelper.IsValid(string?)`  
-**Pré-condições:** Nenhuma.  
-**Dados de Entrada:** `"00000000000000"`, `"11111111111111"`, `"12345"`, `""`, `null`, `"1234567890123456"`
-
-**Passos:**
-
-1. Chamar `CnpjHelper.IsValid(input)` para cada valor.
-2. Verificar que retorna `false`.
-
-**Resultado Esperado:** Retorna `false` para: todos os dígitos iguais, tamanho incorreto, vazio e nulo.  
-**Status:** ✅ Passou
-
----
-
-## Módulo: Helpers — McaspMapper
-
-> Classifica naturezas de despesa MCASP em categorias legíveis.
-
----
-
-### CT-005 — MapToClassificacao retorna a categoria correta por prefixo
-
-**Arquivo:** `Helpers/McaspMapperTests.cs`  
-**Método em teste:** `McaspMapper.MapToClassificacao(string, string)`  
-**Pré-condições:** Nenhuma.  
-**Dados de Entrada:**
-
-| Natureza       | Resultado Esperado             |
-| -------------- | ------------------------------ |
-| `"3.1.90.11"`  | `"Pessoal e Encargos Sociais"` |
-| `"3.1.00.00"`  | `"Pessoal e Encargos Sociais"` |
-| `"3.3.90.30"`  | `"Custeio"`                    |
-| `"3.3.90.39"`  | `"Custeio"`                    |
-| `"4.4.90.51"`  | `"Investimentos"`              |
-| `"4.4.90.61"`  | `"Investimentos"`              |
-| `"3.2.90.00"`  | `"Outros"`                     |
-| `"4.5.90.52"`  | `"Outros"`                     |
-| `"4.6.90.71"`  | `"Outros"`                     |
-| `"5.0.00.00"`  | `"Outros"`                     |
-| `"10.0.00.00"` | `"Outros"`                     |
-| `""`           | `"Outros"`                     |
-| `"   "`        | `"Outros"`                     |
-
-**Passos:**
-
-1. Chamar `McaspMapper.MapToClassificacao(natureza, "")` para cada entrada.
-2. Comparar o resultado com a categoria esperada.
-
-**Resultado Esperado:** Prefixos `3.1.*` → Pessoal, `3.3.*` → Custeio, `4.4.*` → Investimentos, demais → Outros.  
-**Status:** ✅ Passou
-
----
-
-### CT-006 — MapToClassificacao retorna "Outros" quando natureza é null
-
-**Arquivo:** `Helpers/McaspMapperTests.cs`  
-**Método em teste:** `McaspMapper.MapToClassificacao(string, string)`  
-**Pré-condições:** Nenhuma.  
-**Dados de Entrada:** `null`
-
-**Passos:**
-
-1. Chamar `McaspMapper.MapToClassificacao(null!, "")`.
-2. Verificar que retorna `"Outros"`.
-
-**Resultado Esperado:** Tratamento defensivo via `IsNullOrWhiteSpace` evita `NullReferenceException`.  
-**Status:** ✅ Passou
-
----
-
-## Módulo: Entidades — OrgaoGoverno
-
-> Entidade de domínio que representa um órgão governamental.
-
----
-
-### CT-007 — OrgaoGoverno gera Id único a cada instanciação
-
-**Arquivo:** `Entities/OrgaoGovernoTests.cs`  
-**Pré-condições:** Nenhuma.
-
-**Passos:**
-
-1. Criar duas instâncias de `OrgaoGoverno` separadamente.
-2. Comparar os `Id` gerados.
-
-**Resultado Esperado:** Ambos os `Id` são `Guid` não-vazios e distintos entre si.  
-**Status:** ✅ Passou
-
----
-
-### CT-008 — OrgaoGoverno inicializa coleções de Empenhos e Contratos como vazias
-
-**Arquivo:** `Entities/OrgaoGovernoTests.cs`  
-**Pré-condições:** Nenhuma.
-
-**Passos:**
-
-1. Instanciar `new OrgaoGoverno()`.
-2. Verificar `Empenhos` e `Contratos`.
-
-**Resultado Esperado:** As coleções são não-nulas e estão vazias. Não ocorre `NullReferenceException` ao acessá-las.  
-**Status:** ✅ Passou
-
----
-
-### CT-009 — OrgaoGoverno define CreatedAt como UTC no momento da criação
-
-**Arquivo:** `Entities/OrgaoGovernoTests.cs`  
-**Pré-condições:** Nenhuma.
-
-**Passos:**
-
-1. Registrar `antes = DateTime.UtcNow`.
-2. Instanciar `new OrgaoGoverno()`.
-3. Verificar que `CreatedAt` está entre `antes` e `DateTime.UtcNow` e que `UpdatedAt` é `null`.
-
-**Resultado Esperado:** `CreatedAt` é populado automaticamente pela `BaseEntity`; `UpdatedAt` começa nulo.  
-**Status:** ✅ Passou
-
----
-
-### CT-010 — OrgaoGoverno aceita atribuição de Codigo, Nome, Sigla e Tipo
-
-**Arquivo:** `Entities/OrgaoGovernoTests.cs`  
-**Pré-condições:** Nenhuma.  
-**Dados de Entrada:** `Codigo="001"`, `Nome="Secretaria de Educação"`, `Sigla="SEDUC"`, `Tipo="Secretaria"`
-
-**Passos:**
-
-1. Criar `OrgaoGoverno` com os valores acima.
-2. Verificar cada propriedade.
-
-**Resultado Esperado:** Todas as propriedades retornam exatamente os valores atribuídos.  
-**Status:** ✅ Passou
-
----
-
-### CT-011 — OrgaoGoverno armazena TotalServidores e OrcamentoAtual
-
-**Arquivo:** `Entities/OrgaoGovernoTests.cs`  
-**Pré-condições:** Nenhuma.  
-**Dados de Entrada:** `TotalServidores=1500`, `OrcamentoAtual=5.000.000`
-
-**Passos:**
-
-1. Instanciar com os valores.
-2. Verificar ambas as propriedades.
-
-**Resultado Esperado:** Valores numéricos são armazenados sem perda de precisão.  
-**Status:** ✅ Passou
-
----
-
-## Módulo: Entidades — Receita e Orcamento
-
----
-
-### CT-012 — Receita é instanciada com propriedades corretas
-
-**Arquivo:** `Entities/ReceitaTests.cs`  
-**Dados de Entrada:** `Valor=150000`, `Mes=1`, `Ano=2026`, `Origem="Impostos"`, `OrgaoGovernoId=<Guid>`
-
-**Resultado Esperado:** `Id` gerado automaticamente; propriedades refletem os valores atribuídos.  
-**Status:** ✅ Passou
-
----
-
-### CT-013 — Orcamento é instanciado com DotacaoInicial e DotacaoAtualizada
-
-**Arquivo:** `Entities/OrcamentoTests.cs`  
-**Dados de Entrada:** `Ano=2026`, `DotacaoInicial=450000`, `DotacaoAtualizada=500000`, `OrgaoGovernoId=<Guid>`
-
-**Resultado Esperado:** Valores decimais armazenados com precisão; `Id` não vazio.  
-**Status:** ✅ Passou
-
----
-
-## Módulo: Services — DashboardService
-
----
-
-### CT-014 — GetResumoAsync retorna KPIs com PercentualExecutado calculado
-
-**Arquivo:** `Services/DashboardServiceTests.cs`  
-**Pré-condições:** Mock de `IDashboardQueryService` configurado com `TotalEmpenhado=1.000.000`, `TotalPago=600.000`.
-
-**Passos:**
-
-1. Chamar `_sut.GetResumoAsync()`.
-2. Verificar os campos do DTO retornado.
-
-**Resultado Esperado:** `PercentualExecutado = 60` (600k / 1M × 100). Verifica que o método de query foi chamado exatamente uma vez.  
-**Status:** ✅ Passou
-
----
-
-### CT-015 — GetResumoAsync retorna 0% quando não há empenhos
-
-**Arquivo:** `Services/DashboardServiceTests.cs`  
-**Pré-condições:** Mock retorna `TotalEmpenhado=0`.
-
-**Resultado Esperado:** `PercentualExecutado = 0` — divisão por zero tratada corretamente.  
-**Status:** ✅ Passou
-
----
-
-### CT-016 — GetResumoAsync filtra por ano quando informado
-
-**Arquivo:** `Services/DashboardServiceTests.cs`  
-**Pré-condições:** Mock de query configurado para `ano=2025`.
-
-**Passos:**
-
-1. Chamar `_sut.GetResumoAsync(2025)`.
-
-**Resultado Esperado:** A query é chamada com `ano=2025`; o DTO contém o total esperado para o ano.  
-**Status:** ✅ Passou
-
----
-
-### CT-017 — GetComparativoOrgaosAsync retorna lista de órgãos
-
-**Arquivo:** `Services/DashboardServiceTests.cs`  
-**Pré-condições:** Mock retorna 2 órgãos para 2025.
-
-**Resultado Esperado:** DTO com `Ano=2025` e 2 itens em `Orgaos`.  
-**Status:** ✅ Passou
-
----
-
-### CT-018 — GetDrillDownAsync retorna dados hierárquicos por órgão
-
-**Arquivo:** `Services/DashboardServiceTests.cs`  
-**Pré-condições:** Mock retorna 1 item de drill-down para órgão `"001"`.
-
-**Resultado Esperado:** DTO com `CodigoOrgao="001"` e 1 item em `Itens`.  
-**Status:** ✅ Passou
-
----
-
-## Módulo: Services — PesquisaService
-
----
-
-### CT-019 — PesquisaGlobalAsync busca por CNPJ numérico (14 dígitos)
-
-**Arquivo:** `Services/PesquisaServiceTests.cs`  
-**Pré-condições:** Mock de `IContratoRepository.SearchByCnpjAsync` configurado.  
-**Dados de Entrada:** `cnpj = "11222333000181"`
-
-**Resultado Esperado:** `SearchByCnpjAsync` é chamado com o CNPJ limpo; `TotalResultados > 0`.  
-**Status:** ✅ Passou
-
----
-
-### CT-020 — PesquisaGlobalAsync detecta CNPJ formatado com pontuação
-
-**Arquivo:** `Services/PesquisaServiceTests.cs`  
-**Dados de Entrada:** `"11.222.333/0001-81"` (formatado)
-
-**Passos:**
-
-1. Chamar `PesquisaGlobalAsync("11.222.333/0001-81")`.
-2. Verificar que `SearchByCnpjAsync` foi chamado com `"11222333000181"`.
-3. Verificar que `SearchByFornecedorAsync` **não** foi chamado.
-
-**Resultado Esperado:** O serviço sanitiza o CNPJ e usa o fluxo de busca por CNPJ.  
-**Status:** ✅ Passou
-
----
-
-### CT-021 — PesquisaGlobalAsync busca por nome quando termo não é CNPJ
-
-**Arquivo:** `Services/PesquisaServiceTests.cs`  
-**Dados de Entrada:** `"Empresa ABC"` (texto livre)
-
-**Resultado Esperado:** `SearchByFornecedorAsync("Empresa ABC")` chamado uma vez.  
-**Status:** ✅ Passou
-
----
-
-### CT-022 — PesquisaGlobalAsync lança ArgumentException para termo vazio
+- **Projeto:** TransparenciaPE - API de Dados Fiscais do Estado de Pernambuco
+- **Disciplina:** Verificacao e Validacao de Software
+- **Tipos de Teste:** Testes unitarios e testes de integracao
+- **Frameworks:** xUnit + Moq + FluentAssertions + Microsoft.AspNetCore.Mvc.Testing
+- **Cobertura Alvo:** Application, Domain, Infrastructure e API
+- **Data:** 19/06/2026
 
-**Arquivo:** `Services/PesquisaServiceTests.cs`  
-**Dados de Entrada:** `""`, `null`, `"   "`
-
-**Resultado Esperado:** `ArgumentException` lançada antes de qualquer chamada ao repositório.  
-**Status:** ✅ Passou
-
----
-
-### CT-023 — ExportarCsvAsync retorna bytes com dados do empenho
-
-**Arquivo:** `Services/PesquisaServiceTests.cs`  
-**Pré-condições:** Mock retorna 1 empenho.
-
-**Resultado Esperado:** CSV contém `"EMP-001"` e `"Empresa A"`; `result.Length > 0`.  
-**Status:** ✅ Passou
-
----
-
-### CT-024 — ExportarCsvAsync retorna apenas o cabeçalho quando não há dados
-
-**Arquivo:** `Services/PesquisaServiceTests.cs`  
-**Pré-condições:** Mock retorna coleção vazia.
-
-**Resultado Esperado:** CSV gerado contém apenas a linha de cabeçalho (`"NumeroEmpenho;..."`); sem linhas de dados.  
-**Status:** ✅ Passou
-
----
-
-### CT-025 — ExportarCsvAsync aplica filtro de ano quando informado
-
-**Arquivo:** `Services/PesquisaServiceTests.cs`  
-**Dados de Entrada:** `ano=2025`
-
-**Resultado Esperado:** `FindAsync` é chamado exatamente uma vez com a expressão de filtro (verificação de invocação).  
-**Status:** ✅ Passou
-
----
-
-## Módulo: Services — DataSyncService
-
----
-
-### CT-026 — SyncEmpenhosAsync insere empenho novo
-
-**Arquivo:** `Services/DataSyncServiceTests.cs`  
-**Pré-condições:** 1 órgão cadastrado; API externa retorna 1 empenho novo (não existe no banco).
-
-**Resultado Esperado:** `AddAsync` chamado 1 vez; `CommitAsync` chamado 1 vez; retorna `count=1`.  
-**Status:** ✅ Passou
-
----
-
-### CT-027 — SyncEmpenhosAsync atualiza empenho existente (upsert)
-
-**Arquivo:** `Services/DataSyncServiceTests.cs`  
-**Pré-condições:** 1 órgão; empenho já existe no banco com `Valor=30.000`; API retorna `Valor=50.000`.
-
-**Resultado Esperado:** `AddAsync` **não** é chamado; `Valor` do existente atualizado para `50.000`.  
-**Status:** ✅ Passou
-
----
-
-### CT-028 — SyncEmpenhosAsync sanitiza CNPJ ao inserir empenho
-
-**Arquivo:** `Services/DataSyncServiceTests.cs`  
-**Pré-condições:** API retorna CNPJ `"11.222.333/0001-81"` com pontuação.
-
-**Resultado Esperado:** Empenho inserido com `CnpjCredor = "11222333000181"` (apenas dígitos).  
-**Status:** ✅ Passou
-
----
-
-### CT-029 — SyncEmpenhosAsync retorna zero quando não há órgãos cadastrados
-
-**Arquivo:** `Services/DataSyncServiceTests.cs`  
-**Pré-condições:** Repositório de órgãos retorna lista vazia.
-
-**Resultado Esperado:** Retorna `0`; API externa **não** é consultada; `CommitAsync` **não** é chamado.  
-**Status:** ✅ Passou
-
----
-
-### CT-030 — SyncEmpenhosAsync retorna zero quando API externa retorna lista vazia
-
-**Arquivo:** `Services/DataSyncServiceTests.cs`  
-**Pré-condições:** 1 órgão cadastrado; API retorna `[]`.
-
-**Resultado Esperado:** Retorna `0`; `AddAsync` **não** chamado; `CommitAsync` chamado (mesmo sem itens).  
-**Status:** ✅ Passou
-
----
-
-### CT-031 — SyncContratosAsync insere contrato novo com CNPJ sanitizado
-
-**Arquivo:** `Services/DataSyncServiceTests.cs`  
-**Pré-condições:** API retorna 1 contrato novo; repositório retorna `null` para o número do contrato.
-
-**Resultado Esperado:** `AddAsync` chamado com CNPJ `"22333444000155"` (sanitizado); `CommitAsync` chamado.  
-**Status:** ✅ Passou
-
----
-
-### CT-032 — SyncAllAsync retorna resultado combinado de empenhos e contratos
-
-**Arquivo:** `Services/DataSyncServiceTests.cs`  
-**Pré-condições:** 1 empenho novo + 1 contrato novo nas APIs externas.
-
-**Resultado Esperado:** `result.EmpenhosProcessados = 1`; `result.ContratosProcessados = 1`.  
-**Status:** ✅ Passou
-
----
-
-### CT-033 — SyncAllAsync retorna SyncedAt com timestamp recente
-
-**Arquivo:** `Services/DataSyncServiceTests.cs`  
-**Pré-condições:** APIs externas retornam listas vazias.
-
-**Resultado Esperado:** `result.SyncedAt ≤ DateTime.UtcNow`.  
-**Status:** ✅ Passou
-
----
-
-## Módulo: Controllers — DashboardController
-
----
-
-### CT-034 — GET /dashboard/resumo retorna HTTP 200 com KPIs
-
-**Arquivo:** `Controllers/DashboardControllerTests.cs`  
-**Pré-condições:** Mock de `IDashboardService` configurado com DTO válido.
-
-**Resultado Esperado:** `OkObjectResult` com `DashboardResumoDto` contendo `TotalEmpenhado = 1.000.000`.  
-**Status:** ✅ Passou
-
----
-
-### CT-035 — GET /dashboard/resumo aplica filtro de ano corretamente
-
-**Arquivo:** `Controllers/DashboardControllerTests.cs`  
-**Pré-condições:** Mock configurado para `ano=2025`.
-
-**Passos:**
-
-1. Chamar `GetResumo(2025)`.
-2. Verificar que o serviço foi chamado com `ano=2025`.
-
-**Resultado Esperado:** `GetResumoAsync(2025)` chamado exatamente uma vez; retorna DTO correto.  
-**Status:** ✅ Passou
-
----
-
-### CT-036 — GET /dashboard/comparativo retorna HTTP 200 com lista de órgãos
-
-**Arquivo:** `Controllers/DashboardControllerTests.cs`  
-**Pré-condições:** Mock retorna `ComparativoOrgaosDto` com `Ano=2025` e 1 órgão.
-
-**Resultado Esperado:** `OkObjectResult` com `Ano=2025`.  
-**Status:** ✅ Passou
-
----
-
-### CT-037 — GET /dashboard/evolucao retorna HTTP 200 com dados de drill-down
-
-**Arquivo:** `Controllers/DashboardControllerTests.cs`  
-**Pré-condições:** Mock retorna `DrillDownDto` para órgão `"001"`.
-
-**Resultado Esperado:** `OkObjectResult` com `CodigoOrgao = "001"`.  
-**Status:** ✅ Passou
-
----
-
-### CT-038 — GET /dashboard/evolucao aplica filtro de ano quando informado
-
-**Arquivo:** `Controllers/DashboardControllerTests.cs`  
-**Dados de Entrada:** `codigoOrgao="002"`, `ano=2025`
-
-**Resultado Esperado:** Serviço chamado com `("002", 2025)`; DTO retornado com `CodigoOrgao="002"`.  
-**Status:** ✅ Passou
-
----
-
-## Módulo: Controllers — PesquisaController
-
----
-
-### CT-039 — GET /pesquisa/global retorna HTTP 200 com resultados
-
-**Arquivo:** `Controllers/PesquisaControllerTests.cs`  
-**Pré-condições:** Mock retorna `PesquisaResultDto` com 3 resultados.
-
-**Resultado Esperado:** `OkObjectResult` com `TermoBuscado = "Empresa A"`.  
-**Status:** ✅ Passou
-
----
-
-### CT-040 — GET /pesquisa/global retorna HTTP 400 quando termo é vazio
-
-**Arquivo:** `Controllers/PesquisaControllerTests.cs`  
-**Pré-condições:** Mock lança `ArgumentException` para termo vazio.
-
-**Resultado Esperado:** `BadRequestObjectResult`.  
-**Status:** ✅ Passou
-
----
-
-### CT-041 — GET /exportar/csv retorna arquivo CSV com content-type correto
-
-**Arquivo:** `Controllers/PesquisaControllerTests.cs`  
-**Pré-condições:** Mock retorna bytes CSV.
-
-**Resultado Esperado:** `FileContentResult` com `ContentType = "text/csv"` e nome de arquivo contendo `".csv"`.  
-**Status:** ✅ Passou
-
----
-
-## Módulo: ExternalClients — TcePEDataClient
-
----
-
-### CT-042 — GetReceitasAsync desserializa o formato JSON do TCE corretamente
-
-**Arquivo:** `ExternalClients/TcePEDataClientTests.cs`  
-**Pré-condições:** `HttpMessageHandler` mockado retorna JSON no formato envelope `{ resposta: { conteudo: [...] } }`.
-
-**Resultado Esperado:** Lista com 1 item; `ValorReceita = 150.000`; `Origem = "Imposto"`.  
-**Status:** ✅ Passou
-
----
-
-### CT-043 — GetReceitasAsync lança HttpRequestException quando API retorna erro 500
-
-**Arquivo:** `ExternalClients/TcePEDataClientTests.cs`  
-**Pré-condições:** Handler mockado retorna `HttpStatusCode.InternalServerError`.
-
-**Resultado Esperado:** `HttpRequestException` lançada (uso de `EnsureSuccessStatusCode`).  
-**Status:** ✅ Passou
-
----
-
-### CT-044 — GetEmpenhosByOrgaoAsync desserializa empenhos corretamente
-
-**Arquivo:** `ExternalClients/TcePEDataClientTests.cs`  
-**Pré-condições:** Handler retorna JSON com 1 empenho.
-
-**Resultado Esperado:** `NumeroEmpenho = "EMP-001"`, `Valor = 50.000`, `NaturezaDespesa = "3.3.90.30"`.  
-**Status:** ✅ Passou
-
----
-
-### CT-045 — GetEmpenhosByOrgaoAsync retorna lista vazia quando API retorna erro 404
-
-**Arquivo:** `ExternalClients/TcePEDataClientTests.cs`  
-**Pré-condições:** Handler retorna `HttpStatusCode.NotFound`.
-
-**Resultado Esperado:** Lista vazia (sem lançar exceção — verificação manual de `IsSuccessStatusCode`).  
-**Status:** ✅ Passou
-
----
-
-### CT-046 — GetContratosAsync desserializa contratos corretamente
-
-**Arquivo:** `ExternalClients/TcePEDataClientTests.cs`  
-**Pré-condições:** Handler retorna JSON com 1 contrato.
-
-**Resultado Esperado:** `NumeroContrato = "CT-2025-001"`, `ValorContrato = 200.000`.  
-**Status:** ✅ Passou
-
----
-
-### CT-047 — GetContratosAsync retorna lista vazia quando API está indisponível
-
-**Arquivo:** `ExternalClients/TcePEDataClientTests.cs`  
-**Pré-condições:** Handler retorna `HttpStatusCode.ServiceUnavailable`.
-
-**Resultado Esperado:** Lista vazia retornada sem lançar exceção.  
-**Status:** ✅ Passou
-
----
-
-### CT-048 — GetOrcamentoAsync retorna lista vazia quando API retorna erro
-
-**Arquivo:** `ExternalClients/TcePEDataClientTests.cs`  
-**Pré-condições:** Handler retorna `HttpStatusCode.BadGateway`.
-
-**Resultado Esperado:** Lista vazia retornada sem lançar exceção.  
-**Status:** ✅ Passou
-
 ---
-
-## Módulo: Middlewares — GlobalExceptionMiddleware
 
-> Componente cross-cutting que captura exceções não tratadas e retorna respostas padronizadas.
+## Como executar
 
----
+Executar toda a suite:
 
-### CT-049 — Middleware passa para o próximo handler quando não há exceção
+```bash
+dotnet test
+```
 
-**Arquivo:** `Middlewares/GlobalExceptionMiddlewareTests.cs`  
-**Pré-condições:** `RequestDelegate` mockado que apenas seta uma flag.
+Executar apenas testes unitarios:
 
-**Passos:**
+```bash
+dotnet test tests/TransparenciaPE.UnitTests/TransparenciaPE.UnitTests.csproj
+```
 
-1. Invocar `middleware.InvokeAsync(context)`.
-2. Verificar que o delegate seguinte foi chamado.
+Executar apenas testes de integracao:
 
-**Resultado Esperado:** `nextCalled = true`; `StatusCode` permanece `200`.  
-**Status:** ✅ Passou
+```bash
+dotnet test tests/TransparenciaPE.IntegrationTests/TransparenciaPE.IntegrationTests.csproj
+```
 
----
+Executar por metodo:
 
-### CT-050 — Middleware retorna HTTP 400 para ArgumentException
+```bash
+dotnet test --filter "GetResumoAsync_ReturnsKPIs_WhenDataExists"
+```
 
-**Arquivo:** `Middlewares/GlobalExceptionMiddlewareTests.cs`  
-**Pré-condições:** `RequestDelegate` lança `ArgumentException("Termo de busca inválido.")`.
+Executar por classe:
 
-**Resultado Esperado:** `StatusCode = 400`; corpo contém a mensagem da exceção.  
-**Status:** ✅ Passou
+```bash
+dotnet test --filter "FullyQualifiedName~DashboardServiceTests"
+```
 
 ---
 
-### CT-051 — Middleware retorna HTTP 404 para NotFoundException
+## Convencoes
 
-**Arquivo:** `Middlewares/GlobalExceptionMiddlewareTests.cs`  
-**Pré-condições:** `RequestDelegate` lança `NotFoundException("Recurso não encontrado.")`.
+Os metodos de teste seguem o padrao:
 
-**Resultado Esperado:** `StatusCode = 404`; `DomainException.StatusCode` é respeitado.  
-**Status:** ✅ Passou
+```text
+MetodoOuAssunto_ComportamentoEsperado_WhenCondicao
+```
 
----
+Tambem sao aceitas variantes com `For`, `With`, `By` e `On` quando a condicao fica mais natural.
 
-### CT-052 — Middleware retorna HTTP 500 para exceções não tratadas
+Exemplos:
 
-**Arquivo:** `Middlewares/GlobalExceptionMiddlewareTests.cs`  
-**Pré-condições:** `RequestDelegate` lança `InvalidOperationException`.
+- `GetResumoAsync_ReturnsKPIs_WhenDataExists`
+- `ExportarCsvAsync_UsesYearFilter_WhenYearIsProvided`
+- `GetEmpenhosAsync_ReturnsSeedData_ForRequestedYear`
 
-**Resultado Esperado:** `StatusCode = 500`; corpo contém `"internal server error"` (mensagem genérica, sem vazar detalhes internos).  
-**Status:** ✅ Passou
+Os projetos possuem testes de convencao que falham caso um metodo `[Fact]` ou `[Theory]` saia desse padrao.
 
 ---
-
-### CT-053 — Middleware retorna JSON estruturado com statusCode, message e timestamp
-
-**Arquivo:** `Middlewares/GlobalExceptionMiddlewareTests.cs`  
-**Pré-condições:** `RequestDelegate` lança `ArgumentException`.
 
-**Passos:**
+## Sumario
 
-1. Invocar o middleware.
-2. Verificar `ContentType = "application/json"`.
-3. Parsear o corpo como JSON.
-4. Verificar presença das propriedades `statusCode`, `message` e `timestamp`.
+> **CTs (metodos)** correspondem aos metodos de teste declarados no codigo.
+>
+> **Execucoes xUnit** correspondem ao total executado pelo xUnit; metodos `[Theory]` com multiplos dados executam mais de uma vez.
 
-**Resultado Esperado:** Corpo JSON válido com as três propriedades obrigatórias.  
-**Status:** ✅ Passou
+| Suite       | CTs (metodos) | Execucoes xUnit |
+| ----------- | :-----------: | :-------------: |
+| Unitarios   |      104      |       126       |
+| Integracao  |       12      |       12        |
+| **Total**   |    **116**    |     **138**     |
 
----
-
-### CT-054 — Middleware respeita StatusCode da DomainException derivada
+### Sumario por modulo - UnitTests
 
-**Arquivo:** `Middlewares/GlobalExceptionMiddlewareTests.cs`  
-**Pré-condições:** `NotFoundException` herda `DomainException` com `StatusCode=404`.
-
-**Resultado Esperado:** `context.Response.StatusCode = 404`.  
-**Status:** ✅ Passou
-
----
+| Modulo                                   | CTs | Execucoes | Observacao                         |
+| ---------------------------------------- | :-: | :-------: | ---------------------------------- |
+| Helpers - CnpjHelper                     |  6  |    15     | 4 theories com `InlineData`        |
+| Helpers - McaspMapper                    |  6  |    14     | 5 theories com `InlineData`        |
+| Entities - Orcamento                     |  3  |     3     | -                                  |
+| Entities - OrgaoGoverno                  |  5  |     5     | -                                  |
+| Entities - Receita                       |  3  |     3     | -                                  |
+| Services - DashboardService              |  7  |     7     | -                                  |
+| Services - PesquisaService               |  6  |     9     | 2 theories com `InlineData`        |
+| Services - DataSyncService               |  8  |     8     | -                                  |
+| Controllers - DashboardController        | 13  |    13     | -                                  |
+| Controllers - PesquisaController         |  8  |     8     | -                                  |
+| Infrastructure - AppDbContext            |  7  |     7     | -                                  |
+| Infrastructure - FakePEDataClient        |  6  |     6     | -                                  |
+| Infrastructure - Repository              | 12  |    12     | -                                  |
+| Infrastructure - UnitOfWork              |  3  |     3     | -                                  |
+| ExternalClients - TcePEDataClient        |  7  |     7     | -                                  |
+| Middlewares - GlobalExceptionMiddleware  |  3  |     5     | 1 theory com `MemberData`          |
+| Conventions - TestNamingConvention       |  1  |     1     | Valida nomes dos testes unitarios  |
+| **Total**                                | 104 |    126    | -                                  |
 
-## Resumo de Cobertura
-
-| Camada                           | Componentes Testados                                     |
-| -------------------------------- | -------------------------------------------------------- |
-| Domain — Entities                | `OrgaoGoverno`, `Receita`, `Orcamento`                   |
-| Application — Helpers            | `CnpjHelper`, `McaspMapper`                              |
-| Application — Services           | `DashboardService`, `PesquisaService`, `DataSyncService` |
-| Infrastructure — ExternalClients | `TcePEDataClient`                                        |
-| API — Controllers                | `DashboardController`, `PesquisaController`              |
-| API — Middlewares                | `GlobalExceptionMiddleware`                              |
-
-> **Nota:** Os testes unitários utilizam mocks (Moq) para isolar dependências externas (banco de dados, APIs HTTP, logger). Entidades de domínio são testadas diretamente, sem mocks.
+### Sumario por modulo - IntegrationTests
+
+| Modulo                             | CTs | Execucoes | Observacao                           |
+| ---------------------------------- | :-: | :-------: | ------------------------------------ |
+| ApiEndpoints                       | 11  |    11     | Contratos HTTP usando `TestServer`   |
+| Conventions - TestNamingConvention |  1  |     1     | Valida nomes dos testes de integracao |
+| **Total**                          | 12  |    12     | -                                    |
+
+---
+
+## Casos de teste unitarios
+
+### Helpers - CnpjHelper
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-001 | `Sanitize_ReturnsDigitsOnly_WhenInputHasPunctuation` | Remove pontuacao e retorna apenas digitos. |
+| CT-002 | `Sanitize_ReturnsSameValue_WhenInputHasOnlyDigits` | Mantem CNPJ ja sanitizado. |
+| CT-003 | `Sanitize_ReturnsDigitsOnly_WhenInputHasSurroundingWhitespace` | Remove espacos externos e pontuacao. |
+| CT-004 | `Sanitize_ReturnsEmpty_WhenInputIsNullOrWhitespace` | Retorna vazio para `null`, vazio ou branco. |
+| CT-005 | `IsValid_ReturnsTrue_WhenCnpjIsValid` | Aceita CNPJs validos com ou sem mascara. |
+| CT-006 | `IsValid_ReturnsFalse_WhenCnpjIsInvalid` | Rejeita CNPJs invalidos, vazios, nulos ou com tamanho incorreto. |
+
+### Helpers - McaspMapper
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-007 | `MapToClassificacao_ReturnsPessoalEncargos_WhenNaturezaStartsWith31` | Mapeia prefixo `3.1` para pessoal e encargos sociais. |
+| CT-008 | `MapToClassificacao_ReturnsCusteio_WhenNaturezaStartsWith33` | Mapeia prefixo `3.3` para custeio. |
+| CT-009 | `MapToClassificacao_ReturnsInvestimentos_WhenNaturezaStartsWith44` | Mapeia prefixo `4.4` para investimentos. |
+| CT-010 | `MapToClassificacao_ReturnsOutros_WhenNaturezaPrefixIsUnknown` | Retorna outros para prefixos nao mapeados. |
+| CT-011 | `MapToClassificacao_ReturnsOutros_WhenNaturezaIsBlank` | Retorna outros para natureza vazia ou em branco. |
+| CT-012 | `MapToClassificacao_ReturnsOutros_WhenNaturezaIsNull` | Retorna outros para natureza nula. |
+
+### Entities - Orcamento
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-013 | `Orcamento_AssignsBudgetFields_WhenInitialized` | Atribui ano, dotacao inicial e dotacao atualizada. |
+| CT-014 | `Orcamento_AssignsOrgaoGovernoId_WhenInitialized` | Atribui o identificador do orgao associado. |
+| CT-015 | `Orcamento_GeneratesId_WhenCreated` | Gera `Id` automaticamente pela entidade base. |
+
+### Entities - OrgaoGoverno
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-016 | `OrgaoGoverno_GeneratesUniqueId_WhenCreated` | Gera IDs nao vazios e distintos. |
+| CT-017 | `OrgaoGoverno_InitializesCollections_WhenCreated` | Inicializa colecoes de empenhos e contratos vazias. |
+| CT-018 | `OrgaoGoverno_SetsCreatedAt_WhenCreated` | Define `CreatedAt` no momento da criacao e mantem `UpdatedAt` nulo. |
+| CT-019 | `OrgaoGoverno_AssignsIdentificationFields_WhenInitialized` | Atribui codigo, nome, sigla e tipo. |
+| CT-020 | `OrgaoGoverno_AssignsCapacityFields_WhenInitialized` | Atribui total de servidores e orcamento atual. |
+
+### Entities - Receita
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-021 | `Receita_AssignsAccountingFields_WhenInitialized` | Atribui valor, mes, ano e origem. |
+| CT-022 | `Receita_AssignsOrgaoGovernoId_WhenInitialized` | Atribui o identificador do orgao associado. |
+| CT-023 | `Receita_GeneratesId_WhenCreated` | Gera `Id` automaticamente pela entidade base. |
+
+### Services - DashboardService
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-024 | `GetResumoAsync_ReturnsKPIs_WhenDataExists` | Retorna KPIs e calcula percentual executado quando ha dados. |
+| CT-025 | `GetResumoAsync_ReturnsZeroPercentualExecutado_WhenTotalEmpenhadoIsZero` | Evita divisao por zero quando total empenhado e zero. |
+| CT-026 | `GetResumoAsync_PassesYearParameter_WhenYearIsProvided` | Encaminha o filtro de ano ao servico de query. |
+| CT-027 | `GetComparativoOrgaosAsync_ReturnsAno_WhenYearIsProvided` | Retorna o ano solicitado no DTO de comparativo. |
+| CT-028 | `GetComparativoOrgaosAsync_ReturnsOrgaos_WhenDataExists` | Mapeia lista de orgaos retornada pela query. |
+| CT-029 | `GetDrillDownAsync_ReturnsCodigoOrgao_WhenCodigoOrgaoIsProvided` | Retorna o codigo do orgao solicitado. |
+| CT-030 | `GetDrillDownAsync_ReturnsItens_WhenDataExists` | Mapeia itens de drill-down retornados pela query. |
+
+### Services - PesquisaService
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-031 | `PesquisaGlobalAsync_SearchesContratosByCnpj_WhenTermIsCnpj` | Sanitiza termo CNPJ e pesquisa contratos por CNPJ. |
+| CT-032 | `PesquisaGlobalAsync_SearchesContratosByFornecedor_WhenTermIsText` | Pesquisa contratos por fornecedor quando termo e texto. |
+| CT-033 | `PesquisaGlobalAsync_ThrowsArgumentException_WhenTermIsEmpty` | Rejeita termo nulo, vazio ou em branco. |
+| CT-034 | `ExportarCsvAsync_ReturnsCsvWithEmpenhoData_WhenDataExists` | Gera CSV com dados de empenho. |
+| CT-035 | `ExportarCsvAsync_ReturnsHeaderOnly_WhenNoDataExists` | Gera apenas cabecalho quando nao ha dados. |
+| CT-036 | `ExportarCsvAsync_UsesYearFilter_WhenYearIsProvided` | Aplica filtro de ano no predicado enviado ao repositorio. |
+
+### Services - DataSyncService
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-037 | `SyncEmpenhosAsync_AddsEmpenho_WhenEmpenhoDoesNotExist` | Insere empenho novo retornado pela API externa. |
+| CT-038 | `SyncEmpenhosAsync_UpdatesEmpenho_WhenEmpenhoExists` | Atualiza empenho existente sem inserir duplicado. |
+| CT-039 | `SyncEmpenhosAsync_SanitizesCnpj_WhenAddingEmpenho` | Salva CNPJ do credor apenas com digitos. |
+| CT-040 | `SyncAllAsync_ReturnsSyncedAt_WhenSyncCompletes` | Retorna timestamp de sincronizacao ao concluir. |
+| CT-041 | `SyncEmpenhosAsync_ReturnsZero_WhenNoOrgaosExist` | Nao consulta API externa quando nao ha orgaos base. |
+| CT-042 | `SyncEmpenhosAsync_ReturnsZero_WhenApiReturnsEmpty` | Retorna zero quando a API nao traz empenhos. |
+| CT-043 | `SyncContratosAsync_AddsContrato_WhenContratoDoesNotExist` | Insere contrato novo e sanitiza CNPJ do fornecedor. |
+| CT-044 | `SyncAllAsync_ReturnsProcessedCounts_WhenEmpenhosAndContratosExist` | Agrega contadores de empenhos e contratos processados. |
+
+### Controllers - DashboardController
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-045 | `GetResumo_ReturnsOkResult_WhenServiceReturnsResumo` | Retorna `OkObjectResult` no resumo. |
+| CT-046 | `GetResumo_ReturnsDashboardResumoDto_WhenServiceReturnsResumo` | Retorna `DashboardResumoDto` no corpo. |
+| CT-047 | `GetResumo_ReturnsTotalEmpenhado_WhenServiceReturnsResumo` | Propaga `TotalEmpenhado` retornado pelo servico. |
+| CT-048 | `GetResumo_InvokesServiceWithNullYear_WhenAnoIsNull` | Chama o servico com ano nulo. |
+| CT-049 | `GetResumo_InvokesServiceWithProvidedYear_WhenAnoIsProvided` | Chama o servico com ano informado. |
+| CT-050 | `GetComparativo_ReturnsOkResult_WhenServiceReturnsComparativo` | Retorna `OkObjectResult` no comparativo. |
+| CT-051 | `GetComparativo_ReturnsComparativoOrgaosDto_WhenServiceReturnsComparativo` | Retorna `ComparativoOrgaosDto` no corpo. |
+| CT-052 | `GetComparativo_ReturnsAno_WhenServiceReturnsComparativo` | Propaga ano retornado pelo servico. |
+| CT-053 | `GetEvolucao_ReturnsOkResult_WhenServiceReturnsDrillDown` | Retorna `OkObjectResult` na evolucao. |
+| CT-054 | `GetEvolucao_ReturnsDrillDownDto_WhenServiceReturnsDrillDown` | Retorna `DrillDownDto` no corpo. |
+| CT-055 | `GetEvolucao_ReturnsCodigoOrgao_WhenServiceReturnsDrillDown` | Propaga codigo do orgao retornado pelo servico. |
+| CT-056 | `GetEvolucao_InvokesServiceWithNullYear_WhenAnoIsNull` | Chama o servico com codigo e ano nulo. |
+| CT-057 | `GetEvolucao_InvokesServiceWithProvidedParameters_WhenAnoIsProvided` | Chama o servico com codigo e ano informado. |
+
+### Controllers - PesquisaController
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-058 | `PesquisaGlobal_ReturnsOkResult_WhenServiceReturnsResult` | Retorna `OkObjectResult` na pesquisa. |
+| CT-059 | `PesquisaGlobal_ReturnsPesquisaResultDto_WhenServiceReturnsResult` | Retorna `PesquisaResultDto` no corpo. |
+| CT-060 | `PesquisaGlobal_ReturnsTermoBuscado_WhenServiceReturnsResult` | Propaga termo buscado retornado pelo servico. |
+| CT-061 | `PesquisaGlobal_ReturnsBadRequestStatusCode_WhenTermoIsEmpty` | Retorna status 400 quando termo e vazio. |
+| CT-062 | `PesquisaGlobal_ReturnsBadRequestObjectResult_WhenTermoIsEmpty` | Retorna `BadRequestObjectResult` quando termo e vazio. |
+| CT-063 | `ExportarCsv_ReturnsFileContentResult_WhenServiceReturnsCsv` | Retorna arquivo quando servico gera CSV. |
+| CT-064 | `ExportarCsv_ReturnsCsvContentType_WhenServiceReturnsCsv` | Define `ContentType` como `text/csv`. |
+| CT-065 | `ExportarCsv_ReturnsFileNameWithCsvExtension_WhenServiceReturnsCsv` | Define nome de arquivo com extensao `.csv`. |
+
+### Infrastructure - AppDbContext
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-066 | `Model_AppliesEmpenhoConfiguration_WhenBuilt` | Aplica tabela, tamanhos e tipo decimal de empenhos. |
+| CT-067 | `Model_AppliesContratoConfiguration_WhenBuilt` | Aplica tabela e limites de contrato. |
+| CT-068 | `Model_AppliesOrgaoGovernoConfiguration_WhenBuilt` | Aplica tabela e limites de orgao. |
+| CT-069 | `Model_AppliesLiquidacaoConfiguration_WhenBuilt` | Aplica tabela e limite de liquidacao. |
+| CT-070 | `Model_AppliesPagamentoConfiguration_WhenBuilt` | Aplica tabela e limite de pagamento. |
+| CT-071 | `SaveChangesAsync_SetsCreatedAt_WhenEntityIsAdded` | Atualiza `CreatedAt` ao adicionar entidade. |
+| CT-072 | `SaveChangesAsync_SetsUpdatedAt_WhenEntityIsModified` | Atualiza `UpdatedAt` ao modificar entidade. |
+
+### Infrastructure - FakePEDataClient
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-073 | `GetEmpenhosAsync_ReturnsSeedData_ForRequestedYear` | Retorna empenhos fake do ano solicitado. |
+| CT-074 | `GetEmpenhosByOrgaoAsync_ReturnsFilteredData_ForRequestedOrgao` | Filtra empenhos fake por orgao. |
+| CT-075 | `GetContratosAsync_ReturnsSeedData_ForRequestedYear` | Retorna contratos fake do ano solicitado. |
+| CT-076 | `GetReceitasAsync_ReturnsSeedData_ForRequestedYear` | Retorna receitas fake do ano solicitado. |
+| CT-077 | `GetOrcamentoAsync_ReturnsSeedData_ForRequestedYear` | Retorna orcamento fake do ano solicitado. |
+| CT-078 | `GetTotalServidoresAsync_ReturnsFixedTotal_ForAnyOrgao` | Retorna total fixo de servidores. |
+
+### Infrastructure - Repository
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-079 | `AddAsync_PersistsEntity_WhenSaved` | Persiste entidade adicionada. |
+| CT-080 | `GetByIdAsync_ReturnsEntity_WhenEntityExists` | Busca entidade por ID. |
+| CT-081 | `GetAllAsync_ReturnsEntities_WhenEntitiesExist` | Lista entidades existentes. |
+| CT-082 | `FindAsync_ReturnsMatchingEntities_WhenPredicateMatches` | Filtra entidades por predicado. |
+| CT-083 | `ExistsAsync_ReturnsTrue_WhenPredicateMatches` | Confirma existencia por predicado. |
+| CT-084 | `Update_PersistsChanges_WhenSaved` | Persiste alteracoes de entidade. |
+| CT-085 | `Remove_DeletesEntity_WhenSaved` | Remove entidade persistida. |
+| CT-086 | `GetByNumeroAsync_ReturnsEmpenhoWithOrgao_WhenEmpenhoExists` | Busca empenho por numero/ano incluindo orgao. |
+| CT-087 | `GetByAnoAsync_ReturnsOnlyMatchingEmpenhos_WhenYearIsProvided` | Filtra empenhos por ano. |
+| CT-088 | `GetByOrgaoAsync_ReturnsOnlyMatchingEmpenhos_WhenOrgaoIsProvided` | Filtra empenhos por orgao. |
+| CT-089 | `GetByNumeroAsync_ReturnsContratoWithOrgao_WhenContratoExists` | Busca contrato por numero incluindo orgao. |
+| CT-090 | `SearchByCnpjAsync_ReturnsMatchingContratos_WhenCnpjExists` | Busca contratos por CNPJ. |
+
+### Infrastructure - UnitOfWork
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-091 | `UnitOfWork_ExposesConfiguredRepositories_WhenCreated` | Expoe repositorios configurados. |
+| CT-092 | `CommitAsync_PersistsPendingChanges_WhenRepositoryAddsEntity` | Persiste alteracoes pendentes. |
+| CT-093 | `Dispose_DisposesDbContext_WhenCalled` | Descarta o contexto ao chamar `Dispose`. |
+
+### ExternalClients - TcePEDataClient
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-094 | `GetReceitasAsync_ReturnsReceitas_WhenApiReturnsTceJson` | Desserializa receitas no envelope JSON do TCE. |
+| CT-095 | `GetReceitasAsync_ThrowsHttpRequestException_WhenApiReturnsServerError` | Lanca excecao em erro HTTP para receitas. |
+| CT-096 | `GetEmpenhosByOrgaoAsync_ReturnsEmpenhos_WhenApiReturnsTceJson` | Desserializa empenhos por orgao. |
+| CT-097 | `GetEmpenhosByOrgaoAsync_ReturnsEmpty_WhenApiReturnsError` | Retorna lista vazia em erro HTTP de empenhos. |
+| CT-098 | `GetContratosAsync_ReturnsContratos_WhenApiReturnsTceJson` | Desserializa contratos. |
+| CT-099 | `GetContratosAsync_ReturnsEmpty_WhenApiReturnsError` | Retorna lista vazia em erro HTTP de contratos. |
+| CT-100 | `GetOrcamentoAsync_ReturnsEmpty_WhenApiReturnsError` | Retorna lista vazia em erro HTTP de orcamento. |
+
+### Middlewares - GlobalExceptionMiddleware
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-101 | `InvokeAsync_CallsNext_WhenNoExceptionOccurs` | Chama o proximo delegate quando nao ha excecao. |
+| CT-102 | `InvokeAsync_ReturnsExpectedStatusCode_ForGivenException` | Mapeia excecoes para status HTTP esperados. |
+| CT-103 | `InvokeAsync_ReturnsJsonError_WhenExceptionOccurs` | Retorna corpo JSON com campos obrigatorios. |
+
+### Conventions
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-104 | `TestMethods_FollowNamingConvention_WhenDeclaredInUnitAssembly` | Garante padrao de nome nos testes unitarios. |
+
+---
+
+## Casos de teste de integracao
+
+### API Endpoints
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-105 | `GetResumo_ReturnsOkStatus_WhenAnoIsProvided` | `GET /api/v1/dashboard/resumo` retorna HTTP 200. |
+| CT-106 | `GetResumo_ReturnsJsonContentType_WhenAnoIsProvided` | Resposta de resumo retorna `application/json`. |
+| CT-107 | `GetResumo_ReturnsDashboardResumoPayload_WhenAnoIsProvided` | Payload de resumo contem KPIs esperados. |
+| CT-108 | `GetEvolucao_ReturnsOkStatus_WhenCodigoOrgaoIsProvided` | `GET /api/v1/dashboard/evolucao` retorna HTTP 200. |
+| CT-109 | `GetEvolucao_ReturnsDrillDownPayload_WhenCodigoOrgaoIsProvided` | Payload de evolucao contem codigo do orgao e itens. |
+| CT-110 | `PesquisaGlobal_ReturnsBadRequestStatus_WhenTermoIsEmpty` | Pesquisa global retorna HTTP 400 para termo vazio. |
+| CT-111 | `PesquisaGlobal_ReturnsErrorPayload_WhenTermoIsEmpty` | Erro da pesquisa global retorna payload de erro. |
+| CT-112 | `ExportarCsv_ReturnsOkStatus_WhenAnoIsProvided` | Exportacao CSV retorna HTTP 200. |
+| CT-113 | `ExportarCsv_ReturnsCsvContentType_WhenAnoIsProvided` | Exportacao CSV retorna `text/csv`. |
+| CT-114 | `ExportarCsv_ReturnsCsvHeader_WhenAnoIsProvided` | CSV inicia com cabecalho esperado. |
+| CT-115 | `ExportarCsv_ReturnsCsvFileName_WhenAnoIsProvided` | Resposta CSV define nome de arquivo com `.csv`. |
+
+### Conventions
+
+| CT     | Metodo | Cenario validado |
+| ------ | ------ | ---------------- |
+| CT-116 | `TestMethods_FollowNamingConvention_WhenDeclaredInIntegrationAssembly` | Garante padrao de nome nos testes de integracao. |
+
+---
+
+## Observacoes de cobertura
+
+- Os testes unitarios isolam dependencias com Moq sempre que ha repositorios, clientes HTTP, servicos ou loggers.
+- Os testes de repositorio e contexto usam banco em memoria para validar comportamento de persistencia e mapeamento.
+- Os testes de integracao usam `CustomWebApplicationFactory` com servicos fake para validar contratos HTTP da API sem depender de banco ou APIs externas.
+- O objetivo dos CTs e manter um comportamento por metodo sempre que possivel; cenarios amplos foram quebrados em testes menores para facilitar diagnostico.

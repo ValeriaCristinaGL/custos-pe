@@ -75,7 +75,7 @@ public class GlobalExceptionMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_ReturnsJson_WithRequiredErrorFields()
+    public async Task InvokeAsync_ReturnsJsonError_WhenExceptionOccurs()
     {
         // Arrange
         RequestDelegate next = _ => throw new ArgumentException("erro estruturado");
@@ -85,7 +85,7 @@ public class GlobalExceptionMiddlewareTests
         // Act
         await middleware.InvokeAsync(context);
 
-        // Assert — corpo deve ser JSON com os campos obrigatórios
+        // Assert
         context.Response.ContentType.Should().Contain("application/json");
         var body = await ReadBodyAsync(context.Response);
         using var doc = JsonDocument.Parse(body);

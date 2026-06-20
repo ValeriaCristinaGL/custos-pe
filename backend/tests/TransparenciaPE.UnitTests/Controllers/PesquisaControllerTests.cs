@@ -20,10 +20,8 @@ public class PesquisaControllerTests
         _sut = new PesquisaController(_mockService.Object, _mockLogger.Object);
     }
 
-    // ─── PesquisaGlobal — cenário de sucesso ─────────────────────────────
-
     [Fact]
-    public async Task PesquisaGlobal_Returns200StatusCode()
+    public async Task PesquisaGlobal_ReturnsOkResult_WhenServiceReturnsResult()
     {
         // Arrange
         _mockService.Setup(s => s.PesquisaGlobalAsync("Empresa A"))
@@ -38,7 +36,7 @@ public class PesquisaControllerTests
     }
 
     [Fact]
-    public async Task PesquisaGlobal_ReturnsPesquisaResultDtoAsBody()
+    public async Task PesquisaGlobal_ReturnsPesquisaResultDto_WhenServiceReturnsResult()
     {
         // Arrange
         _mockService.Setup(s => s.PesquisaGlobalAsync("Empresa A"))
@@ -53,7 +51,7 @@ public class PesquisaControllerTests
     }
 
     [Fact]
-    public async Task PesquisaGlobal_ReturnsTermoBuscadoFromService()
+    public async Task PesquisaGlobal_ReturnsTermoBuscado_WhenServiceReturnsResult()
     {
         // Arrange
         _mockService.Setup(s => s.PesquisaGlobalAsync("Empresa A"))
@@ -67,10 +65,8 @@ public class PesquisaControllerTests
         Assert.Equal("Empresa A", returned!.TermoBuscado);
     }
 
-    // ─── PesquisaGlobal — cenário de erro ────────────────────────────────
-
     [Fact]
-    public async Task PesquisaGlobal_Returns400StatusCode_WhenTermoIsEmpty()
+    public async Task PesquisaGlobal_ReturnsBadRequestStatusCode_WhenTermoIsEmpty()
     {
         // Arrange
         _mockService.Setup(s => s.PesquisaGlobalAsync(""))
@@ -98,10 +94,8 @@ public class PesquisaControllerTests
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
 
-    // ─── ExportarCsv ─────────────────────────────────────────────────────
-
     [Fact]
-    public async Task ExportarCsv_ReturnsFileContentResult()
+    public async Task ExportarCsv_ReturnsFileContentResult_WhenServiceReturnsCsv()
     {
         // Arrange
         var csvBytes = System.Text.Encoding.UTF8.GetBytes("NumeroEmpenho;Orgao\nEMP-001;Sec Edu");
@@ -115,7 +109,7 @@ public class PesquisaControllerTests
     }
 
     [Fact]
-    public async Task ExportarCsv_ReturnsCsvContentType()
+    public async Task ExportarCsv_ReturnsCsvContentType_WhenServiceReturnsCsv()
     {
         // Arrange
         var csvBytes = System.Text.Encoding.UTF8.GetBytes("NumeroEmpenho;Orgao\nEMP-001;Sec Edu");
@@ -130,7 +124,7 @@ public class PesquisaControllerTests
     }
 
     [Fact]
-    public async Task ExportarCsv_ReturnsFileNameWithCsvExtension()
+    public async Task ExportarCsv_ReturnsFileNameWithCsvExtension_WhenServiceReturnsCsv()
     {
         // Arrange
         var csvBytes = System.Text.Encoding.UTF8.GetBytes("NumeroEmpenho;Orgao\nEMP-001;Sec Edu");
@@ -144,4 +138,3 @@ public class PesquisaControllerTests
         Assert.Contains(".csv", fileResult!.FileDownloadName);
     }
 }
-

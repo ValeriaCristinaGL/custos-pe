@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using FluentAssertions;
 using Moq;
 using Microsoft.Extensions.Logging;
@@ -27,14 +28,14 @@ public class PesquisaServiceTests
     }
 
     [Theory]
-    [InlineData("11222333000181")]          // CNPJ sem formatação
-    [InlineData("11.222.333/0001-81")]      // CNPJ com formatação (deve ser sanitizado)
-    public async Task PesquisaGlobalAsync_SearchesByCnpj_WhenTermIsCnpj(string termo)
+    [InlineData("11222333000181")]
+    [InlineData("11.222.333/0001-81")]
+    public async Task PesquisaGlobalAsync_SearchesContratosByCnpj_WhenTermIsCnpj(string termo)
     {
-        // Arrange — independente da formatação, o CNPJ sanitizado deve ser usado
+        // Arrange
         var cnpjLimpo = "11222333000181";
         _mockContratoRepo.Setup(r => r.SearchByCnpjAsync(cnpjLimpo)).ReturnsAsync(new List<Contrato>());
-        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
+        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<Expression<Func<Empenho, bool>>>()))
             .ReturnsAsync(Enumerable.Empty<Empenho>());
 
         // Act
@@ -47,12 +48,12 @@ public class PesquisaServiceTests
     }
 
     [Fact]
-    public async Task PesquisaGlobalAsync_SearchesByName_WhenTermIsText()
+    public async Task PesquisaGlobalAsync_SearchesContratosByFornecedor_WhenTermIsText()
     {
         // Arrange
         var termo = "Empresa ABC";
         _mockContratoRepo.Setup(r => r.SearchByFornecedorAsync(termo)).ReturnsAsync(new List<Contrato>());
-        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
+        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<Expression<Func<Empenho, bool>>>()))
             .ReturnsAsync(Enumerable.Empty<Empenho>());
 
         // Act
@@ -76,7 +77,7 @@ public class PesquisaServiceTests
     }
 
     [Fact]
-    public async Task ExportarCsvAsync_ReturnsCsvBytes_WhenDataExists()
+    public async Task ExportarCsvAsync_ReturnsCsvWithEmpenhoData_WhenDataExists()
     {
         // Arrange
         var empenhos = new List<Empenho>
@@ -92,7 +93,7 @@ public class PesquisaServiceTests
                 OrgaoGoverno = new OrgaoGoverno { Nome = "Sec. Educação" }
             }
         };
-        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
+        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<Expression<Func<Empenho, bool>>>()))
             .ReturnsAsync(empenhos);
 
         // Act
@@ -110,8 +111,8 @@ public class PesquisaServiceTests
     [Fact]
     public async Task ExportarCsvAsync_ReturnsHeaderOnly_WhenNoDataExists()
     {
-        // Arrange — sem empenhos, CSV deve ter apenas o cabeçalho
-        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
+        // Arrange
+        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<Expression<Func<Empenho, bool>>>()))
             .ReturnsAsync(Enumerable.Empty<Empenho>());
 
         // Act
@@ -124,17 +125,21 @@ public class PesquisaServiceTests
     }
 
     [Fact]
-    public async Task ExportarCsvAsync_AppliesYearFilter_WhenAnoIsProvided()
+    public async Task ExportarCsvAsync_UsesYearFilter_WhenYearIsProvided()
     {
         // Arrange
-        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()))
+        Expression<Func<Empenho, bool>>? capturedFilter = null;
+        _mockEmpenhoRepo.Setup(r => r.FindAsync(It.IsAny<Expression<Func<Empenho, bool>>>()))
+            .Callback<Expression<Func<Empenho, bool>>>(filter => capturedFilter = filter)
             .ReturnsAsync(Enumerable.Empty<Empenho>());
 
         // Act
         await _sut.ExportarCsvAsync(ano: 2025);
 
-        // Assert — apenas verifica que o filtro é passado ao repositório
-        _mockEmpenhoRepo.Verify(r =>
-            r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Empenho, bool>>>()), Times.Once);
+        // Assert
+        capturedFilter.Should().NotBeNull();
+        var filter = capturedFilter!.Compile();
+        filter(new Empenho { Ano = 2025 }).Should().BeTrue();
+        filter(new Empenho { Ano = 2024 }).Should().BeFalse();
     }
 }

@@ -7,7 +7,7 @@ namespace TransparenciaPE.UnitTests.Infrastructure;
 public class RepositoryTests
 {
     [Fact]
-    public async Task Repository_PersistsAndQueriesEntities_WhenUsingGenericOperations()
+    public async Task AddAsync_PersistsEntity_WhenSaved()
     {
         using var context = InMemoryDbContextFactory.Create();
         var repository = new Repository<OrgaoGoverno>(context);
@@ -16,15 +16,74 @@ public class RepositoryTests
         await repository.AddAsync(orgao);
         await context.SaveChangesAsync();
 
+        context.OrgaosGoverno.Should().ContainSingle(o => o.Id == orgao.Id);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsEntity_WhenEntityExists()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+        var repository = new Repository<OrgaoGoverno>(context);
+        var orgao = CreateOrgao("001", "Secretaria de Educacao");
+        await context.OrgaosGoverno.AddAsync(orgao);
+        await context.SaveChangesAsync();
+
         var byId = await repository.GetByIdAsync(orgao.Id);
-        var all = await repository.GetAllAsync();
-        var found = await repository.FindAsync(o => o.Codigo == "001");
-        var exists = await repository.ExistsAsync(o => o.Nome.Contains("Educacao"));
 
         byId.Should().NotBeNull();
+        byId!.Id.Should().Be(orgao.Id);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsEntities_WhenEntitiesExist()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+        var repository = new Repository<OrgaoGoverno>(context);
+        var orgao = CreateOrgao("001", "Secretaria de Educacao");
+        await context.OrgaosGoverno.AddAsync(orgao);
+        await context.SaveChangesAsync();
+
+        var all = await repository.GetAllAsync();
+
         all.Should().ContainSingle(o => o.Id == orgao.Id);
+    }
+
+    [Fact]
+    public async Task FindAsync_ReturnsMatchingEntities_WhenPredicateMatches()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+        var repository = new Repository<OrgaoGoverno>(context);
+        var orgao = CreateOrgao("001", "Secretaria de Educacao");
+        await context.OrgaosGoverno.AddAsync(orgao);
+        await context.SaveChangesAsync();
+
+        var found = await repository.FindAsync(o => o.Codigo == "001");
+
         found.Should().ContainSingle(o => o.Id == orgao.Id);
+    }
+
+    [Fact]
+    public async Task ExistsAsync_ReturnsTrue_WhenPredicateMatches()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+        var repository = new Repository<OrgaoGoverno>(context);
+        var orgao = CreateOrgao("001", "Secretaria de Educacao");
+        await context.OrgaosGoverno.AddAsync(orgao);
+        await context.SaveChangesAsync();
+
+        var exists = await repository.ExistsAsync(o => o.Nome.Contains("Educacao"));
+
         exists.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Update_PersistsChanges_WhenSaved()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+        var repository = new Repository<OrgaoGoverno>(context);
+        var orgao = CreateOrgao("001", "Secretaria de Educacao");
+        await context.OrgaosGoverno.AddAsync(orgao);
+        await context.SaveChangesAsync();
 
         orgao.Nome = "Secretaria Estadual de Educacao";
         repository.Update(orgao);
@@ -32,6 +91,16 @@ public class RepositoryTests
 
         var updated = await repository.GetByIdAsync(orgao.Id);
         updated!.Nome.Should().Be("Secretaria Estadual de Educacao");
+    }
+
+    [Fact]
+    public async Task Remove_DeletesEntity_WhenSaved()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+        var repository = new Repository<OrgaoGoverno>(context);
+        var orgao = CreateOrgao("001", "Secretaria de Educacao");
+        await context.OrgaosGoverno.AddAsync(orgao);
+        await context.SaveChangesAsync();
 
         repository.Remove(orgao);
         await context.SaveChangesAsync();
@@ -40,7 +109,7 @@ public class RepositoryTests
     }
 
     [Fact]
-    public async Task GetByNumeroAsync_ReturnsMatchingEmpenho_WhenEmpenhoExists()
+    public async Task GetByNumeroAsync_ReturnsEmpenhoWithOrgao_WhenEmpenhoExists()
     {
         using var context = InMemoryDbContextFactory.Create();
         var orgao = CreateOrgao("001", "Secretaria de Educacao");
@@ -95,7 +164,7 @@ public class RepositoryTests
     }
 
     [Fact]
-    public async Task GetByNumeroAsync_ReturnsMatchingContrato_WhenContratoExists()
+    public async Task GetByNumeroAsync_ReturnsContratoWithOrgao_WhenContratoExists()
     {
         using var context = InMemoryDbContextFactory.Create();
         var orgao = CreateOrgao("001", "Secretaria de Educacao");

@@ -7,15 +7,11 @@ namespace TransparenciaPE.UnitTests.Infrastructure;
 public class AppDbContextTests
 {
     [Fact]
-    public void Model_AppliesExpectedEntityConfigurations()
+    public void Model_AppliesEmpenhoConfiguration_WhenBuilt()
     {
         using var context = InMemoryDbContextFactory.Create();
 
         var empenho = context.Model.FindEntityType(typeof(Empenho))!;
-        var contrato = context.Model.FindEntityType(typeof(Contrato))!;
-        var orgao = context.Model.FindEntityType(typeof(OrgaoGoverno))!;
-        var liquidacao = context.Model.FindEntityType(typeof(Liquidacao))!;
-        var pagamento = context.Model.FindEntityType(typeof(Pagamento))!;
 
         empenho.GetTableName().Should().Be("empenhos");
         empenho.FindProperty(nameof(Empenho.NumeroEmpenho))!.GetMaxLength().Should().Be(50);
@@ -23,17 +19,49 @@ public class AppDbContextTests
         empenho.FindProperty(nameof(Empenho.Valor))!
             .FindAnnotation("Relational:ColumnType")!
             .Value.Should().Be("numeric(18,2)");
+    }
+
+    [Fact]
+    public void Model_AppliesContratoConfiguration_WhenBuilt()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+
+        var contrato = context.Model.FindEntityType(typeof(Contrato))!;
 
         contrato.GetTableName().Should().Be("contratos");
         contrato.FindProperty(nameof(Contrato.NumeroContrato))!.GetMaxLength().Should().Be(50);
         contrato.FindProperty(nameof(Contrato.Objeto))!.GetMaxLength().Should().Be(1000);
+    }
+
+    [Fact]
+    public void Model_AppliesOrgaoGovernoConfiguration_WhenBuilt()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+
+        var orgao = context.Model.FindEntityType(typeof(OrgaoGoverno))!;
 
         orgao.GetTableName().Should().Be("orgaos_governo");
         orgao.FindProperty(nameof(OrgaoGoverno.Codigo))!.GetMaxLength().Should().Be(20);
         orgao.FindProperty(nameof(OrgaoGoverno.Nome))!.GetMaxLength().Should().Be(200);
+    }
+
+    [Fact]
+    public void Model_AppliesLiquidacaoConfiguration_WhenBuilt()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+
+        var liquidacao = context.Model.FindEntityType(typeof(Liquidacao))!;
 
         liquidacao.GetTableName().Should().Be("liquidacoes");
         liquidacao.FindProperty(nameof(Liquidacao.NumeroLiquidacao))!.GetMaxLength().Should().Be(50);
+    }
+
+    [Fact]
+    public void Model_AppliesPagamentoConfiguration_WhenBuilt()
+    {
+        using var context = InMemoryDbContextFactory.Create();
+
+        var pagamento = context.Model.FindEntityType(typeof(Pagamento))!;
 
         pagamento.GetTableName().Should().Be("pagamentos");
         pagamento.FindProperty(nameof(Pagamento.NumeroPagamento))!.GetMaxLength().Should().Be(50);
