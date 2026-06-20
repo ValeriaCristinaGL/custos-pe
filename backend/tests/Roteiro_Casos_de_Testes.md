@@ -83,6 +83,7 @@ pre code {
 
 - **Projeto:** TransparenciaPE - API de Dados Fiscais do Estado de Pernambuco
 - **Disciplina:** Verificacao e Validacao de Software
+- **Integrantes:** Valéria Cristina, Tomás Abdias, Kauanne Cavalcanti, Nathan Maciel, Pedro Victor e Ítalo Ruan
 - **Tipos de Teste:** Testes unitarios e testes de integracao
 - **Frameworks:** xUnit + Moq + FluentAssertions + Microsoft.AspNetCore.Mvc.Testing
 - **Cobertura Alvo:** Application, Domain, Infrastructure e API
