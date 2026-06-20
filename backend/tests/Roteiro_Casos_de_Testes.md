@@ -57,6 +57,20 @@ tr {
   page-break-inside: avoid;
 }
 
+ul {
+  margin: 4px 0 10px;
+  padding-left: 18px;
+}
+
+ol {
+  margin: 3px 0 4px;
+  padding-left: 18px;
+}
+
+li {
+  margin: 2px 0;
+}
+
 code {
   white-space: normal;
   overflow-wrap: anywhere;
@@ -396,1011 +410,1705 @@ Os projetos possuem testes de convencao que falham caso um metodo `[Fact]` ou `[
 
 ## Detalhamento dos cenarios
 
-### Helpers - CnpjHelper
+### Modulo de Helpers - CnpjHelper
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Helpers/CnpjHelperTests.cs`
 
-#### CT-001 - Sanitize remove pontuacao quando a entrada contem mascara
+#### 1. Sanitize remove pontuacao quando a entrada contem mascara
 
-- **Metodo:** `Sanitize_ReturnsDigitsOnly_WhenInputHasPunctuation`
+- **ID do Caso de Teste:** CT-001
+- **Nome:** Sanitize remove pontuacao quando a entrada contem mascara
+- **Objetivo:** Validar o cenario: Sanitize remove pontuacao quando a entrada contem mascara.
 - **Pre-condicoes:** Nenhuma; helper estatico sem dependencias externas.
-- **Dados:** `"11.222.333/0001-81"` e `"00.000.000/0000-00"`.
-- **Passos:** executar `CnpjHelper.Sanitize(input)` para cada entrada.
-- **Resultado esperado:** retorno contem apenas digitos, preservando a ordem numerica original.
+- **Entradas:**
+  1. `"11.222.333/0001-81"` e `"00.000.000/0000-00"`.
+- **Passos para Execucao:**
+  1. executar `CnpjHelper.Sanitize(input)` para cada entrada.
+- **Resultado Esperado:** retorno contem apenas digitos, preservando a ordem numerica original.
+- **Criterios de Sucesso:** retorno contem apenas digitos, preservando a ordem numerica original.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-002 - Sanitize preserva CNPJ que ja possui apenas digitos
+#### 2. Sanitize preserva CNPJ que ja possui apenas digitos
 
-- **Metodo:** `Sanitize_ReturnsSameValue_WhenInputHasOnlyDigits`
+- **ID do Caso de Teste:** CT-002
+- **Nome:** Sanitize preserva CNPJ que ja possui apenas digitos
+- **Objetivo:** Validar o cenario: Sanitize preserva CNPJ que ja possui apenas digitos.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** `"11222333000181"`.
-- **Passos:** chamar `CnpjHelper.Sanitize` com o valor ja sanitizado.
-- **Resultado esperado:** retorno exatamente igual a entrada, sem inclusao ou remocao indevida de digitos.
+- **Entradas:**
+  1. `"11222333000181"`.
+- **Passos para Execucao:**
+  1. chamar `CnpjHelper.Sanitize` com o valor ja sanitizado.
+- **Resultado Esperado:** retorno exatamente igual a entrada, sem inclusao ou remocao indevida de digitos.
+- **Criterios de Sucesso:** retorno exatamente igual a entrada, sem inclusao ou remocao indevida de digitos.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-003 - Sanitize remove espacos externos e pontuacao
+#### 3. Sanitize remove espacos externos e pontuacao
 
-- **Metodo:** `Sanitize_ReturnsDigitsOnly_WhenInputHasSurroundingWhitespace`
+- **ID do Caso de Teste:** CT-003
+- **Nome:** Sanitize remove espacos externos e pontuacao
+- **Objetivo:** Validar o cenario: Sanitize remove espacos externos e pontuacao.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** `"  11.222.333/0001-81  "`.
-- **Passos:** executar a sanitizacao sobre a string com espacos e mascara.
-- **Resultado esperado:** retorno `"11222333000181"`.
+- **Entradas:**
+  1. `"  11.222.333/0001-81  "`.
+- **Passos para Execucao:**
+  1. executar a sanitizacao sobre a string com espacos e mascara.
+- **Resultado Esperado:** retorno `"11222333000181"`.
+- **Criterios de Sucesso:** retorno `"11222333000181"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-004 - Sanitize retorna vazio para entrada nula, vazia ou em branco
+#### 4. Sanitize retorna vazio para entrada nula, vazia ou em branco
 
-- **Metodo:** `Sanitize_ReturnsEmpty_WhenInputIsNullOrWhitespace`
+- **ID do Caso de Teste:** CT-004
+- **Nome:** Sanitize retorna vazio para entrada nula, vazia ou em branco
+- **Objetivo:** Validar o cenario: Sanitize retorna vazio para entrada nula, vazia ou em branco.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** `null`, `""` e `"   "`.
-- **Passos:** chamar `CnpjHelper.Sanitize` para cada valor.
-- **Resultado esperado:** retorno `string.Empty`, sem lancar excecao.
+- **Entradas:**
+  1. `null`, `""` e `"   "`.
+- **Passos para Execucao:**
+  1. chamar `CnpjHelper.Sanitize` para cada valor.
+- **Resultado Esperado:** retorno `string.Empty`, sem lancar excecao.
+- **Criterios de Sucesso:** retorno `string.Empty`, sem lancar excecao.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-005 - IsValid aceita CNPJs validos
+#### 5. IsValid aceita CNPJs validos
 
-- **Metodo:** `IsValid_ReturnsTrue_WhenCnpjIsValid`
+- **ID do Caso de Teste:** CT-005
+- **Nome:** IsValid aceita CNPJs validos
+- **Objetivo:** Validar o cenario: IsValid aceita CNPJs validos.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** CNPJ valido com e sem mascara.
-- **Passos:** chamar `CnpjHelper.IsValid(cnpj)`.
-- **Resultado esperado:** retorno `true` para as duas representacoes do mesmo CNPJ valido.
+- **Entradas:**
+  1. CNPJ valido com e sem mascara.
+- **Passos para Execucao:**
+  1. chamar `CnpjHelper.IsValid(cnpj)`.
+- **Resultado Esperado:** retorno `true` para as duas representacoes do mesmo CNPJ valido.
+- **Criterios de Sucesso:** retorno `true` para as duas representacoes do mesmo CNPJ valido.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-006 - IsValid rejeita CNPJs invalidos
+#### 6. IsValid rejeita CNPJs invalidos
 
-- **Metodo:** `IsValid_ReturnsFalse_WhenCnpjIsInvalid`
+- **ID do Caso de Teste:** CT-006
+- **Nome:** IsValid rejeita CNPJs invalidos
+- **Objetivo:** Validar o cenario: IsValid rejeita CNPJs invalidos.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** CNPJs com todos os digitos iguais, tamanho incorreto, vazio, nulo e longo demais.
-- **Passos:** chamar `CnpjHelper.IsValid(cnpj)` para cada entrada.
-- **Resultado esperado:** retorno `false` em todos os casos invalidos.
+- **Entradas:**
+  1. CNPJs com todos os digitos iguais, tamanho incorreto, vazio, nulo e longo demais.
+- **Passos para Execucao:**
+  1. chamar `CnpjHelper.IsValid(cnpj)` para cada entrada.
+- **Resultado Esperado:** retorno `false` em todos os casos invalidos.
+- **Criterios de Sucesso:** retorno `false` em todos os casos invalidos.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Helpers - McaspMapper
+### Modulo de Helpers - McaspMapper
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Helpers/McaspMapperTests.cs`
 
-#### CT-007 - Classificacao MCASP identifica despesas de pessoal
+#### 1. Classificacao MCASP identifica despesas de pessoal
 
-- **Metodo:** `MapToClassificacao_ReturnsPessoalEncargos_WhenNaturezaStartsWith31`
+- **ID do Caso de Teste:** CT-007
+- **Nome:** Classificacao MCASP identifica despesas de pessoal
+- **Objetivo:** Validar o cenario: Classificacao MCASP identifica despesas de pessoal.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** naturezas iniciadas por `3.1`.
-- **Passos:** chamar `McaspMapper.MapToClassificacao(natureza, "")`.
-- **Resultado esperado:** retorno `"Pessoal e Encargos Sociais"`.
+- **Entradas:**
+  1. naturezas iniciadas por `3.1`.
+- **Passos para Execucao:**
+  1. chamar `McaspMapper.MapToClassificacao(natureza, "")`.
+- **Resultado Esperado:** retorno `"Pessoal e Encargos Sociais"`.
+- **Criterios de Sucesso:** retorno `"Pessoal e Encargos Sociais"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-008 - Classificacao MCASP identifica custeio
+#### 2. Classificacao MCASP identifica custeio
 
-- **Metodo:** `MapToClassificacao_ReturnsCusteio_WhenNaturezaStartsWith33`
+- **ID do Caso de Teste:** CT-008
+- **Nome:** Classificacao MCASP identifica custeio
+- **Objetivo:** Validar o cenario: Classificacao MCASP identifica custeio.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** naturezas iniciadas por `3.3`.
-- **Passos:** mapear cada natureza informada.
-- **Resultado esperado:** retorno `"Custeio"`.
+- **Entradas:**
+  1. naturezas iniciadas por `3.3`.
+- **Passos para Execucao:**
+  1. mapear cada natureza informada.
+- **Resultado Esperado:** retorno `"Custeio"`.
+- **Criterios de Sucesso:** retorno `"Custeio"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-009 - Classificacao MCASP identifica investimentos
+#### 3. Classificacao MCASP identifica investimentos
 
-- **Metodo:** `MapToClassificacao_ReturnsInvestimentos_WhenNaturezaStartsWith44`
+- **ID do Caso de Teste:** CT-009
+- **Nome:** Classificacao MCASP identifica investimentos
+- **Objetivo:** Validar o cenario: Classificacao MCASP identifica investimentos.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** naturezas iniciadas por `4.4`.
-- **Passos:** mapear cada natureza informada.
-- **Resultado esperado:** retorno `"Investimentos"`.
+- **Entradas:**
+  1. naturezas iniciadas por `4.4`.
+- **Passos para Execucao:**
+  1. mapear cada natureza informada.
+- **Resultado Esperado:** retorno `"Investimentos"`.
+- **Criterios de Sucesso:** retorno `"Investimentos"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-010 - Classificacao MCASP trata prefixos desconhecidos como outros
+#### 4. Classificacao MCASP trata prefixos desconhecidos como outros
 
-- **Metodo:** `MapToClassificacao_ReturnsOutros_WhenNaturezaPrefixIsUnknown`
+- **ID do Caso de Teste:** CT-010
+- **Nome:** Classificacao MCASP trata prefixos desconhecidos como outros
+- **Objetivo:** Validar o cenario: Classificacao MCASP trata prefixos desconhecidos como outros.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** prefixos `3.2`, `4.5`, `4.6`, `5.0` e `10.0`.
-- **Passos:** chamar o mapper para cada prefixo nao mapeado.
-- **Resultado esperado:** retorno `"Outros"` para todos os casos.
+- **Entradas:**
+  1. prefixos `3.2`, `4.5`, `4.6`, `5.0` e `10.0`.
+- **Passos para Execucao:**
+  1. chamar o mapper para cada prefixo nao mapeado.
+- **Resultado Esperado:** retorno `"Outros"` para todos os casos.
+- **Criterios de Sucesso:** retorno `"Outros"` para todos os casos.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-011 - Classificacao MCASP trata natureza em branco como outros
+#### 5. Classificacao MCASP trata natureza em branco como outros
 
-- **Metodo:** `MapToClassificacao_ReturnsOutros_WhenNaturezaIsBlank`
+- **ID do Caso de Teste:** CT-011
+- **Nome:** Classificacao MCASP trata natureza em branco como outros
+- **Objetivo:** Validar o cenario: Classificacao MCASP trata natureza em branco como outros.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** `""` e `"   "`.
-- **Passos:** chamar o mapper com valor vazio ou apenas espacos.
-- **Resultado esperado:** retorno `"Outros"` sem erro de parsing.
+- **Entradas:**
+  1. `""` e `"   "`.
+- **Passos para Execucao:**
+  1. chamar o mapper com valor vazio ou apenas espacos.
+- **Resultado Esperado:** retorno `"Outros"` sem erro de parsing.
+- **Criterios de Sucesso:** retorno `"Outros"` sem erro de parsing.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-012 - Classificacao MCASP trata natureza nula como outros
+#### 6. Classificacao MCASP trata natureza nula como outros
 
-- **Metodo:** `MapToClassificacao_ReturnsOutros_WhenNaturezaIsNull`
+- **ID do Caso de Teste:** CT-012
+- **Nome:** Classificacao MCASP trata natureza nula como outros
+- **Objetivo:** Validar o cenario: Classificacao MCASP trata natureza nula como outros.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** `null`.
-- **Passos:** chamar o mapper com `null!`.
-- **Resultado esperado:** retorno `"Outros"` sem `NullReferenceException`.
+- **Entradas:**
+  1. `null`.
+- **Passos para Execucao:**
+  1. chamar o mapper com `null!`.
+- **Resultado Esperado:** retorno `"Outros"` sem `NullReferenceException`.
+- **Criterios de Sucesso:** retorno `"Outros"` sem `NullReferenceException`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Entities - Orcamento
+### Modulo de Entities - Orcamento
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Entities/OrcamentoTests.cs`
 
-#### CT-013 - Orcamento armazena campos orcamentarios
+#### 1. Orcamento armazena campos orcamentarios
 
-- **Metodo:** `Orcamento_AssignsBudgetFields_WhenInitialized`
+- **ID do Caso de Teste:** CT-013
+- **Nome:** Orcamento armazena campos orcamentarios
+- **Objetivo:** Validar o cenario: Orcamento armazena campos orcamentarios.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** `Ano=2026`, `DotacaoInicial=450000`, `DotacaoAtualizada=500000`.
-- **Passos:** instanciar `Orcamento` com os valores.
-- **Resultado esperado:** propriedades retornam exatamente os valores informados.
+- **Entradas:**
+  1. `Ano=2026`, `DotacaoInicial=450000`, `DotacaoAtualizada=500000`.
+- **Passos para Execucao:**
+  1. instanciar `Orcamento` com os valores.
+- **Resultado Esperado:** propriedades retornam exatamente os valores informados.
+- **Criterios de Sucesso:** propriedades retornam exatamente os valores informados.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-014 - Orcamento armazena identificador do orgao
+#### 2. Orcamento armazena identificador do orgao
 
-- **Metodo:** `Orcamento_AssignsOrgaoGovernoId_WhenInitialized`
+- **ID do Caso de Teste:** CT-014
+- **Nome:** Orcamento armazena identificador do orgao
+- **Objetivo:** Validar o cenario: Orcamento armazena identificador do orgao.
 - **Pre-condicoes:** `Guid` gerado para representar o orgao de governo.
-- **Dados:** `OrgaoGovernoId=<Guid>`.
-- **Passos:** instanciar `Orcamento` atribuindo o identificador.
-- **Resultado esperado:** `OrgaoGovernoId` permanece igual ao `Guid` atribuido.
+- **Entradas:**
+  1. `OrgaoGovernoId=<Guid>`.
+- **Passos para Execucao:**
+  1. instanciar `Orcamento` atribuindo o identificador.
+- **Resultado Esperado:** `OrgaoGovernoId` permanece igual ao `Guid` atribuido.
+- **Criterios de Sucesso:** `OrgaoGovernoId` permanece igual ao `Guid` atribuido.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-015 - Orcamento gera identificador proprio
+#### 3. Orcamento gera identificador proprio
 
-- **Metodo:** `Orcamento_GeneratesId_WhenCreated`
+- **ID do Caso de Teste:** CT-015
+- **Nome:** Orcamento gera identificador proprio
+- **Objetivo:** Validar o cenario: Orcamento gera identificador proprio.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** nova instancia sem propriedades informadas.
-- **Passos:** criar `new Orcamento()`.
-- **Resultado esperado:** `Id` nao e `Guid.Empty`.
+- **Entradas:**
+  1. nova instancia sem propriedades informadas.
+- **Passos para Execucao:**
+  1. criar `new Orcamento()`.
+- **Resultado Esperado:** `Id` nao e `Guid.Empty`.
+- **Criterios de Sucesso:** `Id` nao e `Guid.Empty`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Entities - OrgaoGoverno
+### Modulo de Entities - OrgaoGoverno
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Entities/OrgaoGovernoTests.cs`
 
-#### CT-016 - OrgaoGoverno gera IDs unicos
+#### 1. OrgaoGoverno gera IDs unicos
 
-- **Metodo:** `OrgaoGoverno_GeneratesUniqueId_WhenCreated`
+- **ID do Caso de Teste:** CT-016
+- **Nome:** OrgaoGoverno gera IDs unicos
+- **Objetivo:** Validar o cenario: OrgaoGoverno gera IDs unicos.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** duas instancias independentes de `OrgaoGoverno`.
-- **Passos:** criar as duas instancias e comparar seus IDs.
-- **Resultado esperado:** ambos os IDs sao nao vazios e diferentes entre si.
+- **Entradas:**
+  1. duas instancias independentes de `OrgaoGoverno`.
+- **Passos para Execucao:**
+  1. criar as duas instancias e comparar seus IDs.
+- **Resultado Esperado:** ambos os IDs sao nao vazios e diferentes entre si.
+- **Criterios de Sucesso:** ambos os IDs sao nao vazios e diferentes entre si.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-017 - OrgaoGoverno inicializa colecoes de navegacao
+#### 2. OrgaoGoverno inicializa colecoes de navegacao
 
-- **Metodo:** `OrgaoGoverno_InitializesCollections_WhenCreated`
+- **ID do Caso de Teste:** CT-017
+- **Nome:** OrgaoGoverno inicializa colecoes de navegacao
+- **Objetivo:** Validar o cenario: OrgaoGoverno inicializa colecoes de navegacao.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** nova instancia vazia.
-- **Passos:** acessar `Empenhos` e `Contratos`.
-- **Resultado esperado:** colecoes sao nao nulas e vazias.
+- **Entradas:**
+  1. nova instancia vazia.
+- **Passos para Execucao:**
+  1. acessar `Empenhos` e `Contratos`.
+- **Resultado Esperado:** colecoes sao nao nulas e vazias.
+- **Criterios de Sucesso:** colecoes sao nao nulas e vazias.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-018 - OrgaoGoverno define CreatedAt na criacao
+#### 3. OrgaoGoverno define CreatedAt na criacao
 
-- **Metodo:** `OrgaoGoverno_SetsCreatedAt_WhenCreated`
+- **ID do Caso de Teste:** CT-018
+- **Nome:** OrgaoGoverno define CreatedAt na criacao
+- **Objetivo:** Validar o cenario: OrgaoGoverno define CreatedAt na criacao.
 - **Pre-condicoes:** janela de tempo registrada antes e depois da instanciacao.
-- **Dados:** nova instancia vazia.
-- **Passos:** criar o orgao e validar `CreatedAt` dentro da janela.
-- **Resultado esperado:** `CreatedAt` e recente e `UpdatedAt` inicia nulo.
+- **Entradas:**
+  1. nova instancia vazia.
+- **Passos para Execucao:**
+  1. criar o orgao e validar `CreatedAt` dentro da janela.
+- **Resultado Esperado:** `CreatedAt` e recente e `UpdatedAt` inicia nulo.
+- **Criterios de Sucesso:** `CreatedAt` e recente e `UpdatedAt` inicia nulo.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-019 - OrgaoGoverno armazena dados de identificacao
+#### 4. OrgaoGoverno armazena dados de identificacao
 
-- **Metodo:** `OrgaoGoverno_AssignsIdentificationFields_WhenInitialized`
+- **ID do Caso de Teste:** CT-019
+- **Nome:** OrgaoGoverno armazena dados de identificacao
+- **Objetivo:** Validar o cenario: OrgaoGoverno armazena dados de identificacao.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** codigo, nome, sigla e tipo.
-- **Passos:** criar a entidade com os valores de identificacao.
-- **Resultado esperado:** todas as propriedades retornam os valores atribuidos.
+- **Entradas:**
+  1. codigo, nome, sigla e tipo.
+- **Passos para Execucao:**
+  1. criar a entidade com os valores de identificacao.
+- **Resultado Esperado:** todas as propriedades retornam os valores atribuidos.
+- **Criterios de Sucesso:** todas as propriedades retornam os valores atribuidos.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-020 - OrgaoGoverno armazena dados de capacidade
+#### 5. OrgaoGoverno armazena dados de capacidade
 
-- **Metodo:** `OrgaoGoverno_AssignsCapacityFields_WhenInitialized`
+- **ID do Caso de Teste:** CT-020
+- **Nome:** OrgaoGoverno armazena dados de capacidade
+- **Objetivo:** Validar o cenario: OrgaoGoverno armazena dados de capacidade.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** `TotalServidores=1500` e `OrcamentoAtual=5000000`.
-- **Passos:** criar a entidade com esses valores.
-- **Resultado esperado:** campos numericos sao preservados sem perda.
+- **Entradas:**
+  1. `TotalServidores=1500` e `OrcamentoAtual=5000000`.
+- **Passos para Execucao:**
+  1. criar a entidade com esses valores.
+- **Resultado Esperado:** campos numericos sao preservados sem perda.
+- **Criterios de Sucesso:** campos numericos sao preservados sem perda.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Entities - Receita
+### Modulo de Entities - Receita
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Entities/ReceitaTests.cs`
 
-#### CT-021 - Receita armazena campos contabeis
+#### 1. Receita armazena campos contabeis
 
-- **Metodo:** `Receita_AssignsAccountingFields_WhenInitialized`
+- **ID do Caso de Teste:** CT-021
+- **Nome:** Receita armazena campos contabeis
+- **Objetivo:** Validar o cenario: Receita armazena campos contabeis.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** valor, mes, ano e origem.
-- **Passos:** instanciar `Receita` com os dados contabeis.
-- **Resultado esperado:** propriedades retornam exatamente os valores atribuidos.
+- **Entradas:**
+  1. valor, mes, ano e origem.
+- **Passos para Execucao:**
+  1. instanciar `Receita` com os dados contabeis.
+- **Resultado Esperado:** propriedades retornam exatamente os valores atribuidos.
+- **Criterios de Sucesso:** propriedades retornam exatamente os valores atribuidos.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-022 - Receita armazena identificador do orgao
+#### 2. Receita armazena identificador do orgao
 
-- **Metodo:** `Receita_AssignsOrgaoGovernoId_WhenInitialized`
+- **ID do Caso de Teste:** CT-022
+- **Nome:** Receita armazena identificador do orgao
+- **Objetivo:** Validar o cenario: Receita armazena identificador do orgao.
 - **Pre-condicoes:** `Guid` valido para orgao.
-- **Dados:** `OrgaoGovernoId=<Guid>`.
-- **Passos:** atribuir o identificador na instanciacao.
-- **Resultado esperado:** `OrgaoGovernoId` e igual ao valor recebido.
+- **Entradas:**
+  1. `OrgaoGovernoId=<Guid>`.
+- **Passos para Execucao:**
+  1. atribuir o identificador na instanciacao.
+- **Resultado Esperado:** `OrgaoGovernoId` e igual ao valor recebido.
+- **Criterios de Sucesso:** `OrgaoGovernoId` e igual ao valor recebido.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-023 - Receita gera identificador proprio
+#### 3. Receita gera identificador proprio
 
-- **Metodo:** `Receita_GeneratesId_WhenCreated`
+- **ID do Caso de Teste:** CT-023
+- **Nome:** Receita gera identificador proprio
+- **Objetivo:** Validar o cenario: Receita gera identificador proprio.
 - **Pre-condicoes:** Nenhuma.
-- **Dados:** nova instancia vazia.
-- **Passos:** criar `new Receita()`.
-- **Resultado esperado:** `Id` nao e vazio.
+- **Entradas:**
+  1. nova instancia vazia.
+- **Passos para Execucao:**
+  1. criar `new Receita()`.
+- **Resultado Esperado:** `Id` nao e vazio.
+- **Criterios de Sucesso:** `Id` nao e vazio.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Services - DashboardService
+### Modulo de Services - DashboardService
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Services/DashboardServiceTests.cs`
 
-#### CT-024 - Resumo retorna KPIs quando ha dados
+#### 1. Resumo retorna KPIs quando ha dados
 
-- **Metodo:** `GetResumoAsync_ReturnsKPIs_WhenDataExists`
+- **ID do Caso de Teste:** CT-024
+- **Nome:** Resumo retorna KPIs quando ha dados
+- **Objetivo:** Validar o cenario: Resumo retorna KPIs quando ha dados.
 - **Pre-condicoes:** `IDashboardQueryService` mockado com totais de empenhado, liquidado, pago, empenhos e contratos.
-- **Dados:** `TotalEmpenhado=1000000`, `TotalPago=600000`.
-- **Passos:** chamar `_sut.GetResumoAsync()` e inspecionar o DTO.
-- **Resultado esperado:** totais sao mapeados e `PercentualExecutado=60`.
+- **Entradas:**
+  1. `TotalEmpenhado=1000000`, `TotalPago=600000`.
+- **Passos para Execucao:**
+  1. chamar `_sut.GetResumoAsync()` e inspecionar o DTO.
+- **Resultado Esperado:** totais sao mapeados e `PercentualExecutado=60`.
+- **Criterios de Sucesso:** totais sao mapeados e `PercentualExecutado=60`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-025 - Resumo evita divisao por zero
+#### 2. Resumo evita divisao por zero
 
-- **Metodo:** `GetResumoAsync_ReturnsZeroPercentualExecutado_WhenTotalEmpenhadoIsZero`
+- **ID do Caso de Teste:** CT-025
+- **Nome:** Resumo evita divisao por zero
+- **Objetivo:** Validar o cenario: Resumo evita divisao por zero.
 - **Pre-condicoes:** query retorna `TotalEmpenhado=0`.
-- **Dados:** totais zerados.
-- **Passos:** chamar `_sut.GetResumoAsync()`.
-- **Resultado esperado:** `PercentualExecutado` retorna `0`.
+- **Entradas:**
+  1. totais zerados.
+- **Passos para Execucao:**
+  1. chamar `_sut.GetResumoAsync()`.
+- **Resultado Esperado:** `PercentualExecutado` retorna `0`.
+- **Criterios de Sucesso:** `PercentualExecutado` retorna `0`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-026 - Resumo repassa filtro de ano
+#### 3. Resumo repassa filtro de ano
 
-- **Metodo:** `GetResumoAsync_PassesYearParameter_WhenYearIsProvided`
+- **ID do Caso de Teste:** CT-026
+- **Nome:** Resumo repassa filtro de ano
+- **Objetivo:** Validar o cenario: Resumo repassa filtro de ano.
 - **Pre-condicoes:** mock configurado para receber `2025`.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `_sut.GetResumoAsync(2025)`.
-- **Resultado esperado:** `GetResumoAsync(2025)` do query service e chamado uma vez.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `_sut.GetResumoAsync(2025)`.
+- **Resultado Esperado:** `GetResumoAsync(2025)` do query service e chamado uma vez.
+- **Criterios de Sucesso:** `GetResumoAsync(2025)` do query service e chamado uma vez.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-027 - Comparativo retorna ano solicitado
+#### 4. Comparativo retorna ano solicitado
 
-- **Metodo:** `GetComparativoOrgaosAsync_ReturnsAno_WhenYearIsProvided`
+- **ID do Caso de Teste:** CT-027
+- **Nome:** Comparativo retorna ano solicitado
+- **Objetivo:** Validar o cenario: Comparativo retorna ano solicitado.
 - **Pre-condicoes:** query retorna lista vazia.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `_sut.GetComparativoOrgaosAsync(2025)`.
-- **Resultado esperado:** DTO retorna `Ano=2025`.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `_sut.GetComparativoOrgaosAsync(2025)`.
+- **Resultado Esperado:** DTO retorna `Ano=2025`.
+- **Criterios de Sucesso:** DTO retorna `Ano=2025`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-028 - Comparativo retorna lista de orgaos
+#### 5. Comparativo retorna lista de orgaos
 
-- **Metodo:** `GetComparativoOrgaosAsync_ReturnsOrgaos_WhenDataExists`
+- **ID do Caso de Teste:** CT-028
+- **Nome:** Comparativo retorna lista de orgaos
+- **Objetivo:** Validar o cenario: Comparativo retorna lista de orgaos.
 - **Pre-condicoes:** query retorna dois orgaos com valores de execucao.
-- **Dados:** orgaos `001` e `002`.
-- **Passos:** chamar o comparativo e contar os itens.
-- **Resultado esperado:** `Orgaos` possui dois itens mapeados.
+- **Entradas:**
+  1. orgaos `001` e `002`.
+- **Passos para Execucao:**
+  1. chamar o comparativo e contar os itens.
+- **Resultado Esperado:** `Orgaos` possui dois itens mapeados.
+- **Criterios de Sucesso:** `Orgaos` possui dois itens mapeados.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-029 - Drill-down retorna codigo do orgao
+#### 6. Drill-down retorna codigo do orgao
 
-- **Metodo:** `GetDrillDownAsync_ReturnsCodigoOrgao_WhenCodigoOrgaoIsProvided`
+- **ID do Caso de Teste:** CT-029
+- **Nome:** Drill-down retorna codigo do orgao
+- **Objetivo:** Validar o cenario: Drill-down retorna codigo do orgao.
 - **Pre-condicoes:** query retorna lista vazia.
-- **Dados:** `codigoOrgao="001"`.
-- **Passos:** chamar `_sut.GetDrillDownAsync("001")`.
-- **Resultado esperado:** DTO retorna `CodigoOrgao="001"`.
+- **Entradas:**
+  1. `codigoOrgao="001"`.
+- **Passos para Execucao:**
+  1. chamar `_sut.GetDrillDownAsync("001")`.
+- **Resultado Esperado:** DTO retorna `CodigoOrgao="001"`.
+- **Criterios de Sucesso:** DTO retorna `CodigoOrgao="001"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-030 - Drill-down retorna itens hierarquicos
+#### 7. Drill-down retorna itens hierarquicos
 
-- **Metodo:** `GetDrillDownAsync_ReturnsItens_WhenDataExists`
+- **ID do Caso de Teste:** CT-030
+- **Nome:** Drill-down retorna itens hierarquicos
+- **Objetivo:** Validar o cenario: Drill-down retorna itens hierarquicos.
 - **Pre-condicoes:** query retorna um item de classificacao MCASP.
-- **Dados:** classificacao `3.3.90.30`, descricao e total.
-- **Passos:** chamar o drill-down e verificar a colecao.
-- **Resultado esperado:** `Itens` contem exatamente um item.
+- **Entradas:**
+  1. classificacao `3.3.90.30`, descricao e total.
+- **Passos para Execucao:**
+  1. chamar o drill-down e verificar a colecao.
+- **Resultado Esperado:** `Itens` contem exatamente um item.
+- **Criterios de Sucesso:** `Itens` contem exatamente um item.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Services - PesquisaService
+### Modulo de Services - PesquisaService
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Services/PesquisaServiceTests.cs`
 
-#### CT-031 - Pesquisa global usa fluxo de CNPJ
+#### 1. Pesquisa global usa fluxo de CNPJ
 
-- **Metodo:** `PesquisaGlobalAsync_SearchesContratosByCnpj_WhenTermIsCnpj`
+- **ID do Caso de Teste:** CT-031
+- **Nome:** Pesquisa global usa fluxo de CNPJ
+- **Objetivo:** Validar o cenario: Pesquisa global usa fluxo de CNPJ.
 - **Pre-condicoes:** repositorio de contratos mockado para CNPJ sanitizado.
-- **Dados:** CNPJ com e sem mascara.
-- **Passos:** chamar `PesquisaGlobalAsync(termo)`.
-- **Resultado esperado:** busca por CNPJ e executada uma vez e busca por fornecedor nao e executada.
+- **Entradas:**
+  1. CNPJ com e sem mascara.
+- **Passos para Execucao:**
+  1. chamar `PesquisaGlobalAsync(termo)`.
+- **Resultado Esperado:** busca por CNPJ e executada uma vez e busca por fornecedor nao e executada.
+- **Criterios de Sucesso:** busca por CNPJ e executada uma vez e busca por fornecedor nao e executada.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-032 - Pesquisa global usa fluxo textual
+#### 2. Pesquisa global usa fluxo textual
 
-- **Metodo:** `PesquisaGlobalAsync_SearchesContratosByFornecedor_WhenTermIsText`
+- **ID do Caso de Teste:** CT-032
+- **Nome:** Pesquisa global usa fluxo textual
+- **Objetivo:** Validar o cenario: Pesquisa global usa fluxo textual.
 - **Pre-condicoes:** repositorio de contratos mockado para fornecedor.
-- **Dados:** `termo="Empresa ABC"`.
-- **Passos:** executar pesquisa global com termo textual.
-- **Resultado esperado:** `SearchByFornecedorAsync("Empresa ABC")` e chamado uma vez e termo buscado e preservado.
+- **Entradas:**
+  1. `termo="Empresa ABC"`.
+- **Passos para Execucao:**
+  1. executar pesquisa global com termo textual.
+- **Resultado Esperado:** `SearchByFornecedorAsync("Empresa ABC")` e chamado uma vez e termo buscado e preservado.
+- **Criterios de Sucesso:** `SearchByFornecedorAsync("Empresa ABC")` e chamado uma vez e termo buscado e preservado.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-033 - Pesquisa global rejeita termo vazio
+#### 3. Pesquisa global rejeita termo vazio
 
-- **Metodo:** `PesquisaGlobalAsync_ThrowsArgumentException_WhenTermIsEmpty`
+- **ID do Caso de Teste:** CT-033
+- **Nome:** Pesquisa global rejeita termo vazio
+- **Objetivo:** Validar o cenario: Pesquisa global rejeita termo vazio.
 - **Pre-condicoes:** Nenhuma chamada aos repositorios deve ser necessaria.
-- **Dados:** `""`, `null` e `"   "`.
-- **Passos:** chamar `PesquisaGlobalAsync` com cada valor invalido.
-- **Resultado esperado:** `ArgumentException` e lancada.
+- **Entradas:**
+  1. `""`, `null` e `"   "`.
+- **Passos para Execucao:**
+  1. chamar `PesquisaGlobalAsync` com cada valor invalido.
+- **Resultado Esperado:** `ArgumentException` e lancada.
+- **Criterios de Sucesso:** `ArgumentException` e lancada.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-034 - Exportacao CSV retorna dados de empenho
+#### 4. Exportacao CSV retorna dados de empenho
 
-- **Metodo:** `ExportarCsvAsync_ReturnsCsvWithEmpenhoData_WhenDataExists`
+- **ID do Caso de Teste:** CT-034
+- **Nome:** Exportacao CSV retorna dados de empenho
+- **Objetivo:** Validar o cenario: Exportacao CSV retorna dados de empenho.
 - **Pre-condicoes:** repositorio de empenhos retorna um empenho com orgao e credor.
-- **Dados:** `NumeroEmpenho="EMP-001"` e `Credor="Empresa A"`.
-- **Passos:** chamar `ExportarCsvAsync()` e decodificar bytes UTF-8.
-- **Resultado esperado:** CSV contem numero do empenho e fornecedor.
+- **Entradas:**
+  1. `NumeroEmpenho="EMP-001"` e `Credor="Empresa A"`.
+- **Passos para Execucao:**
+  1. chamar `ExportarCsvAsync()` e decodificar bytes UTF-8.
+- **Resultado Esperado:** CSV contem numero do empenho e fornecedor.
+- **Criterios de Sucesso:** CSV contem numero do empenho e fornecedor.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-035 - Exportacao CSV retorna apenas cabecalho sem dados
+#### 5. Exportacao CSV retorna apenas cabecalho sem dados
 
-- **Metodo:** `ExportarCsvAsync_ReturnsHeaderOnly_WhenNoDataExists`
+- **ID do Caso de Teste:** CT-035
+- **Nome:** Exportacao CSV retorna apenas cabecalho sem dados
+- **Objetivo:** Validar o cenario: Exportacao CSV retorna apenas cabecalho sem dados.
 - **Pre-condicoes:** repositorio retorna colecao vazia.
-- **Dados:** nenhum empenho.
-- **Passos:** chamar `ExportarCsvAsync()` e separar linhas.
-- **Resultado esperado:** CSV contem somente a linha de cabecalho.
+- **Entradas:**
+  1. nenhum empenho.
+- **Passos para Execucao:**
+  1. chamar `ExportarCsvAsync()` e separar linhas.
+- **Resultado Esperado:** CSV contem somente a linha de cabecalho.
+- **Criterios de Sucesso:** CSV contem somente a linha de cabecalho.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-036 - Exportacao CSV aplica filtro de ano
+#### 6. Exportacao CSV aplica filtro de ano
 
-- **Metodo:** `ExportarCsvAsync_UsesYearFilter_WhenYearIsProvided`
+- **ID do Caso de Teste:** CT-036
+- **Nome:** Exportacao CSV aplica filtro de ano
+- **Objetivo:** Validar o cenario: Exportacao CSV aplica filtro de ano.
 - **Pre-condicoes:** callback captura a expressao enviada ao repositorio.
-- **Dados:** filtro `ano=2025`.
-- **Passos:** compilar o predicado capturado e testar empenhos de 2025 e 2024.
-- **Resultado esperado:** predicado aceita 2025 e rejeita 2024.
+- **Entradas:**
+  1. filtro `ano=2025`.
+- **Passos para Execucao:**
+  1. compilar o predicado capturado e testar empenhos de 2025 e 2024.
+- **Resultado Esperado:** predicado aceita 2025 e rejeita 2024.
+- **Criterios de Sucesso:** predicado aceita 2025 e rejeita 2024.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Services - DataSyncService
+### Modulo de Services - DataSyncService
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Services/DataSyncServiceTests.cs`
 
-#### CT-037 - Sincronizacao insere empenho novo
+#### 1. Sincronizacao insere empenho novo
 
-- **Metodo:** `SyncEmpenhosAsync_AddsEmpenho_WhenEmpenhoDoesNotExist`
+- **ID do Caso de Teste:** CT-037
+- **Nome:** Sincronizacao insere empenho novo
+- **Objetivo:** Validar o cenario: Sincronizacao insere empenho novo.
 - **Pre-condicoes:** existe orgao base e API externa retorna empenho inexistente.
-- **Dados:** `NumeroEmpenho="EMP-001"`, ano 2025 e CNPJ com mascara.
-- **Passos:** chamar `SyncEmpenhosAsync(2025)`.
-- **Resultado esperado:** empenho e adicionado com CNPJ sanitizado, count retorna `1` e commit e chamado.
+- **Entradas:**
+  1. `NumeroEmpenho="EMP-001"`, ano 2025 e CNPJ com mascara.
+- **Passos para Execucao:**
+  1. chamar `SyncEmpenhosAsync(2025)`.
+- **Resultado Esperado:** empenho e adicionado com CNPJ sanitizado, count retorna `1` e commit e chamado.
+- **Criterios de Sucesso:** empenho e adicionado com CNPJ sanitizado, count retorna `1` e commit e chamado.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-038 - Sincronizacao atualiza empenho existente
+#### 2. Sincronizacao atualiza empenho existente
 
-- **Metodo:** `SyncEmpenhosAsync_UpdatesEmpenho_WhenEmpenhoExists`
+- **ID do Caso de Teste:** CT-038
+- **Nome:** Sincronizacao atualiza empenho existente
+- **Objetivo:** Validar o cenario: Sincronizacao atualiza empenho existente.
 - **Pre-condicoes:** repositorio retorna empenho ja existente.
-- **Dados:** valor antigo `30000` e valor externo `50000`.
-- **Passos:** executar sincronizacao do ano.
-- **Resultado esperado:** valor do empenho existente e atualizado e nenhum novo empenho e inserido.
+- **Entradas:**
+  1. valor antigo `30000` e valor externo `50000`.
+- **Passos para Execucao:**
+  1. executar sincronizacao do ano.
+- **Resultado Esperado:** valor do empenho existente e atualizado e nenhum novo empenho e inserido.
+- **Criterios de Sucesso:** valor do empenho existente e atualizado e nenhum novo empenho e inserido.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-039 - Sincronizacao sanitiza CNPJ ao adicionar empenho
+#### 3. Sincronizacao sanitiza CNPJ ao adicionar empenho
 
-- **Metodo:** `SyncEmpenhosAsync_SanitizesCnpj_WhenAddingEmpenho`
+- **ID do Caso de Teste:** CT-039
+- **Nome:** Sincronizacao sanitiza CNPJ ao adicionar empenho
+- **Objetivo:** Validar o cenario: Sincronizacao sanitiza CNPJ ao adicionar empenho.
 - **Pre-condicoes:** API retorna empenho novo com CNPJ pontuado.
-- **Dados:** `"11.222.333/0001-81"`.
-- **Passos:** sincronizar empenhos.
-- **Resultado esperado:** `AddAsync` recebe entidade com `CnpjCredor="11222333000181"`.
+- **Entradas:**
+  1. `"11.222.333/0001-81"`.
+- **Passos para Execucao:**
+  1. sincronizar empenhos.
+- **Resultado Esperado:** `AddAsync` recebe entidade com `CnpjCredor="11222333000181"`.
+- **Criterios de Sucesso:** `AddAsync` recebe entidade com `CnpjCredor="11222333000181"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-040 - SyncAll retorna timestamp de sincronizacao
+#### 4. SyncAll retorna timestamp de sincronizacao
 
-- **Metodo:** `SyncAllAsync_ReturnsSyncedAt_WhenSyncCompletes`
+- **ID do Caso de Teste:** CT-040
+- **Nome:** SyncAll retorna timestamp de sincronizacao
+- **Objetivo:** Validar o cenario: SyncAll retorna timestamp de sincronizacao.
 - **Pre-condicoes:** APIs retornam listas vazias.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `SyncAllAsync(2025)`.
-- **Resultado esperado:** `SyncedAt` e preenchido com data/hora menor ou igual ao momento atual.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `SyncAllAsync(2025)`.
+- **Resultado Esperado:** `SyncedAt` e preenchido com data/hora menor ou igual ao momento atual.
+- **Criterios de Sucesso:** `SyncedAt` e preenchido com data/hora menor ou igual ao momento atual.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-041 - Sincronizacao de empenhos para quando nao ha orgaos
+#### 5. Sincronizacao de empenhos para quando nao ha orgaos
 
-- **Metodo:** `SyncEmpenhosAsync_ReturnsZero_WhenNoOrgaosExist`
+- **ID do Caso de Teste:** CT-041
+- **Nome:** Sincronizacao de empenhos para quando nao ha orgaos
+- **Objetivo:** Validar o cenario: Sincronizacao de empenhos para quando nao ha orgaos.
 - **Pre-condicoes:** repositorio de orgaos retorna lista vazia.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `SyncEmpenhosAsync`.
-- **Resultado esperado:** retorna `0`, nao consulta API externa e nao realiza commit.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `SyncEmpenhosAsync`.
+- **Resultado Esperado:** retorna `0`, nao consulta API externa e nao realiza commit.
+- **Criterios de Sucesso:** retorna `0`, nao consulta API externa e nao realiza commit.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-042 - Sincronizacao retorna zero quando API nao traz empenhos
+#### 6. Sincronizacao retorna zero quando API nao traz empenhos
 
-- **Metodo:** `SyncEmpenhosAsync_ReturnsZero_WhenApiReturnsEmpty`
+- **ID do Caso de Teste:** CT-042
+- **Nome:** Sincronizacao retorna zero quando API nao traz empenhos
+- **Objetivo:** Validar o cenario: Sincronizacao retorna zero quando API nao traz empenhos.
 - **Pre-condicoes:** existe orgao base, mas API retorna lista vazia.
-- **Dados:** orgao `001`.
-- **Passos:** chamar sincronizacao.
-- **Resultado esperado:** retorna `0`, nao adiciona empenhos e realiza commit da operacao.
+- **Entradas:**
+  1. orgao `001`.
+- **Passos para Execucao:**
+  1. chamar sincronizacao.
+- **Resultado Esperado:** retorna `0`, nao adiciona empenhos e realiza commit da operacao.
+- **Criterios de Sucesso:** retorna `0`, nao adiciona empenhos e realiza commit da operacao.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-043 - Sincronizacao insere contrato novo
+#### 7. Sincronizacao insere contrato novo
 
-- **Metodo:** `SyncContratosAsync_AddsContrato_WhenContratoDoesNotExist`
+- **ID do Caso de Teste:** CT-043
+- **Nome:** Sincronizacao insere contrato novo
+- **Objetivo:** Validar o cenario: Sincronizacao insere contrato novo.
 - **Pre-condicoes:** API externa retorna contrato inexistente.
-- **Dados:** contrato `CT-2025-001` com CNPJ pontuado.
-- **Passos:** chamar `SyncContratosAsync(2025)`.
-- **Resultado esperado:** contrato e adicionado com CNPJ sanitizado, count `1` e commit chamado.
+- **Entradas:**
+  1. contrato `CT-2025-001` com CNPJ pontuado.
+- **Passos para Execucao:**
+  1. chamar `SyncContratosAsync(2025)`.
+- **Resultado Esperado:** contrato e adicionado com CNPJ sanitizado, count `1` e commit chamado.
+- **Criterios de Sucesso:** contrato e adicionado com CNPJ sanitizado, count `1` e commit chamado.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-044 - SyncAll agrega contadores processados
+#### 8. SyncAll agrega contadores processados
 
-- **Metodo:** `SyncAllAsync_ReturnsProcessedCounts_WhenEmpenhosAndContratosExist`
+- **ID do Caso de Teste:** CT-044
+- **Nome:** SyncAll agrega contadores processados
+- **Objetivo:** Validar o cenario: SyncAll agrega contadores processados.
 - **Pre-condicoes:** API retorna um empenho novo e um contrato novo.
-- **Dados:** `EMP-X` e `CT-X`.
-- **Passos:** executar `SyncAllAsync(2025)`.
-- **Resultado esperado:** resultado retorna `EmpenhosProcessados=1` e `ContratosProcessados=1`.
+- **Entradas:**
+  1. `EMP-X` e `CT-X`.
+- **Passos para Execucao:**
+  1. executar `SyncAllAsync(2025)`.
+- **Resultado Esperado:** resultado retorna `EmpenhosProcessados=1` e `ContratosProcessados=1`.
+- **Criterios de Sucesso:** resultado retorna `EmpenhosProcessados=1` e `ContratosProcessados=1`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Controllers - DashboardController
+### Modulo de Controllers - DashboardController
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Controllers/DashboardControllerTests.cs`
 
-#### CT-045 - GetResumo retorna Ok
+#### 1. GetResumo retorna Ok
 
-- **Metodo:** `GetResumo_ReturnsOkResult_WhenServiceReturnsResumo`
+- **ID do Caso de Teste:** CT-045
+- **Nome:** GetResumo retorna Ok
+- **Objetivo:** Validar o cenario: GetResumo retorna Ok.
 - **Pre-condicoes:** `IDashboardService` retorna `DashboardResumoDto`.
-- **Dados:** chamada sem ano.
-- **Passos:** executar `_sut.GetResumo(null)`.
-- **Resultado esperado:** resultado HTTP e `OkObjectResult`.
+- **Entradas:**
+  1. chamada sem ano.
+- **Passos para Execucao:**
+  1. executar `_sut.GetResumo(null)`.
+- **Resultado Esperado:** resultado HTTP e `OkObjectResult`.
+- **Criterios de Sucesso:** resultado HTTP e `OkObjectResult`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-046 - GetResumo retorna DTO esperado
+#### 2. GetResumo retorna DTO esperado
 
-- **Metodo:** `GetResumo_ReturnsDashboardResumoDto_WhenServiceReturnsResumo`
+- **ID do Caso de Teste:** CT-046
+- **Nome:** GetResumo retorna DTO esperado
+- **Objetivo:** Validar o cenario: GetResumo retorna DTO esperado.
 - **Pre-condicoes:** servico retorna resumo vazio valido.
-- **Dados:** chamada sem ano.
-- **Passos:** executar controller e inspecionar `Value`.
-- **Resultado esperado:** corpo e do tipo `DashboardResumoDto`.
+- **Entradas:**
+  1. chamada sem ano.
+- **Passos para Execucao:**
+  1. executar controller e inspecionar `Value`.
+- **Resultado Esperado:** corpo e do tipo `DashboardResumoDto`.
+- **Criterios de Sucesso:** corpo e do tipo `DashboardResumoDto`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-047 - GetResumo propaga total empenhado
+#### 3. GetResumo propaga total empenhado
 
-- **Metodo:** `GetResumo_ReturnsTotalEmpenhado_WhenServiceReturnsResumo`
+- **ID do Caso de Teste:** CT-047
+- **Nome:** GetResumo propaga total empenhado
+- **Objetivo:** Validar o cenario: GetResumo propaga total empenhado.
 - **Pre-condicoes:** servico retorna `TotalEmpenhado=1000000`.
-- **Dados:** chamada sem ano.
-- **Passos:** executar controller e converter corpo para DTO.
-- **Resultado esperado:** DTO retornado contem `TotalEmpenhado=1000000`.
+- **Entradas:**
+  1. chamada sem ano.
+- **Passos para Execucao:**
+  1. executar controller e converter corpo para DTO.
+- **Resultado Esperado:** DTO retornado contem `TotalEmpenhado=1000000`.
+- **Criterios de Sucesso:** DTO retornado contem `TotalEmpenhado=1000000`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-048 - GetResumo chama servico com ano nulo
+#### 4. GetResumo chama servico com ano nulo
 
-- **Metodo:** `GetResumo_InvokesServiceWithNullYear_WhenAnoIsNull`
+- **ID do Caso de Teste:** CT-048
+- **Nome:** GetResumo chama servico com ano nulo
+- **Objetivo:** Validar o cenario: GetResumo chama servico com ano nulo.
 - **Pre-condicoes:** mock configurado para `GetResumoAsync(null)`.
-- **Dados:** `ano=null`.
-- **Passos:** executar endpoint do controller.
-- **Resultado esperado:** servico e chamado uma vez com `null`.
+- **Entradas:**
+  1. `ano=null`.
+- **Passos para Execucao:**
+  1. executar endpoint do controller.
+- **Resultado Esperado:** servico e chamado uma vez com `null`.
+- **Criterios de Sucesso:** servico e chamado uma vez com `null`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-049 - GetResumo chama servico com ano informado
+#### 5. GetResumo chama servico com ano informado
 
-- **Metodo:** `GetResumo_InvokesServiceWithProvidedYear_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-049
+- **Nome:** GetResumo chama servico com ano informado
+- **Objetivo:** Validar o cenario: GetResumo chama servico com ano informado.
 - **Pre-condicoes:** mock configurado para `2025`.
-- **Dados:** `ano=2025`.
-- **Passos:** executar endpoint do controller.
-- **Resultado esperado:** servico e chamado uma vez com `2025`.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. executar endpoint do controller.
+- **Resultado Esperado:** servico e chamado uma vez com `2025`.
+- **Criterios de Sucesso:** servico e chamado uma vez com `2025`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-050 - GetComparativo retorna Ok
+#### 6. GetComparativo retorna Ok
 
-- **Metodo:** `GetComparativo_ReturnsOkResult_WhenServiceReturnsComparativo`
+- **ID do Caso de Teste:** CT-050
+- **Nome:** GetComparativo retorna Ok
+- **Objetivo:** Validar o cenario: GetComparativo retorna Ok.
 - **Pre-condicoes:** servico retorna `ComparativoOrgaosDto`.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `_sut.GetComparativo(2025)`.
-- **Resultado esperado:** resultado HTTP e `OkObjectResult`.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `_sut.GetComparativo(2025)`.
+- **Resultado Esperado:** resultado HTTP e `OkObjectResult`.
+- **Criterios de Sucesso:** resultado HTTP e `OkObjectResult`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-051 - GetComparativo retorna DTO esperado
+#### 7. GetComparativo retorna DTO esperado
 
-- **Metodo:** `GetComparativo_ReturnsComparativoOrgaosDto_WhenServiceReturnsComparativo`
+- **ID do Caso de Teste:** CT-051
+- **Nome:** GetComparativo retorna DTO esperado
+- **Objetivo:** Validar o cenario: GetComparativo retorna DTO esperado.
 - **Pre-condicoes:** servico retorna comparativo valido.
-- **Dados:** `ano=2025`.
-- **Passos:** executar controller e avaliar corpo.
-- **Resultado esperado:** corpo e `ComparativoOrgaosDto`.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. executar controller e avaliar corpo.
+- **Resultado Esperado:** corpo e `ComparativoOrgaosDto`.
+- **Criterios de Sucesso:** corpo e `ComparativoOrgaosDto`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-052 - GetComparativo propaga ano
+#### 8. GetComparativo propaga ano
 
-- **Metodo:** `GetComparativo_ReturnsAno_WhenServiceReturnsComparativo`
+- **ID do Caso de Teste:** CT-052
+- **Nome:** GetComparativo propaga ano
+- **Objetivo:** Validar o cenario: GetComparativo propaga ano.
 - **Pre-condicoes:** servico retorna DTO com `Ano=2025`.
-- **Dados:** `ano=2025`.
-- **Passos:** executar controller.
-- **Resultado esperado:** corpo retorna `Ano=2025`.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. executar controller.
+- **Resultado Esperado:** corpo retorna `Ano=2025`.
+- **Criterios de Sucesso:** corpo retorna `Ano=2025`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-053 - GetEvolucao retorna Ok
+#### 9. GetEvolucao retorna Ok
 
-- **Metodo:** `GetEvolucao_ReturnsOkResult_WhenServiceReturnsDrillDown`
+- **ID do Caso de Teste:** CT-053
+- **Nome:** GetEvolucao retorna Ok
+- **Objetivo:** Validar o cenario: GetEvolucao retorna Ok.
 - **Pre-condicoes:** servico retorna `DrillDownDto`.
-- **Dados:** `codigoOrgao="001"`.
-- **Passos:** chamar `_sut.GetEvolucao("001", null)`.
-- **Resultado esperado:** resultado HTTP e `OkObjectResult`.
+- **Entradas:**
+  1. `codigoOrgao="001"`.
+- **Passos para Execucao:**
+  1. chamar `_sut.GetEvolucao("001", null)`.
+- **Resultado Esperado:** resultado HTTP e `OkObjectResult`.
+- **Criterios de Sucesso:** resultado HTTP e `OkObjectResult`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-054 - GetEvolucao retorna DTO de drill-down
+#### 10. GetEvolucao retorna DTO de drill-down
 
-- **Metodo:** `GetEvolucao_ReturnsDrillDownDto_WhenServiceReturnsDrillDown`
+- **ID do Caso de Teste:** CT-054
+- **Nome:** GetEvolucao retorna DTO de drill-down
+- **Objetivo:** Validar o cenario: GetEvolucao retorna DTO de drill-down.
 - **Pre-condicoes:** servico retorna drill-down valido.
-- **Dados:** `codigoOrgao="001"`.
-- **Passos:** executar controller e inspecionar corpo.
-- **Resultado esperado:** corpo e `DrillDownDto`.
+- **Entradas:**
+  1. `codigoOrgao="001"`.
+- **Passos para Execucao:**
+  1. executar controller e inspecionar corpo.
+- **Resultado Esperado:** corpo e `DrillDownDto`.
+- **Criterios de Sucesso:** corpo e `DrillDownDto`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-055 - GetEvolucao propaga codigo do orgao
+#### 11. GetEvolucao propaga codigo do orgao
 
-- **Metodo:** `GetEvolucao_ReturnsCodigoOrgao_WhenServiceReturnsDrillDown`
+- **ID do Caso de Teste:** CT-055
+- **Nome:** GetEvolucao propaga codigo do orgao
+- **Objetivo:** Validar o cenario: GetEvolucao propaga codigo do orgao.
 - **Pre-condicoes:** servico retorna DTO com `CodigoOrgao="001"`.
-- **Dados:** `codigoOrgao="001"`.
-- **Passos:** executar controller.
-- **Resultado esperado:** corpo preserva `CodigoOrgao="001"`.
+- **Entradas:**
+  1. `codigoOrgao="001"`.
+- **Passos para Execucao:**
+  1. executar controller.
+- **Resultado Esperado:** corpo preserva `CodigoOrgao="001"`.
+- **Criterios de Sucesso:** corpo preserva `CodigoOrgao="001"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-056 - GetEvolucao chama servico com ano nulo
+#### 12. GetEvolucao chama servico com ano nulo
 
-- **Metodo:** `GetEvolucao_InvokesServiceWithNullYear_WhenAnoIsNull`
+- **ID do Caso de Teste:** CT-056
+- **Nome:** GetEvolucao chama servico com ano nulo
+- **Objetivo:** Validar o cenario: GetEvolucao chama servico com ano nulo.
 - **Pre-condicoes:** mock configurado com codigo `001` e ano nulo.
-- **Dados:** `codigoOrgao="001"`, `ano=null`.
-- **Passos:** chamar controller.
-- **Resultado esperado:** servico recebe exatamente esses parametros.
+- **Entradas:**
+  1. `codigoOrgao="001"`, `ano=null`.
+- **Passos para Execucao:**
+  1. chamar controller.
+- **Resultado Esperado:** servico recebe exatamente esses parametros.
+- **Criterios de Sucesso:** servico recebe exatamente esses parametros.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-057 - GetEvolucao chama servico com parametros informados
+#### 13. GetEvolucao chama servico com parametros informados
 
-- **Metodo:** `GetEvolucao_InvokesServiceWithProvidedParameters_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-057
+- **Nome:** GetEvolucao chama servico com parametros informados
+- **Objetivo:** Validar o cenario: GetEvolucao chama servico com parametros informados.
 - **Pre-condicoes:** mock configurado com codigo `002` e ano `2025`.
-- **Dados:** `codigoOrgao="002"`, `ano=2025`.
-- **Passos:** chamar controller.
-- **Resultado esperado:** servico e chamado uma vez com codigo e ano informados.
+- **Entradas:**
+  1. `codigoOrgao="002"`, `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar controller.
+- **Resultado Esperado:** servico e chamado uma vez com codigo e ano informados.
+- **Criterios de Sucesso:** servico e chamado uma vez com codigo e ano informados.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Controllers - PesquisaController
+### Modulo de Controllers - PesquisaController
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Controllers/PesquisaControllerTests.cs`
 
-#### CT-058 - PesquisaGlobal retorna Ok
+#### 1. PesquisaGlobal retorna Ok
 
-- **Metodo:** `PesquisaGlobal_ReturnsOkResult_WhenServiceReturnsResult`
+- **ID do Caso de Teste:** CT-058
+- **Nome:** PesquisaGlobal retorna Ok
+- **Objetivo:** Validar o cenario: PesquisaGlobal retorna Ok.
 - **Pre-condicoes:** servico retorna `PesquisaResultDto`.
-- **Dados:** termo `"Empresa A"`.
-- **Passos:** chamar `_sut.PesquisaGlobal("Empresa A")`.
-- **Resultado esperado:** resultado HTTP e `OkObjectResult`.
+- **Entradas:**
+  1. termo `"Empresa A"`.
+- **Passos para Execucao:**
+  1. chamar `_sut.PesquisaGlobal("Empresa A")`.
+- **Resultado Esperado:** resultado HTTP e `OkObjectResult`.
+- **Criterios de Sucesso:** resultado HTTP e `OkObjectResult`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-059 - PesquisaGlobal retorna DTO esperado
+#### 2. PesquisaGlobal retorna DTO esperado
 
-- **Metodo:** `PesquisaGlobal_ReturnsPesquisaResultDto_WhenServiceReturnsResult`
+- **ID do Caso de Teste:** CT-059
+- **Nome:** PesquisaGlobal retorna DTO esperado
+- **Objetivo:** Validar o cenario: PesquisaGlobal retorna DTO esperado.
 - **Pre-condicoes:** servico retorna resultado valido.
-- **Dados:** termo `"Empresa A"`.
-- **Passos:** executar controller e inspecionar corpo.
-- **Resultado esperado:** corpo e `PesquisaResultDto`.
+- **Entradas:**
+  1. termo `"Empresa A"`.
+- **Passos para Execucao:**
+  1. executar controller e inspecionar corpo.
+- **Resultado Esperado:** corpo e `PesquisaResultDto`.
+- **Criterios de Sucesso:** corpo e `PesquisaResultDto`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-060 - PesquisaGlobal propaga termo buscado
+#### 3. PesquisaGlobal propaga termo buscado
 
-- **Metodo:** `PesquisaGlobal_ReturnsTermoBuscado_WhenServiceReturnsResult`
+- **ID do Caso de Teste:** CT-060
+- **Nome:** PesquisaGlobal propaga termo buscado
+- **Objetivo:** Validar o cenario: PesquisaGlobal propaga termo buscado.
 - **Pre-condicoes:** servico retorna `TermoBuscado="Empresa A"`.
-- **Dados:** termo `"Empresa A"`.
-- **Passos:** executar controller.
-- **Resultado esperado:** corpo preserva o termo buscado.
+- **Entradas:**
+  1. termo `"Empresa A"`.
+- **Passos para Execucao:**
+  1. executar controller.
+- **Resultado Esperado:** corpo preserva o termo buscado.
+- **Criterios de Sucesso:** corpo preserva o termo buscado.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-061 - PesquisaGlobal retorna status 400 para termo vazio
+#### 4. PesquisaGlobal retorna status 400 para termo vazio
 
-- **Metodo:** `PesquisaGlobal_ReturnsBadRequestStatusCode_WhenTermoIsEmpty`
+- **ID do Caso de Teste:** CT-061
+- **Nome:** PesquisaGlobal retorna status 400 para termo vazio
+- **Objetivo:** Validar o cenario: PesquisaGlobal retorna status 400 para termo vazio.
 - **Pre-condicoes:** servico lanca `ArgumentException` para termo vazio.
-- **Dados:** `termo=""`.
-- **Passos:** chamar controller com termo vazio.
-- **Resultado esperado:** `BadRequestObjectResult.StatusCode=400`.
+- **Entradas:**
+  1. `termo=""`.
+- **Passos para Execucao:**
+  1. chamar controller com termo vazio.
+- **Resultado Esperado:** `BadRequestObjectResult.StatusCode=400`.
+- **Criterios de Sucesso:** `BadRequestObjectResult.StatusCode=400`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-062 - PesquisaGlobal retorna BadRequestObjectResult
+#### 5. PesquisaGlobal retorna BadRequestObjectResult
 
-- **Metodo:** `PesquisaGlobal_ReturnsBadRequestObjectResult_WhenTermoIsEmpty`
+- **ID do Caso de Teste:** CT-062
+- **Nome:** PesquisaGlobal retorna BadRequestObjectResult
+- **Objetivo:** Validar o cenario: PesquisaGlobal retorna BadRequestObjectResult.
 - **Pre-condicoes:** servico lanca `ArgumentException`.
-- **Dados:** `termo=""`.
-- **Passos:** chamar controller.
-- **Resultado esperado:** `result.Result` e `BadRequestObjectResult`.
+- **Entradas:**
+  1. `termo=""`.
+- **Passos para Execucao:**
+  1. chamar controller.
+- **Resultado Esperado:** `result.Result` e `BadRequestObjectResult`.
+- **Criterios de Sucesso:** `result.Result` e `BadRequestObjectResult`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-063 - ExportarCsv retorna arquivo
+#### 6. ExportarCsv retorna arquivo
 
-- **Metodo:** `ExportarCsv_ReturnsFileContentResult_WhenServiceReturnsCsv`
+- **ID do Caso de Teste:** CT-063
+- **Nome:** ExportarCsv retorna arquivo
+- **Objetivo:** Validar o cenario: ExportarCsv retorna arquivo.
 - **Pre-condicoes:** servico retorna bytes CSV.
-- **Dados:** chamada sem termo e sem ano.
-- **Passos:** chamar `_sut.ExportarCsv(null, null)`.
-- **Resultado esperado:** retorno e `FileContentResult`.
+- **Entradas:**
+  1. chamada sem termo e sem ano.
+- **Passos para Execucao:**
+  1. chamar `_sut.ExportarCsv(null, null)`.
+- **Resultado Esperado:** retorno e `FileContentResult`.
+- **Criterios de Sucesso:** retorno e `FileContentResult`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-064 - ExportarCsv define content-type CSV
+#### 7. ExportarCsv define content-type CSV
 
-- **Metodo:** `ExportarCsv_ReturnsCsvContentType_WhenServiceReturnsCsv`
+- **ID do Caso de Teste:** CT-064
+- **Nome:** ExportarCsv define content-type CSV
+- **Objetivo:** Validar o cenario: ExportarCsv define content-type CSV.
 - **Pre-condicoes:** servico retorna bytes CSV.
-- **Dados:** CSV simples em UTF-8.
-- **Passos:** chamar controller e ler `ContentType`.
-- **Resultado esperado:** `ContentType="text/csv"`.
+- **Entradas:**
+  1. CSV simples em UTF-8.
+- **Passos para Execucao:**
+  1. chamar controller e ler `ContentType`.
+- **Resultado Esperado:** `ContentType="text/csv"`.
+- **Criterios de Sucesso:** `ContentType="text/csv"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-065 - ExportarCsv define nome de arquivo
+#### 8. ExportarCsv define nome de arquivo
 
-- **Metodo:** `ExportarCsv_ReturnsFileNameWithCsvExtension_WhenServiceReturnsCsv`
+- **ID do Caso de Teste:** CT-065
+- **Nome:** ExportarCsv define nome de arquivo
+- **Objetivo:** Validar o cenario: ExportarCsv define nome de arquivo.
 - **Pre-condicoes:** servico retorna bytes CSV.
-- **Dados:** chamada sem filtros.
-- **Passos:** chamar controller e ler `FileDownloadName`.
-- **Resultado esperado:** nome de download contem `.csv`.
+- **Entradas:**
+  1. chamada sem filtros.
+- **Passos para Execucao:**
+  1. chamar controller e ler `FileDownloadName`.
+- **Resultado Esperado:** nome de download contem `.csv`.
+- **Criterios de Sucesso:** nome de download contem `.csv`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Infrastructure - AppDbContext
+### Modulo de Infrastructure - AppDbContext
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Infrastructure/AppDbContextTests.cs`
 
-#### CT-066 - Modelo aplica configuracao de Empenho
+#### 1. Modelo aplica configuracao de Empenho
 
-- **Metodo:** `Model_AppliesEmpenhoConfiguration_WhenBuilt`
+- **ID do Caso de Teste:** CT-066
+- **Nome:** Modelo aplica configuracao de Empenho
+- **Objetivo:** Validar o cenario: Modelo aplica configuracao de Empenho.
 - **Pre-condicoes:** contexto em memoria criado.
-- **Dados:** metadados EF da entidade `Empenho`.
-- **Passos:** consultar tabela, tamanhos de campos e tipo decimal.
-- **Resultado esperado:** tabela `empenhos`, limites esperados e `numeric(18,2)`.
+- **Entradas:**
+  1. metadados EF da entidade `Empenho`.
+- **Passos para Execucao:**
+  1. consultar tabela, tamanhos de campos e tipo decimal.
+- **Resultado Esperado:** tabela `empenhos`, limites esperados e `numeric(18,2)`.
+- **Criterios de Sucesso:** tabela `empenhos`, limites esperados e `numeric(18,2)`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-067 - Modelo aplica configuracao de Contrato
+#### 2. Modelo aplica configuracao de Contrato
 
-- **Metodo:** `Model_AppliesContratoConfiguration_WhenBuilt`
+- **ID do Caso de Teste:** CT-067
+- **Nome:** Modelo aplica configuracao de Contrato
+- **Objetivo:** Validar o cenario: Modelo aplica configuracao de Contrato.
 - **Pre-condicoes:** contexto em memoria criado.
-- **Dados:** metadados EF da entidade `Contrato`.
-- **Passos:** verificar tabela e limites de propriedades.
-- **Resultado esperado:** tabela `contratos`, numero com tamanho 50 e objeto com tamanho 1000.
+- **Entradas:**
+  1. metadados EF da entidade `Contrato`.
+- **Passos para Execucao:**
+  1. verificar tabela e limites de propriedades.
+- **Resultado Esperado:** tabela `contratos`, numero com tamanho 50 e objeto com tamanho 1000.
+- **Criterios de Sucesso:** tabela `contratos`, numero com tamanho 50 e objeto com tamanho 1000.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-068 - Modelo aplica configuracao de OrgaoGoverno
+#### 3. Modelo aplica configuracao de OrgaoGoverno
 
-- **Metodo:** `Model_AppliesOrgaoGovernoConfiguration_WhenBuilt`
+- **ID do Caso de Teste:** CT-068
+- **Nome:** Modelo aplica configuracao de OrgaoGoverno
+- **Objetivo:** Validar o cenario: Modelo aplica configuracao de OrgaoGoverno.
 - **Pre-condicoes:** contexto em memoria criado.
-- **Dados:** metadados da entidade `OrgaoGoverno`.
-- **Passos:** verificar nome da tabela e limites.
-- **Resultado esperado:** tabela `orgaos_governo`, codigo ate 20 e nome ate 200.
+- **Entradas:**
+  1. metadados da entidade `OrgaoGoverno`.
+- **Passos para Execucao:**
+  1. verificar nome da tabela e limites.
+- **Resultado Esperado:** tabela `orgaos_governo`, codigo ate 20 e nome ate 200.
+- **Criterios de Sucesso:** tabela `orgaos_governo`, codigo ate 20 e nome ate 200.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-069 - Modelo aplica configuracao de Liquidacao
+#### 4. Modelo aplica configuracao de Liquidacao
 
-- **Metodo:** `Model_AppliesLiquidacaoConfiguration_WhenBuilt`
+- **ID do Caso de Teste:** CT-069
+- **Nome:** Modelo aplica configuracao de Liquidacao
+- **Objetivo:** Validar o cenario: Modelo aplica configuracao de Liquidacao.
 - **Pre-condicoes:** contexto em memoria criado.
-- **Dados:** metadados de `Liquidacao`.
-- **Passos:** verificar tabela e tamanho do numero.
-- **Resultado esperado:** tabela `liquidacoes` e numero com limite 50.
+- **Entradas:**
+  1. metadados de `Liquidacao`.
+- **Passos para Execucao:**
+  1. verificar tabela e tamanho do numero.
+- **Resultado Esperado:** tabela `liquidacoes` e numero com limite 50.
+- **Criterios de Sucesso:** tabela `liquidacoes` e numero com limite 50.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-070 - Modelo aplica configuracao de Pagamento
+#### 5. Modelo aplica configuracao de Pagamento
 
-- **Metodo:** `Model_AppliesPagamentoConfiguration_WhenBuilt`
+- **ID do Caso de Teste:** CT-070
+- **Nome:** Modelo aplica configuracao de Pagamento
+- **Objetivo:** Validar o cenario: Modelo aplica configuracao de Pagamento.
 - **Pre-condicoes:** contexto em memoria criado.
-- **Dados:** metadados de `Pagamento`.
-- **Passos:** verificar tabela e tamanho do numero.
-- **Resultado esperado:** tabela `pagamentos` e numero com limite 50.
+- **Entradas:**
+  1. metadados de `Pagamento`.
+- **Passos para Execucao:**
+  1. verificar tabela e tamanho do numero.
+- **Resultado Esperado:** tabela `pagamentos` e numero com limite 50.
+- **Criterios de Sucesso:** tabela `pagamentos` e numero com limite 50.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-071 - SaveChanges define CreatedAt ao adicionar
+#### 6. SaveChanges define CreatedAt ao adicionar
 
-- **Metodo:** `SaveChangesAsync_SetsCreatedAt_WhenEntityIsAdded`
+- **ID do Caso de Teste:** CT-071
+- **Nome:** SaveChanges define CreatedAt ao adicionar
+- **Objetivo:** Validar o cenario: SaveChanges define CreatedAt ao adicionar.
 - **Pre-condicoes:** entidade criada com `CreatedAt` antigo.
-- **Dados:** orgao novo.
-- **Passos:** adicionar entidade e salvar.
-- **Resultado esperado:** `CreatedAt` e atualizado para valor recente e `UpdatedAt` permanece nulo.
+- **Entradas:**
+  1. orgao novo.
+- **Passos para Execucao:**
+  1. adicionar entidade e salvar.
+- **Resultado Esperado:** `CreatedAt` e atualizado para valor recente e `UpdatedAt` permanece nulo.
+- **Criterios de Sucesso:** `CreatedAt` e atualizado para valor recente e `UpdatedAt` permanece nulo.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-072 - SaveChanges define UpdatedAt ao modificar
+#### 7. SaveChanges define UpdatedAt ao modificar
 
-- **Metodo:** `SaveChangesAsync_SetsUpdatedAt_WhenEntityIsModified`
+- **ID do Caso de Teste:** CT-072
+- **Nome:** SaveChanges define UpdatedAt ao modificar
+- **Objetivo:** Validar o cenario: SaveChanges define UpdatedAt ao modificar.
 - **Pre-condicoes:** entidade ja persistida.
-- **Dados:** alteracao no nome do orgao.
-- **Passos:** atualizar entidade e salvar.
-- **Resultado esperado:** `UpdatedAt` e preenchido com data recente.
+- **Entradas:**
+  1. alteracao no nome do orgao.
+- **Passos para Execucao:**
+  1. atualizar entidade e salvar.
+- **Resultado Esperado:** `UpdatedAt` e preenchido com data recente.
+- **Criterios de Sucesso:** `UpdatedAt` e preenchido com data recente.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Infrastructure - FakePEDataClient
+### Modulo de Infrastructure - FakePEDataClient
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Infrastructure/FakePEDataClientTests.cs`
 
-#### CT-073 - Fake retorna empenhos do ano solicitado
+#### 1. Fake retorna empenhos do ano solicitado
 
-- **Metodo:** `GetEmpenhosAsync_ReturnsSeedData_ForRequestedYear`
+- **ID do Caso de Teste:** CT-073
+- **Nome:** Fake retorna empenhos do ano solicitado
+- **Objetivo:** Validar o cenario: Fake retorna empenhos do ano solicitado.
 - **Pre-condicoes:** cliente fake instanciado.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `GetEmpenhosAsync(2025)`.
-- **Resultado esperado:** tres empenhos retornados e todos pertencem a 2025.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `GetEmpenhosAsync(2025)`.
+- **Resultado Esperado:** tres empenhos retornados e todos pertencem a 2025.
+- **Criterios de Sucesso:** tres empenhos retornados e todos pertencem a 2025.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-074 - Fake filtra empenhos por orgao
+#### 2. Fake filtra empenhos por orgao
 
-- **Metodo:** `GetEmpenhosByOrgaoAsync_ReturnsFilteredData_ForRequestedOrgao`
+- **ID do Caso de Teste:** CT-074
+- **Nome:** Fake filtra empenhos por orgao
+- **Objetivo:** Validar o cenario: Fake filtra empenhos por orgao.
 - **Pre-condicoes:** cliente fake instanciado.
-- **Dados:** `ano=2025`, `codigoOrgao="SES"`.
-- **Passos:** chamar metodo de filtro por orgao.
-- **Resultado esperado:** retorna um item com `CodigoOrgao="SES"`.
+- **Entradas:**
+  1. `ano=2025`, `codigoOrgao="SES"`.
+- **Passos para Execucao:**
+  1. chamar metodo de filtro por orgao.
+- **Resultado Esperado:** retorna um item com `CodigoOrgao="SES"`.
+- **Criterios de Sucesso:** retorna um item com `CodigoOrgao="SES"`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-075 - Fake retorna contratos do ano solicitado
+#### 3. Fake retorna contratos do ano solicitado
 
-- **Metodo:** `GetContratosAsync_ReturnsSeedData_ForRequestedYear`
+- **ID do Caso de Teste:** CT-075
+- **Nome:** Fake retorna contratos do ano solicitado
+- **Objetivo:** Validar o cenario: Fake retorna contratos do ano solicitado.
 - **Pre-condicoes:** cliente fake instanciado.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `GetContratosAsync`.
-- **Resultado esperado:** dois contratos com numero iniciado por `CT-2025`.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `GetContratosAsync`.
+- **Resultado Esperado:** dois contratos com numero iniciado por `CT-2025`.
+- **Criterios de Sucesso:** dois contratos com numero iniciado por `CT-2025`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-076 - Fake retorna receitas do ano solicitado
+#### 4. Fake retorna receitas do ano solicitado
 
-- **Metodo:** `GetReceitasAsync_ReturnsSeedData_ForRequestedYear`
+- **ID do Caso de Teste:** CT-076
+- **Nome:** Fake retorna receitas do ano solicitado
+- **Objetivo:** Validar o cenario: Fake retorna receitas do ano solicitado.
 - **Pre-condicoes:** cliente fake instanciado.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `GetReceitasAsync`.
-- **Resultado esperado:** uma receita com ano 2025 e valor esperado.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `GetReceitasAsync`.
+- **Resultado Esperado:** uma receita com ano 2025 e valor esperado.
+- **Criterios de Sucesso:** uma receita com ano 2025 e valor esperado.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-077 - Fake retorna orcamento do ano solicitado
+#### 5. Fake retorna orcamento do ano solicitado
 
-- **Metodo:** `GetOrcamentoAsync_ReturnsSeedData_ForRequestedYear`
+- **ID do Caso de Teste:** CT-077
+- **Nome:** Fake retorna orcamento do ano solicitado
+- **Objetivo:** Validar o cenario: Fake retorna orcamento do ano solicitado.
 - **Pre-condicoes:** cliente fake instanciado.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `GetOrcamentoAsync`.
-- **Resultado esperado:** um registro com dotacao atualizada esperada.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `GetOrcamentoAsync`.
+- **Resultado Esperado:** um registro com dotacao atualizada esperada.
+- **Criterios de Sucesso:** um registro com dotacao atualizada esperada.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-078 - Fake retorna total fixo de servidores
+#### 6. Fake retorna total fixo de servidores
 
-- **Metodo:** `GetTotalServidoresAsync_ReturnsFixedTotal_ForAnyOrgao`
+- **ID do Caso de Teste:** CT-078
+- **Nome:** Fake retorna total fixo de servidores
+- **Objetivo:** Validar o cenario: Fake retorna total fixo de servidores.
 - **Pre-condicoes:** cliente fake instanciado.
-- **Dados:** `codigoOrgao="SEE"`.
-- **Passos:** chamar `GetTotalServidoresAsync`.
-- **Resultado esperado:** retorno `1200`.
+- **Entradas:**
+  1. `codigoOrgao="SEE"`.
+- **Passos para Execucao:**
+  1. chamar `GetTotalServidoresAsync`.
+- **Resultado Esperado:** retorno `1200`.
+- **Criterios de Sucesso:** retorno `1200`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Infrastructure - Repository
+### Modulo de Infrastructure - Repository
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Infrastructure/RepositoryTests.cs`
 
-#### CT-079 - Repositorio adiciona entidade
+#### 1. Repositorio adiciona entidade
 
-- **Metodo:** `AddAsync_PersistsEntity_WhenSaved`
+- **ID do Caso de Teste:** CT-079
+- **Nome:** Repositorio adiciona entidade
+- **Objetivo:** Validar o cenario: Repositorio adiciona entidade.
 - **Pre-condicoes:** contexto em memoria vazio.
-- **Dados:** orgao `001`.
-- **Passos:** chamar `AddAsync` e `SaveChangesAsync`.
-- **Resultado esperado:** entidade passa a existir no `DbSet`.
+- **Entradas:**
+  1. orgao `001`.
+- **Passos para Execucao:**
+  1. chamar `AddAsync` e `SaveChangesAsync`.
+- **Resultado Esperado:** entidade passa a existir no `DbSet`.
+- **Criterios de Sucesso:** entidade passa a existir no `DbSet`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-080 - Repositorio busca por ID
+#### 2. Repositorio busca por ID
 
-- **Metodo:** `GetByIdAsync_ReturnsEntity_WhenEntityExists`
+- **ID do Caso de Teste:** CT-080
+- **Nome:** Repositorio busca por ID
+- **Objetivo:** Validar o cenario: Repositorio busca por ID.
 - **Pre-condicoes:** orgao previamente salvo.
-- **Dados:** ID do orgao salvo.
-- **Passos:** chamar `GetByIdAsync(id)`.
-- **Resultado esperado:** entidade retornada possui o mesmo ID.
+- **Entradas:**
+  1. ID do orgao salvo.
+- **Passos para Execucao:**
+  1. chamar `GetByIdAsync(id)`.
+- **Resultado Esperado:** entidade retornada possui o mesmo ID.
+- **Criterios de Sucesso:** entidade retornada possui o mesmo ID.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-081 - Repositorio lista entidades
+#### 3. Repositorio lista entidades
 
-- **Metodo:** `GetAllAsync_ReturnsEntities_WhenEntitiesExist`
+- **ID do Caso de Teste:** CT-081
+- **Nome:** Repositorio lista entidades
+- **Objetivo:** Validar o cenario: Repositorio lista entidades.
 - **Pre-condicoes:** orgao previamente salvo.
-- **Dados:** contexto com um orgao.
-- **Passos:** chamar `GetAllAsync()`.
-- **Resultado esperado:** lista contem o orgao salvo.
+- **Entradas:**
+  1. contexto com um orgao.
+- **Passos para Execucao:**
+  1. chamar `GetAllAsync()`.
+- **Resultado Esperado:** lista contem o orgao salvo.
+- **Criterios de Sucesso:** lista contem o orgao salvo.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-082 - Repositorio filtra por predicado
+#### 4. Repositorio filtra por predicado
 
-- **Metodo:** `FindAsync_ReturnsMatchingEntities_WhenPredicateMatches`
+- **ID do Caso de Teste:** CT-082
+- **Nome:** Repositorio filtra por predicado
+- **Objetivo:** Validar o cenario: Repositorio filtra por predicado.
 - **Pre-condicoes:** orgao salvo com codigo `001`.
-- **Dados:** predicado `o.Codigo == "001"`.
-- **Passos:** chamar `FindAsync`.
-- **Resultado esperado:** colecao contem somente o orgao esperado.
+- **Entradas:**
+  1. predicado `o.Codigo == "001"`.
+- **Passos para Execucao:**
+  1. chamar `FindAsync`.
+- **Resultado Esperado:** colecao contem somente o orgao esperado.
+- **Criterios de Sucesso:** colecao contem somente o orgao esperado.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-083 - Repositorio confirma existencia
+#### 5. Repositorio confirma existencia
 
-- **Metodo:** `ExistsAsync_ReturnsTrue_WhenPredicateMatches`
+- **ID do Caso de Teste:** CT-083
+- **Nome:** Repositorio confirma existencia
+- **Objetivo:** Validar o cenario: Repositorio confirma existencia.
 - **Pre-condicoes:** orgao salvo com nome contendo `Educacao`.
-- **Dados:** predicado por nome.
-- **Passos:** chamar `ExistsAsync`.
-- **Resultado esperado:** retorno `true`.
+- **Entradas:**
+  1. predicado por nome.
+- **Passos para Execucao:**
+  1. chamar `ExistsAsync`.
+- **Resultado Esperado:** retorno `true`.
+- **Criterios de Sucesso:** retorno `true`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-084 - Repositorio atualiza entidade
+#### 6. Repositorio atualiza entidade
 
-- **Metodo:** `Update_PersistsChanges_WhenSaved`
+- **ID do Caso de Teste:** CT-084
+- **Nome:** Repositorio atualiza entidade
+- **Objetivo:** Validar o cenario: Repositorio atualiza entidade.
 - **Pre-condicoes:** orgao salvo.
-- **Dados:** novo nome `Secretaria Estadual de Educacao`.
-- **Passos:** alterar propriedade, chamar `Update` e salvar.
-- **Resultado esperado:** busca posterior retorna o nome atualizado.
+- **Entradas:**
+  1. novo nome `Secretaria Estadual de Educacao`.
+- **Passos para Execucao:**
+  1. alterar propriedade, chamar `Update` e salvar.
+- **Resultado Esperado:** busca posterior retorna o nome atualizado.
+- **Criterios de Sucesso:** busca posterior retorna o nome atualizado.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-085 - Repositorio remove entidade
+#### 7. Repositorio remove entidade
 
-- **Metodo:** `Remove_DeletesEntity_WhenSaved`
+- **ID do Caso de Teste:** CT-085
+- **Nome:** Repositorio remove entidade
+- **Objetivo:** Validar o cenario: Repositorio remove entidade.
 - **Pre-condicoes:** orgao salvo.
-- **Dados:** ID do orgao.
-- **Passos:** chamar `Remove`, salvar e verificar existencia.
-- **Resultado esperado:** `ExistsAsync` retorna `false`.
+- **Entradas:**
+  1. ID do orgao.
+- **Passos para Execucao:**
+  1. chamar `Remove`, salvar e verificar existencia.
+- **Resultado Esperado:** `ExistsAsync` retorna `false`.
+- **Criterios de Sucesso:** `ExistsAsync` retorna `false`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-086 - EmpenhoRepository busca empenho com orgao
+#### 8. EmpenhoRepository busca empenho com orgao
 
-- **Metodo:** `GetByNumeroAsync_ReturnsEmpenhoWithOrgao_WhenEmpenhoExists`
+- **ID do Caso de Teste:** CT-086
+- **Nome:** EmpenhoRepository busca empenho com orgao
+- **Objetivo:** Validar o cenario: EmpenhoRepository busca empenho com orgao.
 - **Pre-condicoes:** empenho e orgao salvos no contexto.
-- **Dados:** numero `EMP-001`, ano `2025`.
-- **Passos:** chamar `GetByNumeroAsync`.
-- **Resultado esperado:** empenho retornado inclui dados do orgao.
+- **Entradas:**
+  1. numero `EMP-001`, ano `2025`.
+- **Passos para Execucao:**
+  1. chamar `GetByNumeroAsync`.
+- **Resultado Esperado:** empenho retornado inclui dados do orgao.
+- **Criterios de Sucesso:** empenho retornado inclui dados do orgao.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-087 - EmpenhoRepository filtra por ano
+#### 9. EmpenhoRepository filtra por ano
 
-- **Metodo:** `GetByAnoAsync_ReturnsOnlyMatchingEmpenhos_WhenYearIsProvided`
+- **ID do Caso de Teste:** CT-087
+- **Nome:** EmpenhoRepository filtra por ano
+- **Objetivo:** Validar o cenario: EmpenhoRepository filtra por ano.
 - **Pre-condicoes:** existem empenhos de 2025 e 2024.
-- **Dados:** `ano=2025`.
-- **Passos:** chamar `GetByAnoAsync(2025)`.
-- **Resultado esperado:** retorna apenas o empenho de 2025.
+- **Entradas:**
+  1. `ano=2025`.
+- **Passos para Execucao:**
+  1. chamar `GetByAnoAsync(2025)`.
+- **Resultado Esperado:** retorna apenas o empenho de 2025.
+- **Criterios de Sucesso:** retorna apenas o empenho de 2025.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-088 - EmpenhoRepository filtra por orgao
+#### 10. EmpenhoRepository filtra por orgao
 
-- **Metodo:** `GetByOrgaoAsync_ReturnsOnlyMatchingEmpenhos_WhenOrgaoIsProvided`
+- **ID do Caso de Teste:** CT-088
+- **Nome:** EmpenhoRepository filtra por orgao
+- **Objetivo:** Validar o cenario: EmpenhoRepository filtra por orgao.
 - **Pre-condicoes:** existem empenhos de dois orgaos.
-- **Dados:** ID do orgao de educacao.
-- **Passos:** chamar `GetByOrgaoAsync`.
-- **Resultado esperado:** todos os itens retornados pertencem ao orgao informado.
+- **Entradas:**
+  1. ID do orgao de educacao.
+- **Passos para Execucao:**
+  1. chamar `GetByOrgaoAsync`.
+- **Resultado Esperado:** todos os itens retornados pertencem ao orgao informado.
+- **Criterios de Sucesso:** todos os itens retornados pertencem ao orgao informado.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-089 - ContratoRepository busca contrato com orgao
+#### 11. ContratoRepository busca contrato com orgao
 
-- **Metodo:** `GetByNumeroAsync_ReturnsContratoWithOrgao_WhenContratoExists`
+- **ID do Caso de Teste:** CT-089
+- **Nome:** ContratoRepository busca contrato com orgao
+- **Objetivo:** Validar o cenario: ContratoRepository busca contrato com orgao.
 - **Pre-condicoes:** contrato e orgao salvos.
-- **Dados:** numero `CT-001`.
-- **Passos:** chamar `GetByNumeroAsync`.
-- **Resultado esperado:** contrato retornado inclui fornecedor e orgao.
+- **Entradas:**
+  1. numero `CT-001`.
+- **Passos para Execucao:**
+  1. chamar `GetByNumeroAsync`.
+- **Resultado Esperado:** contrato retornado inclui fornecedor e orgao.
+- **Criterios de Sucesso:** contrato retornado inclui fornecedor e orgao.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-090 - ContratoRepository busca por CNPJ
+#### 12. ContratoRepository busca por CNPJ
 
-- **Metodo:** `SearchByCnpjAsync_ReturnsMatchingContratos_WhenCnpjExists`
+- **ID do Caso de Teste:** CT-090
+- **Nome:** ContratoRepository busca por CNPJ
+- **Objetivo:** Validar o cenario: ContratoRepository busca por CNPJ.
 - **Pre-condicoes:** existem contratos com CNPJs diferentes.
-- **Dados:** CNPJ `"11222333000181"`.
-- **Passos:** chamar `SearchByCnpjAsync`.
-- **Resultado esperado:** retorna somente o contrato com CNPJ correspondente.
+- **Entradas:**
+  1. CNPJ `"11222333000181"`.
+- **Passos para Execucao:**
+  1. chamar `SearchByCnpjAsync`.
+- **Resultado Esperado:** retorna somente o contrato com CNPJ correspondente.
+- **Criterios de Sucesso:** retorna somente o contrato com CNPJ correspondente.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Infrastructure - UnitOfWork
+### Modulo de Infrastructure - UnitOfWork
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Infrastructure/UnitOfWorkTests.cs`
 
-#### CT-091 - UnitOfWork expoe repositorios configurados
+#### 1. UnitOfWork expoe repositorios configurados
 
-- **Metodo:** `UnitOfWork_ExposesConfiguredRepositories_WhenCreated`
+- **ID do Caso de Teste:** CT-091
+- **Nome:** UnitOfWork expoe repositorios configurados
+- **Objetivo:** Validar o cenario: UnitOfWork expoe repositorios configurados.
 - **Pre-condicoes:** repositorios de empenhos e contratos instanciados.
-- **Dados:** contexto em memoria.
-- **Passos:** criar `UnitOfWork`.
-- **Resultado esperado:** propriedades `Empenhos` e `Contratos` referenciam os repositorios recebidos.
+- **Entradas:**
+  1. contexto em memoria.
+- **Passos para Execucao:**
+  1. criar `UnitOfWork`.
+- **Resultado Esperado:** propriedades `Empenhos` e `Contratos` referenciam os repositorios recebidos.
+- **Criterios de Sucesso:** propriedades `Empenhos` e `Contratos` referenciam os repositorios recebidos.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-092 - UnitOfWork persiste alteracoes pendentes
+#### 2. UnitOfWork persiste alteracoes pendentes
 
-- **Metodo:** `CommitAsync_PersistsPendingChanges_WhenRepositoryAddsEntity`
+- **ID do Caso de Teste:** CT-092
+- **Nome:** UnitOfWork persiste alteracoes pendentes
+- **Objetivo:** Validar o cenario: UnitOfWork persiste alteracoes pendentes.
 - **Pre-condicoes:** entidade adicionada ao contexto.
-- **Dados:** orgao novo.
-- **Passos:** chamar `CommitAsync`.
-- **Resultado esperado:** retorno indica uma alteracao persistida e entidade fica salva.
+- **Entradas:**
+  1. orgao novo.
+- **Passos para Execucao:**
+  1. chamar `CommitAsync`.
+- **Resultado Esperado:** retorno indica uma alteracao persistida e entidade fica salva.
+- **Criterios de Sucesso:** retorno indica uma alteracao persistida e entidade fica salva.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-093 - UnitOfWork descarta contexto
+#### 3. UnitOfWork descarta contexto
 
-- **Metodo:** `Dispose_DisposesDbContext_WhenCalled`
+- **ID do Caso de Teste:** CT-093
+- **Nome:** UnitOfWork descarta contexto
+- **Objetivo:** Validar o cenario: UnitOfWork descarta contexto.
 - **Pre-condicoes:** `UnitOfWork` criado com contexto em memoria.
-- **Dados:** chamada direta a `Dispose`.
-- **Passos:** descartar e tentar acessar o contexto.
-- **Resultado esperado:** acesso posterior lanca `ObjectDisposedException`.
+- **Entradas:**
+  1. chamada direta a `Dispose`.
+- **Passos para Execucao:**
+  1. descartar e tentar acessar o contexto.
+- **Resultado Esperado:** acesso posterior lanca `ObjectDisposedException`.
+- **Criterios de Sucesso:** acesso posterior lanca `ObjectDisposedException`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### ExternalClients - TcePEDataClient
+### Modulo de ExternalClients - TcePEDataClient
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/ExternalClients/TcePEDataClientTests.cs`
 
-#### CT-094 - Cliente TCE desserializa receitas
+#### 1. Cliente TCE desserializa receitas
 
-- **Metodo:** `GetReceitasAsync_ReturnsReceitas_WhenApiReturnsTceJson`
+- **ID do Caso de Teste:** CT-094
+- **Nome:** Cliente TCE desserializa receitas
+- **Objetivo:** Validar o cenario: Cliente TCE desserializa receitas.
 - **Pre-condicoes:** `HttpMessageHandler` mockado retorna HTTP 200.
-- **Dados:** envelope JSON do TCE com uma receita.
-- **Passos:** chamar `GetReceitasAsync(2026)`.
-- **Resultado esperado:** lista contem uma receita com valor e origem esperados.
+- **Entradas:**
+  1. envelope JSON do TCE com uma receita.
+- **Passos para Execucao:**
+  1. chamar `GetReceitasAsync(2026)`.
+- **Resultado Esperado:** lista contem uma receita com valor e origem esperados.
+- **Criterios de Sucesso:** lista contem uma receita com valor e origem esperados.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-095 - Cliente TCE lanca excecao em erro de receitas
+#### 2. Cliente TCE lanca excecao em erro de receitas
 
-- **Metodo:** `GetReceitasAsync_ThrowsHttpRequestException_WhenApiReturnsServerError`
+- **ID do Caso de Teste:** CT-095
+- **Nome:** Cliente TCE lanca excecao em erro de receitas
+- **Objetivo:** Validar o cenario: Cliente TCE lanca excecao em erro de receitas.
 - **Pre-condicoes:** handler retorna HTTP 500.
-- **Dados:** corpo vazio/default.
-- **Passos:** chamar `GetReceitasAsync`.
-- **Resultado esperado:** `HttpRequestException` e lancada.
+- **Entradas:**
+  1. corpo vazio/default.
+- **Passos para Execucao:**
+  1. chamar `GetReceitasAsync`.
+- **Resultado Esperado:** `HttpRequestException` e lancada.
+- **Criterios de Sucesso:** `HttpRequestException` e lancada.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-096 - Cliente TCE desserializa empenhos por orgao
+#### 3. Cliente TCE desserializa empenhos por orgao
 
-- **Metodo:** `GetEmpenhosByOrgaoAsync_ReturnsEmpenhos_WhenApiReturnsTceJson`
+- **ID do Caso de Teste:** CT-096
+- **Nome:** Cliente TCE desserializa empenhos por orgao
+- **Objetivo:** Validar o cenario: Cliente TCE desserializa empenhos por orgao.
 - **Pre-condicoes:** handler retorna HTTP 200.
-- **Dados:** envelope JSON com um empenho.
-- **Passos:** chamar `GetEmpenhosByOrgaoAsync(2025, "001")`.
-- **Resultado esperado:** item contem numero, valor e natureza de despesa esperados.
+- **Entradas:**
+  1. envelope JSON com um empenho.
+- **Passos para Execucao:**
+  1. chamar `GetEmpenhosByOrgaoAsync(2025, "001")`.
+- **Resultado Esperado:** item contem numero, valor e natureza de despesa esperados.
+- **Criterios de Sucesso:** item contem numero, valor e natureza de despesa esperados.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-097 - Cliente TCE retorna vazio em erro de empenhos
+#### 4. Cliente TCE retorna vazio em erro de empenhos
 
-- **Metodo:** `GetEmpenhosByOrgaoAsync_ReturnsEmpty_WhenApiReturnsError`
+- **ID do Caso de Teste:** CT-097
+- **Nome:** Cliente TCE retorna vazio em erro de empenhos
+- **Objetivo:** Validar o cenario: Cliente TCE retorna vazio em erro de empenhos.
 - **Pre-condicoes:** handler retorna HTTP 404.
-- **Dados:** orgao inexistente `999`.
-- **Passos:** chamar metodo de empenhos por orgao.
-- **Resultado esperado:** lista vazia, sem excecao.
+- **Entradas:**
+  1. orgao inexistente `999`.
+- **Passos para Execucao:**
+  1. chamar metodo de empenhos por orgao.
+- **Resultado Esperado:** lista vazia, sem excecao.
+- **Criterios de Sucesso:** lista vazia, sem excecao.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-098 - Cliente TCE desserializa contratos
+#### 5. Cliente TCE desserializa contratos
 
-- **Metodo:** `GetContratosAsync_ReturnsContratos_WhenApiReturnsTceJson`
+- **ID do Caso de Teste:** CT-098
+- **Nome:** Cliente TCE desserializa contratos
+- **Objetivo:** Validar o cenario: Cliente TCE desserializa contratos.
 - **Pre-condicoes:** handler retorna HTTP 200.
-- **Dados:** envelope JSON com um contrato.
-- **Passos:** chamar `GetContratosAsync(2025)`.
-- **Resultado esperado:** contrato retornado contem numero e valor esperados.
+- **Entradas:**
+  1. envelope JSON com um contrato.
+- **Passos para Execucao:**
+  1. chamar `GetContratosAsync(2025)`.
+- **Resultado Esperado:** contrato retornado contem numero e valor esperados.
+- **Criterios de Sucesso:** contrato retornado contem numero e valor esperados.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-099 - Cliente TCE retorna vazio em erro de contratos
+#### 6. Cliente TCE retorna vazio em erro de contratos
 
-- **Metodo:** `GetContratosAsync_ReturnsEmpty_WhenApiReturnsError`
+- **ID do Caso de Teste:** CT-099
+- **Nome:** Cliente TCE retorna vazio em erro de contratos
+- **Objetivo:** Validar o cenario: Cliente TCE retorna vazio em erro de contratos.
 - **Pre-condicoes:** handler retorna HTTP 503.
-- **Dados:** ano 2025.
-- **Passos:** chamar `GetContratosAsync`.
-- **Resultado esperado:** lista vazia, sem excecao.
+- **Entradas:**
+  1. ano 2025.
+- **Passos para Execucao:**
+  1. chamar `GetContratosAsync`.
+- **Resultado Esperado:** lista vazia, sem excecao.
+- **Criterios de Sucesso:** lista vazia, sem excecao.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-100 - Cliente TCE retorna vazio em erro de orcamento
+#### 7. Cliente TCE retorna vazio em erro de orcamento
 
-- **Metodo:** `GetOrcamentoAsync_ReturnsEmpty_WhenApiReturnsError`
+- **ID do Caso de Teste:** CT-100
+- **Nome:** Cliente TCE retorna vazio em erro de orcamento
+- **Objetivo:** Validar o cenario: Cliente TCE retorna vazio em erro de orcamento.
 - **Pre-condicoes:** handler retorna HTTP 502.
-- **Dados:** ano 2025.
-- **Passos:** chamar `GetOrcamentoAsync`.
-- **Resultado esperado:** lista vazia, sem excecao.
+- **Entradas:**
+  1. ano 2025.
+- **Passos para Execucao:**
+  1. chamar `GetOrcamentoAsync`.
+- **Resultado Esperado:** lista vazia, sem excecao.
+- **Criterios de Sucesso:** lista vazia, sem excecao.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Middlewares - GlobalExceptionMiddleware
+### Modulo de Middlewares - GlobalExceptionMiddleware
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Middlewares/GlobalExceptionMiddlewareTests.cs`
 
-#### CT-101 - Middleware chama proximo delegate sem excecao
+#### 1. Middleware chama proximo delegate sem excecao
 
-- **Metodo:** `InvokeAsync_CallsNext_WhenNoExceptionOccurs`
+- **ID do Caso de Teste:** CT-101
+- **Nome:** Middleware chama proximo delegate sem excecao
+- **Objetivo:** Validar o cenario: Middleware chama proximo delegate sem excecao.
 - **Pre-condicoes:** `RequestDelegate` apenas marca flag de chamada.
-- **Dados:** `DefaultHttpContext` com corpo gravavel.
-- **Passos:** executar `InvokeAsync`.
-- **Resultado esperado:** proximo delegate e chamado e status permanece `200`.
+- **Entradas:**
+  1. `DefaultHttpContext` com corpo gravavel.
+- **Passos para Execucao:**
+  1. executar `InvokeAsync`.
+- **Resultado Esperado:** proximo delegate e chamado e status permanece `200`.
+- **Criterios de Sucesso:** proximo delegate e chamado e status permanece `200`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-102 - Middleware mapeia excecoes para status HTTP
+#### 2. Middleware mapeia excecoes para status HTTP
 
-- **Metodo:** `InvokeAsync_ReturnsExpectedStatusCode_ForGivenException`
+- **ID do Caso de Teste:** CT-102
+- **Nome:** Middleware mapeia excecoes para status HTTP
+- **Objetivo:** Validar o cenario: Middleware mapeia excecoes para status HTTP.
 - **Pre-condicoes:** delegate configurado para lancar excecao.
-- **Dados:** `ArgumentException`, `NotFoundException` e `InvalidOperationException`.
-- **Passos:** executar middleware para cada excecao.
-- **Resultado esperado:** status `400`, `404` e `500`, respectivamente.
+- **Entradas:**
+  1. `ArgumentException`, `NotFoundException` e `InvalidOperationException`.
+- **Passos para Execucao:**
+  1. executar middleware para cada excecao.
+- **Resultado Esperado:** status `400`, `404` e `500`, respectivamente.
+- **Criterios de Sucesso:** status `400`, `404` e `500`, respectivamente.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-103 - Middleware retorna erro JSON estruturado
+#### 3. Middleware retorna erro JSON estruturado
 
-- **Metodo:** `InvokeAsync_ReturnsJsonError_WhenExceptionOccurs`
+- **ID do Caso de Teste:** CT-103
+- **Nome:** Middleware retorna erro JSON estruturado
+- **Objetivo:** Validar o cenario: Middleware retorna erro JSON estruturado.
 - **Pre-condicoes:** delegate lanca `ArgumentException`.
-- **Dados:** contexto HTTP com `MemoryStream`.
-- **Passos:** executar middleware, ler corpo e parsear JSON.
-- **Resultado esperado:** resposta `application/json` com `statusCode`, `message` e `timestamp`.
+- **Entradas:**
+  1. contexto HTTP com `MemoryStream`.
+- **Passos para Execucao:**
+  1. executar middleware, ler corpo e parsear JSON.
+- **Resultado Esperado:** resposta `application/json` com `statusCode`, `message` e `timestamp`.
+- **Criterios de Sucesso:** resposta `application/json` com `statusCode`, `message` e `timestamp`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Conventions - UnitTests
+### Modulo de Conventions - UnitTests
 
 **Arquivo:** `tests/TransparenciaPE.UnitTests/Conventions/TestNamingConventionTests.cs`
 
-#### CT-104 - Convencao valida nomes dos testes unitarios
+#### 1. Convencao valida nomes dos testes unitarios
 
-- **Metodo:** `TestMethods_FollowNamingConvention_WhenDeclaredInUnitAssembly`
+- **ID do Caso de Teste:** CT-104
+- **Nome:** Convencao valida nomes dos testes unitarios
+- **Objetivo:** Validar o cenario: Convencao valida nomes dos testes unitarios.
 - **Pre-condicoes:** assembly de testes unitarios carregado.
-- **Dados:** metodos com `[Fact]` ou `[Theory]`.
-- **Passos:** varrer metodos publicos declarados no assembly.
-- **Resultado esperado:** todos seguem o padrao `Assunto_Comportamento_WhenCondicao`.
+- **Entradas:**
+  1. metodos com `[Fact]` ou `[Theory]`.
+- **Passos para Execucao:**
+  1. varrer metodos publicos declarados no assembly.
+- **Resultado Esperado:** todos seguem o padrao `Assunto_Comportamento_WhenCondicao`.
+- **Criterios de Sucesso:** todos seguem o padrao `Assunto_Comportamento_WhenCondicao`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### IntegrationTests - API Endpoints
+### Modulo de IntegrationTests - API Endpoints
 
 **Arquivo:** `tests/TransparenciaPE.IntegrationTests/ApiEndpointsTests.cs`
 
-#### CT-105 - Endpoint de resumo retorna HTTP 200
+#### 1. Endpoint de resumo retorna HTTP 200
 
-- **Metodo:** `GetResumo_ReturnsOkStatus_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-105
+- **Nome:** Endpoint de resumo retorna HTTP 200
+- **Objetivo:** Validar o cenario: Endpoint de resumo retorna HTTP 200.
 - **Pre-condicoes:** `CustomWebApplicationFactory` sobe API em ambiente `Testing`.
-- **Dados:** `GET /api/v1/dashboard/resumo?ano=2025`.
-- **Passos:** executar requisicao via `HttpClient`.
-- **Resultado esperado:** status `200 OK`.
+- **Entradas:**
+  1. `GET /api/v1/dashboard/resumo?ano=2025`.
+- **Passos para Execucao:**
+  1. executar requisicao via `HttpClient`.
+- **Resultado Esperado:** status `200 OK`.
+- **Criterios de Sucesso:** status `200 OK`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-106 - Endpoint de resumo retorna JSON
+#### 2. Endpoint de resumo retorna JSON
 
-- **Metodo:** `GetResumo_ReturnsJsonContentType_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-106
+- **Nome:** Endpoint de resumo retorna JSON
+- **Objetivo:** Validar o cenario: Endpoint de resumo retorna JSON.
 - **Pre-condicoes:** API de teste ativa.
-- **Dados:** mesma rota de resumo.
-- **Passos:** executar requisicao e ler header `Content-Type`.
-- **Resultado esperado:** media type `application/json`.
+- **Entradas:**
+  1. mesma rota de resumo.
+- **Passos para Execucao:**
+  1. executar requisicao e ler header `Content-Type`.
+- **Resultado Esperado:** media type `application/json`.
+- **Criterios de Sucesso:** media type `application/json`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-107 - Endpoint de resumo retorna payload de KPIs
+#### 3. Endpoint de resumo retorna payload de KPIs
 
-- **Metodo:** `GetResumo_ReturnsDashboardResumoPayload_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-107
+- **Nome:** Endpoint de resumo retorna payload de KPIs
+- **Objetivo:** Validar o cenario: Endpoint de resumo retorna payload de KPIs.
 - **Pre-condicoes:** `FakeDashboardService` retorna dados deterministas.
-- **Dados:** ano 2025.
-- **Passos:** desserializar resposta para `DashboardResumoDto`.
-- **Resultado esperado:** `TotalEmpenhado=1000` e `PercentualExecutado=60`.
+- **Entradas:**
+  1. ano 2025.
+- **Passos para Execucao:**
+  1. desserializar resposta para `DashboardResumoDto`.
+- **Resultado Esperado:** `TotalEmpenhado=1000` e `PercentualExecutado=60`.
+- **Criterios de Sucesso:** `TotalEmpenhado=1000` e `PercentualExecutado=60`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-108 - Endpoint de evolucao retorna HTTP 200
+#### 4. Endpoint de evolucao retorna HTTP 200
 
-- **Metodo:** `GetEvolucao_ReturnsOkStatus_WhenCodigoOrgaoIsProvided`
+- **ID do Caso de Teste:** CT-108
+- **Nome:** Endpoint de evolucao retorna HTTP 200
+- **Objetivo:** Validar o cenario: Endpoint de evolucao retorna HTTP 200.
 - **Pre-condicoes:** API de teste ativa.
-- **Dados:** `GET /api/v1/dashboard/evolucao?codigoOrgao=001&ano=2025`.
-- **Passos:** executar requisicao.
-- **Resultado esperado:** status `200 OK`.
+- **Entradas:**
+  1. `GET /api/v1/dashboard/evolucao?codigoOrgao=001&ano=2025`.
+- **Passos para Execucao:**
+  1. executar requisicao.
+- **Resultado Esperado:** status `200 OK`.
+- **Criterios de Sucesso:** status `200 OK`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-109 - Endpoint de evolucao retorna drill-down
+#### 5. Endpoint de evolucao retorna drill-down
 
-- **Metodo:** `GetEvolucao_ReturnsDrillDownPayload_WhenCodigoOrgaoIsProvided`
+- **ID do Caso de Teste:** CT-109
+- **Nome:** Endpoint de evolucao retorna drill-down
+- **Objetivo:** Validar o cenario: Endpoint de evolucao retorna drill-down.
 - **Pre-condicoes:** `FakeDashboardService` retorna um item de drill-down.
-- **Dados:** `codigoOrgao=001`.
-- **Passos:** desserializar resposta para `DrillDownDto`.
-- **Resultado esperado:** `CodigoOrgao="001"` e `Itens` contem um item.
+- **Entradas:**
+  1. `codigoOrgao=001`.
+- **Passos para Execucao:**
+  1. desserializar resposta para `DrillDownDto`.
+- **Resultado Esperado:** `CodigoOrgao="001"` e `Itens` contem um item.
+- **Criterios de Sucesso:** `CodigoOrgao="001"` e `Itens` contem um item.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-110 - Pesquisa global retorna 400 para termo vazio
+#### 6. Pesquisa global retorna 400 para termo vazio
 
-- **Metodo:** `PesquisaGlobal_ReturnsBadRequestStatus_WhenTermoIsEmpty`
+- **ID do Caso de Teste:** CT-110
+- **Nome:** Pesquisa global retorna 400 para termo vazio
+- **Objetivo:** Validar o cenario: Pesquisa global retorna 400 para termo vazio.
 - **Pre-condicoes:** `FakePesquisaService` rejeita termo vazio.
-- **Dados:** `GET /api/v1/pesquisa/global?termo=`.
-- **Passos:** executar requisicao.
-- **Resultado esperado:** status `400 BadRequest`.
+- **Entradas:**
+  1. `GET /api/v1/pesquisa/global?termo=`.
+- **Passos para Execucao:**
+  1. executar requisicao.
+- **Resultado Esperado:** status `400 BadRequest`.
+- **Criterios de Sucesso:** status `400 BadRequest`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-111 - Pesquisa global retorna payload de erro
+#### 7. Pesquisa global retorna payload de erro
 
-- **Metodo:** `PesquisaGlobal_ReturnsErrorPayload_WhenTermoIsEmpty`
+- **ID do Caso de Teste:** CT-111
+- **Nome:** Pesquisa global retorna payload de erro
+- **Objetivo:** Validar o cenario: Pesquisa global retorna payload de erro.
 - **Pre-condicoes:** rota valida a falha do termo vazio.
-- **Dados:** resposta de erro da API.
-- **Passos:** parsear corpo como JSON e verificar `message` ou `errors`.
-- **Resultado esperado:** payload possui mensagem ou erros de validacao.
+- **Entradas:**
+  1. resposta de erro da API.
+- **Passos para Execucao:**
+  1. parsear corpo como JSON e verificar `message` ou `errors`.
+- **Resultado Esperado:** payload possui mensagem ou erros de validacao.
+- **Criterios de Sucesso:** payload possui mensagem ou erros de validacao.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-112 - Exportacao CSV retorna HTTP 200
+#### 8. Exportacao CSV retorna HTTP 200
 
-- **Metodo:** `ExportarCsv_ReturnsOkStatus_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-112
+- **Nome:** Exportacao CSV retorna HTTP 200
+- **Objetivo:** Validar o cenario: Exportacao CSV retorna HTTP 200.
 - **Pre-condicoes:** `FakePesquisaService` retorna bytes CSV.
-- **Dados:** `GET /api/v1/exportar/csv?ano=2025`.
-- **Passos:** executar requisicao.
-- **Resultado esperado:** status `200 OK`.
+- **Entradas:**
+  1. `GET /api/v1/exportar/csv?ano=2025`.
+- **Passos para Execucao:**
+  1. executar requisicao.
+- **Resultado Esperado:** status `200 OK`.
+- **Criterios de Sucesso:** status `200 OK`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-113 - Exportacao CSV retorna content-type correto
+#### 9. Exportacao CSV retorna content-type correto
 
-- **Metodo:** `ExportarCsv_ReturnsCsvContentType_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-113
+- **Nome:** Exportacao CSV retorna content-type correto
+- **Objetivo:** Validar o cenario: Exportacao CSV retorna content-type correto.
 - **Pre-condicoes:** API de teste ativa.
-- **Dados:** rota de exportacao CSV.
-- **Passos:** ler `Content-Type`.
-- **Resultado esperado:** media type `text/csv`.
+- **Entradas:**
+  1. rota de exportacao CSV.
+- **Passos para Execucao:**
+  1. ler `Content-Type`.
+- **Resultado Esperado:** media type `text/csv`.
+- **Criterios de Sucesso:** media type `text/csv`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-114 - Exportacao CSV retorna cabecalho
+#### 10. Exportacao CSV retorna cabecalho
 
-- **Metodo:** `ExportarCsv_ReturnsCsvHeader_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-114
+- **Nome:** Exportacao CSV retorna cabecalho
+- **Objetivo:** Validar o cenario: Exportacao CSV retorna cabecalho.
 - **Pre-condicoes:** servico fake retorna CSV deterministico.
-- **Dados:** ano 2025.
-- **Passos:** ler conteudo como string.
-- **Resultado esperado:** conteudo inicia com `NumeroEmpenho;Orgao;Valor`.
+- **Entradas:**
+  1. ano 2025.
+- **Passos para Execucao:**
+  1. ler conteudo como string.
+- **Resultado Esperado:** conteudo inicia com `NumeroEmpenho;Orgao;Valor`.
+- **Criterios de Sucesso:** conteudo inicia com `NumeroEmpenho;Orgao;Valor`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-#### CT-115 - Exportacao CSV retorna nome de arquivo
+#### 11. Exportacao CSV retorna nome de arquivo
 
-- **Metodo:** `ExportarCsv_ReturnsCsvFileName_WhenAnoIsProvided`
+- **ID do Caso de Teste:** CT-115
+- **Nome:** Exportacao CSV retorna nome de arquivo
+- **Objetivo:** Validar o cenario: Exportacao CSV retorna nome de arquivo.
 - **Pre-condicoes:** resposta de arquivo gerada pelo controller.
-- **Dados:** chamada com ano 2025.
-- **Passos:** ler header `Content-Disposition`.
-- **Resultado esperado:** nome de arquivo contem `.csv`.
+- **Entradas:**
+  1. chamada com ano 2025.
+- **Passos para Execucao:**
+  1. ler header `Content-Disposition`.
+- **Resultado Esperado:** nome de arquivo contem `.csv`.
+- **Criterios de Sucesso:** nome de arquivo contem `.csv`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
-### Conventions - IntegrationTests
+### Modulo de Conventions - IntegrationTests
 
 **Arquivo:** `tests/TransparenciaPE.IntegrationTests/Conventions/TestNamingConventionTests.cs`
 
-#### CT-116 - Convencao valida nomes dos testes de integracao
+#### 1. Convencao valida nomes dos testes de integracao
 
-- **Metodo:** `TestMethods_FollowNamingConvention_WhenDeclaredInIntegrationAssembly`
+- **ID do Caso de Teste:** CT-116
+- **Nome:** Convencao valida nomes dos testes de integracao
+- **Objetivo:** Validar o cenario: Convencao valida nomes dos testes de integracao.
 - **Pre-condicoes:** assembly de integracao carregado.
-- **Dados:** metodos com `[Fact]` ou `[Theory]`.
-- **Passos:** varrer metodos publicos declarados no assembly.
-- **Resultado esperado:** todos seguem o padrao `Assunto_Comportamento_WhenCondicao`.
-
----
+- **Entradas:**
+  1. metodos com `[Fact]` ou `[Theory]`.
+- **Passos para Execucao:**
+  1. varrer metodos publicos declarados no assembly.
+- **Resultado Esperado:** todos seguem o padrao `Assunto_Comportamento_WhenCondicao`.
+- **Criterios de Sucesso:** todos seguem o padrao `Assunto_Comportamento_WhenCondicao`.
+- **Criterios de Falha:** O caso falha se o resultado observado divergir do esperado, se uma chamada obrigatoria nao ocorrer ou se ocorrer uma excecao inesperada.
 
 ## Observacoes de cobertura
 
