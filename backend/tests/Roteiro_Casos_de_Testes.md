@@ -1,5 +1,67 @@
 # Roteiro de Casos de Testes - TransparenciaPE Backend
 
+<style>
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+h2 {
+  font-size: 18px;
+  page-break-before: auto;
+}
+
+h3 {
+  font-size: 14px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 8px 0 14px;
+}
+
+th,
+td {
+  border: 1px solid #d0d7de;
+  padding: 4px 6px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+th {
+  background: #f6f8fa;
+}
+
+thead {
+  display: table-header-group;
+}
+
+tr {
+  page-break-inside: avoid;
+}
+
+code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+pre code {
+  white-space: pre-wrap;
+}
+</style>
+
 - **Projeto:** TransparenciaPE - API de Dados Fiscais do Estado de Pernambuco
 - **Disciplina:** Verificacao e Validacao de Software
 - **Tipos de Teste:** Testes unitarios e testes de integracao
@@ -78,7 +140,7 @@ Os projetos possuem testes de convencao que falham caso um metodo `[Fact]` ou `[
 ### Sumario por modulo - UnitTests
 
 | Modulo                                   | CTs | Execucoes | Observacao                         |
-| ---------------------------------------- | :-: | :-------: | ---------------------------------- |
+| ---------------------------------------- | :---: | :-------: | ---------------------------------- |
 | Helpers - CnpjHelper                     |  6  |    15     | 4 theories com `InlineData`        |
 | Helpers - McaspMapper                    |  6  |    14     | 5 theories com `InlineData`        |
 | Entities - Orcamento                     |  3  |     3     | -                                  |
@@ -101,7 +163,7 @@ Os projetos possuem testes de convencao que falham caso um metodo `[Fact]` ou `[
 ### Sumario por modulo - IntegrationTests
 
 | Modulo                             | CTs | Execucoes | Observacao                           |
-| ---------------------------------- | :-: | :-------: | ------------------------------------ |
+| ---------------------------------- | :---: | :-------: | ------------------------------------ |
 | ApiEndpoints                       | 11  |    11     | Contratos HTTP usando `TestServer`   |
 | Conventions - TestNamingConvention |  1  |     1     | Valida nomes dos testes de integracao |
 | **Total**                          | 12  |    12     | -                                    |
