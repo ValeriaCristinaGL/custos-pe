@@ -12,7 +12,12 @@ import {
 } from 'recharts'
 import { useEffect, useRef, useState } from 'react'
 import { TrendingUp, Calendar, Info, Download } from 'lucide-react'
-import * as XLSX from 'xlsx'
+import {
+  exportToExcel,
+  exportToPdf,
+  type ExportTable,
+} from '../services/ExportService'
+import { toPng } from 'html-to-image'
 import { DashboardHeader } from './Dashboard'
 import { KpiCard } from '../components/KpiCard'
 import {
@@ -75,6 +80,7 @@ export function AnaliseTemporal() {
     ExportOption[]
   >([])
   const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -129,7 +135,7 @@ export function AnaliseTemporal() {
     setSelectedExportOptions([])
   }
 
-  function handleExportExcel() {
+  async function handleExport(format: 'excel' | 'pdf') {
     if (
       selectedExportOptions.length === 0 ||
       selectedExportYears.length === 0
@@ -137,160 +143,173 @@ export function AnaliseTemporal() {
       return
     }
 
-    const rows: Array<Array<string | number>> = []
-    const currencyCells: string[] = []
-    const currencyFormat = '"R$" #,##0.00'
+    setIsExporting(true)
+    try {
+      const tables: ExportTable[] = []
 
-    const addEmptyLine = () => {
-      rows.push([])
-    }
-
-    const addTitle = (title: string) => {
-      rows.push([title])
-    }
-
-    const addCurrencyCell = (rowIndex: number, columnIndex: number) => {
-      const cellAddress = XLSX.utils.encode_cell({
-        r: rowIndex,
-        c: columnIndex,
-      })
-
-      currencyCells.push(cellAddress)
-    }
-
-    if (selectedExportOptions.includes('indicadores')) {
-      addTitle('Indicadores principais')
-      rows.push(['Indicador', 'Valor', 'Descrição', 'Ano'])
-
-      selectedExportYears.forEach((year) => {
-        rows.push([
-          'Crescimento anual médio',
-          '47,9%',
-          'Média dos últimos 5 anos',
-          year,
-        ])
-
-        rows.push(['Pico sazonal', 'Janeiro', 'Índice sazonal de 116%', year])
-
-        rows.push(['Tendência 2026', '+3,4%', 'Projeção de crescimento', year])
-      })
-
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('despesasTrimestrais')) {
-      addTitle('Despesas Trimestrais')
-      rows.push(['Trimestre', 'Despesa', 'Ano'])
-
-      selectedExportYears.forEach((year) => {
-        const yearKey = `ano${year}`
-
-        MOCK_QUARTERLY.forEach((item) => {
-          const value = Number(item[yearKey as keyof typeof item] ?? 0)
-
-          if (value > 0) {
-            const rowIndex = rows.length
-
-            rows.push([item.trimestre, value * 1_000_000, year])
-
-            addCurrencyCell(rowIndex, 1)
-          }
+      if (selectedExportOptions.includes('indicadores')) {
+        const data: Record<string, any>[] = []
+        selectedExportYears.forEach((year) => {
+          data.push({ indicador: 'Crescimento anual médio', valor: '47,9%', descricao: 'Média dos últimos 5 anos', ano: year })
+          data.push({ indicador: 'Pico sazonal', valor: 'Janeiro', descricao: 'Índice sazonal de 116%', ano: year })
+          data.push({ indicador: 'Tendência 2026', valor: '+3,4%', descricao: 'Projeção de crescimento', ano: year })
         })
-      })
 
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('crescimentoAnual')) {
-      addTitle('Crescimento anual')
-      rows.push(['Ano', 'Crescimento'])
-
-      MOCK_ANNUAL_GROWTH.forEach((item) => {
-        if (selectedExportYears.includes(item.ano as unknown as ExportYear)) {
-          rows.push([item.ano, `${item.valor}%`])
-        }
-      })
-
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('sazonalidade')) {
-      addTitle('Índice de sazonalidade')
-      rows.push(['Mês', 'Índice', 'Ano'])
-
-      selectedExportYears.forEach((year) => {
-        MOCK_SEASONALITY.forEach((item) => {
-          rows.push([item.mes, item.indice, year])
+        tables.push({
+          title: 'Indicadores Principais',
+          columns: [
+            { header: 'Indicador', key: 'indicador', width: 25 },
+            { header: 'Valor', key: 'valor', width: 15 },
+            { header: 'Descrição', key: 'descricao', width: 35 },
+            { header: 'Ano', key: 'ano', width: 10 },
+          ],
+          data,
         })
-      })
-
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('comparativoMensal')) {
-      addTitle('Comparativo mensal por ano')
-      rows.push(['Mês', 'Despesa', 'Ano'])
-
-      selectedExportYears.forEach((year) => {
-        const yearKey = `ano${year}`
-
-        MOCK_MONTHLY_COMPARISON.forEach((item) => {
-          const value = Number(item[yearKey as keyof typeof item] ?? 0)
-
-          if (value > 0) {
-            const rowIndex = rows.length
-
-            rows.push([item.mes, value * 1_000_000, year])
-
-            addCurrencyCell(rowIndex, 1)
-          }
-        })
-      })
-
-      addEmptyLine()
-    }
-
-    const workbook = XLSX.utils.book_new()
-    const worksheet = XLSX.utils.aoa_to_sheet(rows)
-
-    currencyCells.forEach((cellAddress) => {
-      if (worksheet[cellAddress]) {
-        worksheet[cellAddress].t = 'n'
-        worksheet[cellAddress].z = currencyFormat
       }
-    })
 
-    worksheet['!cols'] = [{ wch: 28 }, { wch: 22 }, { wch: 36 }, { wch: 12 }]
+      if (selectedExportOptions.includes('despesasTrimestrais')) {
+        const data: Record<string, any>[] = []
+        selectedExportYears.forEach((year) => {
+          const yearKey = `ano${year}`
+          MOCK_QUARTERLY.forEach((item) => {
+            const value = Number(item[yearKey as keyof typeof item] ?? 0)
+            if (value > 0) {
+              data.push({ trimestre: item.trimestre, despesa: value * 1_000_000, ano: year })
+            }
+          })
+        })
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório')
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-despesas-trimestrais')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
 
-    XLSX.writeFile(
-      workbook,
-      `analise-temporal-${selectedExportYears.join('-')}.xlsx`
-    )
+        tables.push({
+          title: 'Despesas Trimestrais',
+          columns: [
+            { header: 'Trimestre', key: 'trimestre', width: 20 },
+            { header: 'Despesa', key: 'despesa', width: 30, isCurrency: true },
+            { header: 'Ano', key: 'ano', width: 15 },
+          ],
+          data,
+          imageBase64,
+        })
+      }
+
+      if (selectedExportOptions.includes('crescimentoAnual')) {
+        const data: Record<string, any>[] = []
+        MOCK_ANNUAL_GROWTH.forEach((item) => {
+          if (selectedExportYears.includes(item.ano as unknown as ExportYear)) {
+            data.push({ ano: item.ano, crescimento: item.valor })
+          }
+        })
+
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-crescimento-anual')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
+
+        tables.push({
+          title: 'Crescimento Anual',
+          columns: [
+            { header: 'Ano', key: 'ano', width: 20 },
+            { header: 'Crescimento', key: 'crescimento', width: 20, isPercentage: true },
+          ],
+          data,
+          imageBase64,
+        })
+      }
+
+      if (selectedExportOptions.includes('sazonalidade')) {
+        const data: Record<string, any>[] = []
+        selectedExportYears.forEach((year) => {
+          MOCK_SEASONALITY.forEach((item) => {
+            data.push({ mes: item.mes, indice: item.indice, ano: year })
+          })
+        })
+
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-sazonalidade')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
+
+        tables.push({
+          title: 'Índice de Sazonalidade',
+          columns: [
+            { header: 'Mês', key: 'mes', width: 20 },
+            { header: 'Índice', key: 'indice', width: 15 },
+            { header: 'Ano', key: 'ano', width: 15 },
+          ],
+          data,
+          imageBase64,
+        })
+      }
+
+      if (selectedExportOptions.includes('comparativoMensal')) {
+        const data: Record<string, any>[] = []
+        selectedExportYears.forEach((year) => {
+          const yearKey = `ano${year}`
+          MOCK_MONTHLY_COMPARISON.forEach((item) => {
+            const value = Number(item[yearKey as keyof typeof item] ?? 0)
+            if (value > 0) {
+              data.push({ mes: item.mes, despesa: value * 1_000_000, ano: year })
+            }
+          })
+        })
+
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-comparativo-mensal')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
+
+        tables.push({
+          title: 'Comparativo Mensal',
+          columns: [
+            { header: 'Mês', key: 'mes', width: 20 },
+            { header: 'Despesa', key: 'despesa', width: 30, isCurrency: true },
+            { header: 'Ano', key: 'ano', width: 15 },
+          ],
+          data,
+          imageBase64,
+        })
+      }
+
+      const filename = `analise-temporal-${selectedExportYears.join('-')}`
+      if (format === 'excel') {
+        await exportToExcel(filename, tables)
+      } else {
+        await exportToPdf(filename, tables)
+      }
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   const infoTexts = {
     crescimentoAnualMedio:
-      'Mostra quanto as despesas cresceram, em média, nos últimos anos. Esse indicador ajuda a entender se os gastos estão aumentando, diminuindo ou ficando mais estáveis ao longo do tempo.',
+      'Média de crescimento das despesas nos últimos anos.',
 
     picoSazonal:
-      'Mostra o mês em que as despesas costumam ser mais altas. Isso ajuda a identificar períodos do ano em que o governo geralmente gasta mais.',
+      'Mês com histórico de maiores despesas.',
 
     tendencia2026:
-      'Mostra uma estimativa de como as despesas podem se comportar em 2026. Essa projeção ajuda a perceber se a tendência é de crescimento, queda ou estabilidade nos gastos.',
+      'Projeção do comportamento das despesas para 2026.',
 
     despesasTrimestrais:
-      'Mostra o total de despesas por trimestre. Cada trimestre representa um período de três meses, facilitando a comparação dos gastos ao longo do ano.',
+      'Total de despesas acumuladas por trimestre.',
 
     crescimentoAnual:
-      'Mostra a variação das despesas de um ano para o outro. Esse gráfico ajuda a entender em quais anos os gastos cresceram mais ou tiveram redução.',
+      'Variação percentual das despesas entre os anos.',
 
     indiceSazonalidade:
-      'Mostra em quais meses as despesas costumam ficar acima ou abaixo da média. O índice 100 representa a média mensal: valores acima de 100 indicam gastos maiores que a média, e valores abaixo indicam gastos menores.',
+      'Comportamento mensal em relação à média do ano (Base 100).',
 
     comparativoMensalPorAno:
-      'Compara as despesas mês a mês entre os anos apresentados. Esse gráfico ajuda a ver se, em determinado mês, o gasto foi maior ou menor em relação ao mesmo período de outro ano.',
+      'Comparação das despesas mensais entre diferentes anos.',
   }
 
   return (
@@ -422,18 +441,35 @@ export function AnaliseTemporal() {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleExportExcel}
-            disabled={
-              selectedExportOptions.length === 0 ||
-              selectedExportYears.length === 0
-            }
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#142F4B] px-5 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
-          >
-            <Download className="h-4 w-4" />
-            Exportar
-          </button>
+            {/* Botões Exportar */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleExport('excel')}
+                disabled={
+                  isExporting ||
+                  selectedExportOptions.length === 0 ||
+                  selectedExportYears.length === 0
+                }
+                className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#142F4B] px-4 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                <Download className="h-4 w-4" />
+                {isExporting ? 'Gerando...' : 'Excel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExport('pdf')}
+                disabled={
+                  isExporting ||
+                  selectedExportOptions.length === 0 ||
+                  selectedExportYears.length === 0
+                }
+                className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#008C6C] px-4 text-sm font-semibold text-white transition hover:bg-[#007258] disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                <Download className="h-4 w-4" />
+                {isExporting ? 'Gerando...' : 'PDF'}
+              </button>
+            </div>
         </div>
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -475,7 +511,7 @@ export function AnaliseTemporal() {
         {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Despesas Trimestrais */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div id="chart-despesas-trimestrais" className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-1">
               <div className="mb-1 flex items-center gap-2">
                 <h3 className="font-semibold text-gray-900">
@@ -491,7 +527,7 @@ export function AnaliseTemporal() {
             <p className="text-sm text-gray-500 mb-4">
               Evolução trimestral dos últimos 2 anos (em milhões R$)
             </p>
-            <div className="h-60">
+            <div className="h-60 bg-white">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={MOCK_QUARTERLY}
@@ -547,7 +583,7 @@ export function AnaliseTemporal() {
           </div>
 
           {/* Crescimento Anual */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div id="chart-crescimento-anual" className="bg-white rounded-xl border border-gray-200 p-6">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-gray-900">
@@ -563,7 +599,7 @@ export function AnaliseTemporal() {
                 Taxa de crescimento da despesa total por ano
               </p>
             </div>
-            <div className="h-60">
+            <div className="h-60 bg-white">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={MOCK_ANNUAL_GROWTH}
@@ -610,7 +646,7 @@ export function AnaliseTemporal() {
         </div>
 
         {/* Índice de Sazonalidade */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div id="chart-sazonalidade" className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900">
@@ -627,7 +663,7 @@ export function AnaliseTemporal() {
               Padrão de gastos ao longo do ano (índice 100 = média mensal)
             </p>
           </div>
-          <div className="h-50 mt-4">
+          <div className="h-50 mt-4 bg-white">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={MOCK_SEASONALITY}
@@ -670,7 +706,7 @@ export function AnaliseTemporal() {
         </div>
 
         {/* Comparativo Mensal por Ano */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div id="chart-comparativo-mensal" className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900">
@@ -686,7 +722,7 @@ export function AnaliseTemporal() {
               Despesas mensais dos últimos 2 anos (em milhões R$)
             </p>
           </div>
-          <div className="h-70 mt-4">
+          <div className="h-70 mt-4 bg-white">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={MOCK_MONTHLY_COMPARISON}

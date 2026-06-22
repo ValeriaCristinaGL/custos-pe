@@ -32,8 +32,12 @@ import {
   type DashboardResumo,
   type ComparativoOrgaos,
 } from '../api'
-import * as XLSX from 'xlsx'
-
+import {
+  exportToExcel,
+  exportToPdf,
+  type ExportTable,
+} from '../services/ExportService'
+import { toPng } from 'html-to-image'
 type ExportYear = 2026 | 2025 | 2024
 
 const exportYears: ExportYear[] = [2026, 2025, 2024]
@@ -74,6 +78,7 @@ export function PainelGeral() {
     ExportOption[]
   >([])
   const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -166,7 +171,7 @@ export function PainelGeral() {
   const currentKey = `ano${selectedYear}`
   const previousKey = `ano${selectedYear - 1}`
 
-  function handleExportExcel() {
+  async function handleExport(format: 'excel' | 'pdf') {
     if (
       !resumo ||
       selectedExportOptions.length === 0 ||
@@ -175,142 +180,132 @@ export function PainelGeral() {
       return
     }
 
-    const rows: Array<Array<string | number>> = []
-    const currencyCells: string[] = []
-    const currencyFormat = '"R$" #,##0.00'
+    setIsExporting(true)
+    try {
+      const tables: ExportTable[] = []
 
-    const addEmptyLine = () => {
-      rows.push([])
-    }
-
-    const addTitle = (title: string) => {
-      rows.push([title])
-    }
-
-    const addCurrencyCell = (rowIndex: number, columnIndex: number) => {
-      const cellAddress = XLSX.utils.encode_cell({
-        r: rowIndex,
-        c: columnIndex,
-      })
-
-      currencyCells.push(cellAddress)
-    }
-
-    if (selectedExportOptions.includes('resumo')) {
-      addTitle('Resumo geral')
-      rows.push(['Indicador', 'Valor', 'Ano'])
-
-      selectedExportYears.forEach((year) => {
-        let rowIndex = rows.length
-        rows.push(['Despesa Total', resumo.totalEmpenhado, year])
-        addCurrencyCell(rowIndex, 1)
-
-        rowIndex = rows.length
-        rows.push(['Receita Total', resumo.totalLiquidado, year])
-        addCurrencyCell(rowIndex, 1)
-
-        rowIndex = rows.length
-        rows.push(['Investimentos', resumo.totalPago, year])
-        addCurrencyCell(rowIndex, 1)
-      })
-
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('evolucaoMensal')) {
-      addTitle('Evolução mensal')
-      rows.push(['Mês', 'Despesa', 'Ano'])
-
-      selectedExportYears.forEach((year) => {
-        const currentKeyByYear = `ano${year}`
-
-        monthlyData.forEach((item) => {
-          const value = Number(item[currentKeyByYear as keyof typeof item] ?? 0)
-          const rowIndex = rows.length
-
-          rows.push([item.mes, value * 1_000_000, year])
-
-          addCurrencyCell(rowIndex, 1)
+      if (selectedExportOptions.includes('resumo')) {
+        const data: Record<string, any>[] = []
+        selectedExportYears.forEach((year) => {
+          data.push({ indicador: 'Despesa Total', valor: resumo.totalEmpenhado, ano: year })
+          data.push({ indicador: 'Receita Total', valor: resumo.totalLiquidado, ano: year })
+          data.push({ indicador: 'Investimentos', valor: resumo.totalPago, ano: year })
         })
-      })
 
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('categorias')) {
-      addTitle('Categorias')
-      rows.push(['Categoria', 'Percentual', 'Ano'])
-
-      selectedExportYears.forEach((year) => {
-        categoryData.forEach((item) => {
-          rows.push([item.name, `${item.value}%`, year])
+        tables.push({
+          title: 'Resumo Geral',
+          columns: [
+            { header: 'Indicador', key: 'indicador', width: 30 },
+            { header: 'Valor', key: 'valor', width: 30, isCurrency: true },
+            { header: 'Ano', key: 'ano', width: 15 },
+          ],
+          data,
         })
-      })
-
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('orgaos')) {
-      addTitle('Órgãos')
-      rows.push([
-        'Posição',
-        'Sigla',
-        'Órgão',
-        'Código do Órgão',
-        'Total Empenhado',
-        'Total Liquidado',
-        'Total Pago',
-        'Ano',
-      ])
-
-      selectedExportYears.forEach((year) => {
-        topOrgaos.forEach((orgao, index) => {
-          const rowIndex = rows.length
-
-          rows.push([
-            index + 1,
-            orgao.siglaOrgao,
-            orgao.nomeOrgao,
-            orgao.codigoOrgao,
-            orgao.totalEmpenhado,
-            orgao.totalLiquidado,
-            orgao.totalPago,
-            year,
-          ])
-
-          addCurrencyCell(rowIndex, 4)
-          addCurrencyCell(rowIndex, 5)
-          addCurrencyCell(rowIndex, 6)
-        })
-      })
-
-      addEmptyLine()
-    }
-
-    const workbook = XLSX.utils.book_new()
-    const worksheet = XLSX.utils.aoa_to_sheet(rows)
-
-    currencyCells.forEach((cellAddress) => {
-      if (worksheet[cellAddress]) {
-        worksheet[cellAddress].t = 'n'
-        worksheet[cellAddress].z = currencyFormat
       }
-    })
 
-    worksheet['!cols'] = [
-      { wch: 18 },
-      { wch: 20 },
-      { wch: 45 },
-      { wch: 18 },
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 12 },
-    ]
+      if (selectedExportOptions.includes('evolucaoMensal')) {
+        const data: Record<string, any>[] = []
+        selectedExportYears.forEach((year) => {
+          const currentKeyByYear = `ano${year}`
+          monthlyData.forEach((item) => {
+            const value = Number(item[currentKeyByYear as keyof typeof item] ?? 0)
+            data.push({ mes: item.mes, valor: value * 1_000_000, ano: year })
+          })
+        })
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório')
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-evolucao-mensal')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
 
-    XLSX.writeFile(workbook, `custos-pe-${selectedExportYears.join('-')}.xlsx`)
+        tables.push({
+          title: 'Evolução Mensal',
+          columns: [
+            { header: 'Mês', key: 'mes', width: 20 },
+            { header: 'Despesa', key: 'valor', width: 30, isCurrency: true },
+            { header: 'Ano', key: 'ano', width: 15 },
+          ],
+          data,
+          imageBase64,
+        })
+      }
+
+      if (selectedExportOptions.includes('categorias')) {
+        const data: Record<string, any>[] = []
+        selectedExportYears.forEach((year) => {
+          categoryData.forEach((item) => {
+            data.push({ categoria: item.name, percentual: item.value, ano: year })
+          })
+        })
+
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-categorias')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
+
+        tables.push({
+          title: 'Categorias',
+          columns: [
+            { header: 'Categoria', key: 'categoria', width: 30 },
+            { header: 'Percentual', key: 'percentual', width: 20, isPercentage: true },
+            { header: 'Ano', key: 'ano', width: 15 },
+          ],
+          data,
+          imageBase64,
+        })
+      }
+
+      if (selectedExportOptions.includes('orgaos')) {
+        const data: Record<string, any>[] = []
+        selectedExportYears.forEach((year) => {
+          topOrgaos.forEach((orgao, index) => {
+            data.push({
+              posicao: index + 1,
+              sigla: orgao.siglaOrgao,
+              nome: orgao.nomeOrgao,
+              codigo: orgao.codigoOrgao,
+              empenhado: orgao.totalEmpenhado,
+              liquidado: orgao.totalLiquidado,
+              pago: orgao.totalPago,
+              ano: year,
+            })
+          })
+        })
+
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-orgaos')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
+
+        tables.push({
+          title: 'Órgãos',
+          columns: [
+            { header: 'Posição', key: 'posicao', width: 10 },
+            { header: 'Sigla', key: 'sigla', width: 15 },
+            { header: 'Órgão', key: 'nome', width: 45 },
+            { header: 'Código', key: 'codigo', width: 15 },
+            { header: 'Total Empenhado', key: 'empenhado', width: 25, isCurrency: true },
+            { header: 'Total Liquidado', key: 'liquidado', width: 25, isCurrency: true },
+            { header: 'Total Pago', key: 'pago', width: 25, isCurrency: true },
+            { header: 'Ano', key: 'ano', width: 10 },
+          ],
+          data,
+          imageBase64,
+        })
+      }
+
+      const filename = `custos-pe-${selectedExportYears.join('-')}`
+      if (format === 'excel') {
+        await exportToExcel(filename, tables)
+      } else {
+        await exportToPdf(filename, tables)
+      }
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   return (
@@ -463,19 +458,35 @@ export function PainelGeral() {
               )}
             </div>
 
-            {/* Botão Exportar */}
-            <button
-              type="button"
-              onClick={handleExportExcel}
-              disabled={
-                selectedExportOptions.length === 0 ||
-                selectedExportYears.length === 0
-              }
-              className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#142F4B] px-4 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
-            >
-              <Download className="h-4 w-4" />
-              Exportar
-            </button>
+            {/* Botões Exportar */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleExport('excel')}
+                disabled={
+                  isExporting ||
+                  selectedExportOptions.length === 0 ||
+                  selectedExportYears.length === 0
+                }
+                className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#142F4B] px-4 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                <Download className="h-4 w-4" />
+                {isExporting ? 'Gerando...' : 'Excel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExport('pdf')}
+                disabled={
+                  isExporting ||
+                  selectedExportOptions.length === 0 ||
+                  selectedExportYears.length === 0
+                }
+                className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#008C6C] px-4 text-sm font-semibold text-white transition hover:bg-[#007258] disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                <Download className="h-4 w-4" />
+                {isExporting ? 'Gerando...' : 'PDF'}
+              </button>
+            </div>
           </div>
         </div>
         {/* KPI Cards */}
@@ -485,7 +496,7 @@ export function PainelGeral() {
             value={formatCurrency(resumo.totalEmpenhado)}
             icon={<TrendingUp className="h-5 w-5" />}
             trend={{ value: '+ 7,5%', positive: true }}
-            info="Mostra quanto o governo se comprometeu a gastar no período selecionado. Esse valor inclui despesas planejadas ou já registradas, mas nem sempre significa que o dinheiro já foi pago."
+            info="Total de despesas empenhadas (comprometidas) no período selecionado."
             subtitle="vs ano anterior"
           />
           <KpiCard
@@ -493,7 +504,7 @@ export function PainelGeral() {
             value={formatCurrency(resumo.totalLiquidado)}
             icon={<DollarSign className="h-5 w-5" />}
             trend={{ value: '+ 7,5%', positive: true }}
-            info="Mostra quanto o governo arrecadou ou registrou como entrada de dinheiro no período selecionado. Esse valor ajuda a entender os recursos disponíveis para manter serviços e realizar ações públicas."
+            info="Total arrecadado pelo governo no período selecionado."
             subtitle="vs ano anterior"
           />
           <KpiCard
@@ -501,7 +512,7 @@ export function PainelGeral() {
             value={formatCurrency(resumo.totalPago)}
             icon={<PiggyBank className="h-5 w-5" />}
             trend={{ value: '+ 7,5%', positive: true }}
-            info="Mostra quanto foi destinado para melhorias e ações que podem gerar benefícios para a população, como obras, infraestrutura, equipamentos, tecnologia, saúde, educação e outros projetos públicos."
+            info="Total destinado a obras, infraestrutura, saúde, educação e outros projetos públicos."
             subtitle="vs ano anterior"
           />
         </div>
@@ -509,7 +520,7 @@ export function PainelGeral() {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* Evolução Mensal */}
-          <div className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6">
+          <div id="chart-evolucao-mensal" className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-1">
               <div>
                 <div className="flex items-center gap-2">
@@ -527,10 +538,7 @@ export function PainelGeral() {
                     </button>
 
                     <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-64 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                      Mostra como as despesas mudaram mês a mês. A linha do ano
-                      atual permite acompanhar a evolução dos gastos ao longo do
-                      tempo, enquanto a linha do ano anterior ajuda a comparar
-                      se os valores estão maiores, menores ou parecidos.
+                      Acompanhamento da evolução mensal dos gastos e comparação direta com o ano anterior.
                       <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
                     </div>
                   </div>
@@ -540,7 +548,7 @@ export function PainelGeral() {
                 </p>
               </div>
             </div>
-            <div className="h-70 mt-4">
+            <div className="h-70 mt-4 bg-white">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={monthlyData}
@@ -607,7 +615,7 @@ export function PainelGeral() {
           </div>
 
           {/* Distribuição por Categorias */}
-          <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
+          <div id="chart-categorias" className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-1">
               <div>
                 <div className="flex items-center gap-2">
@@ -625,10 +633,7 @@ export function PainelGeral() {
                     </button>
 
                     <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-64 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                      Mostra como as despesas estão divididas entre as
-                      principais categorias. Cada parte do gráfico representa
-                      uma área de gasto, ajudando a entender onde está a maior
-                      concentração dos recursos.
+                      Composição das despesas dividida por categoria, evidenciando a concentração dos recursos.
                       <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
                     </div>
                   </div>
@@ -638,7 +643,7 @@ export function PainelGeral() {
                 </p>
               </div>
             </div>
-            <div className="h-50 mt-4">
+            <div className="h-50 mt-4 bg-white">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -690,7 +695,7 @@ export function PainelGeral() {
         </div>
 
         {/* Maiores Órgãos por Despesa */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div id="chart-orgaos" className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="mb-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900">
@@ -707,9 +712,7 @@ export function PainelGeral() {
                 </button>
 
                 <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-72 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                  Mostra os órgãos públicos com maior volume de despesas no ano
-                  selecionado. Esse gráfico ajuda a identificar quais áreas
-                  concentram mais gastos dentro do orçamento.
+                  Ranking dos órgãos com maior volume de despesas dentro do orçamento.
                   <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
                 </div>
               </div>
@@ -718,7 +721,7 @@ export function PainelGeral() {
               Top 10 órgão com maior volume de despesas no ano atual
             </p>
           </div>
-          <div className="h-95 mt-4">
+          <div className="h-95 mt-4 bg-white">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={orgaoBars}
