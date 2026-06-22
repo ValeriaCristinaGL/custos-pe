@@ -185,11 +185,23 @@ export function PainelGeral() {
       const tables: ExportTable[] = []
 
       if (selectedExportOptions.includes('resumo')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         selectedExportYears.forEach((year) => {
-          data.push({ indicador: 'Despesa Total', valor: resumo.totalEmpenhado, ano: year })
-          data.push({ indicador: 'Receita Total', valor: resumo.totalLiquidado, ano: year })
-          data.push({ indicador: 'Investimentos', valor: resumo.totalPago, ano: year })
+          data.push({
+            indicador: 'Despesa Total',
+            valor: resumo.totalEmpenhado,
+            ano: year,
+          })
+          data.push({
+            indicador: 'Receita Total',
+            valor: resumo.totalLiquidado,
+            ano: year,
+          })
+          data.push({
+            indicador: 'Investimentos',
+            valor: resumo.totalPago,
+            ano: year,
+          })
         })
 
         tables.push({
@@ -204,11 +216,13 @@ export function PainelGeral() {
       }
 
       if (selectedExportOptions.includes('evolucaoMensal')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         selectedExportYears.forEach((year) => {
           const currentKeyByYear = `ano${year}`
           monthlyData.forEach((item) => {
-            const value = Number(item[currentKeyByYear as keyof typeof item] ?? 0)
+            const value = Number(
+              item[currentKeyByYear as keyof typeof item] ?? 0
+            )
             data.push({ mes: item.mes, valor: value * 1_000_000, ano: year })
           })
         })
@@ -216,7 +230,10 @@ export function PainelGeral() {
         let imageBase64: string | undefined
         const element = document.getElementById('chart-evolucao-mensal')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
@@ -232,24 +249,36 @@ export function PainelGeral() {
       }
 
       if (selectedExportOptions.includes('categorias')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         selectedExportYears.forEach((year) => {
           categoryData.forEach((item) => {
-            data.push({ categoria: item.name, percentual: item.value, ano: year })
+            data.push({
+              categoria: item.name,
+              percentual: item.value,
+              ano: year,
+            })
           })
         })
 
         let imageBase64: string | undefined
         const element = document.getElementById('chart-categorias')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
           title: 'Categorias',
           columns: [
             { header: 'Categoria', key: 'categoria', width: 30 },
-            { header: 'Percentual', key: 'percentual', width: 20, isPercentage: true },
+            {
+              header: 'Percentual',
+              key: 'percentual',
+              width: 20,
+              isPercentage: true,
+            },
             { header: 'Ano', key: 'ano', width: 15 },
           ],
           data,
@@ -258,7 +287,7 @@ export function PainelGeral() {
       }
 
       if (selectedExportOptions.includes('orgaos')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         selectedExportYears.forEach((year) => {
           topOrgaos.forEach((orgao, index) => {
             data.push({
@@ -277,7 +306,10 @@ export function PainelGeral() {
         let imageBase64: string | undefined
         const element = document.getElementById('chart-orgaos')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
@@ -287,8 +319,18 @@ export function PainelGeral() {
             { header: 'Sigla', key: 'sigla', width: 15 },
             { header: 'Órgão', key: 'nome', width: 45 },
             { header: 'Código', key: 'codigo', width: 15 },
-            { header: 'Total Empenhado', key: 'empenhado', width: 25, isCurrency: true },
-            { header: 'Total Liquidado', key: 'liquidado', width: 25, isCurrency: true },
+            {
+              header: 'Total Empenhado',
+              key: 'empenhado',
+              width: 25,
+              isCurrency: true,
+            },
+            {
+              header: 'Total Liquidado',
+              key: 'liquidado',
+              width: 25,
+              isCurrency: true,
+            },
             { header: 'Total Pago', key: 'pago', width: 25, isCurrency: true },
             { header: 'Ano', key: 'ano', width: 10 },
           ],
@@ -520,7 +562,10 @@ export function PainelGeral() {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* Evolução Mensal */}
-          <div id="chart-evolucao-mensal" className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6">
+          <div
+            id="chart-evolucao-mensal"
+            className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6"
+          >
             <div className="flex items-center justify-between mb-1">
               <div>
                 <div className="flex items-center gap-2">
@@ -538,7 +583,8 @@ export function PainelGeral() {
                     </button>
 
                     <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-64 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                      Acompanhamento da evolução mensal dos gastos e comparação direta com o ano anterior.
+                      Acompanhamento da evolução mensal dos gastos e comparação
+                      direta com o ano anterior.
                       <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
                     </div>
                   </div>
@@ -615,7 +661,10 @@ export function PainelGeral() {
           </div>
 
           {/* Distribuição por Categorias */}
-          <div id="chart-categorias" className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
+          <div
+            id="chart-categorias"
+            className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6"
+          >
             <div className="flex items-center justify-between mb-1">
               <div>
                 <div className="flex items-center gap-2">
@@ -633,7 +682,8 @@ export function PainelGeral() {
                     </button>
 
                     <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-64 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                      Composição das despesas dividida por categoria, evidenciando a concentração dos recursos.
+                      Composição das despesas dividida por categoria,
+                      evidenciando a concentração dos recursos.
                       <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
                     </div>
                   </div>
@@ -695,7 +745,10 @@ export function PainelGeral() {
         </div>
 
         {/* Maiores Órgãos por Despesa */}
-        <div id="chart-orgaos" className="bg-white rounded-xl border border-gray-200 p-6">
+        <div
+          id="chart-orgaos"
+          className="bg-white rounded-xl border border-gray-200 p-6"
+        >
           <div className="mb-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900">
@@ -712,7 +765,8 @@ export function PainelGeral() {
                 </button>
 
                 <div className="pointer-events-none absolute left-1/2 top-6 z-50 w-72 -translate-x-1/2 rounded-lg bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                  Ranking dos órgãos com maior volume de despesas dentro do orçamento.
+                  Ranking dos órgãos com maior volume de despesas dentro do
+                  orçamento.
                   <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900" />
                 </div>
               </div>

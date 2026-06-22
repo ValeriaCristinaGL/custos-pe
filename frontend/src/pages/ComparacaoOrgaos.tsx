@@ -277,7 +277,7 @@ export function ComparacaoOrgaos() {
       )
 
       if (selectedExportOptions.includes('evolucaoComparativa')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
 
         comparativosByYear.forEach(({ year, data: compData }) => {
           const selectedOrgaoByYear =
@@ -331,7 +331,10 @@ export function ComparacaoOrgaos() {
         let imageBase64: string | undefined
         const element = document.getElementById('chart-evolucao-comparativa')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
@@ -348,7 +351,7 @@ export function ComparacaoOrgaos() {
       }
 
       if (selectedExportOptions.includes('perfilGastos')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
 
         comparativosByYear.forEach(({ year, data: compData }) => {
           const selectedOrgaoByYear =
@@ -372,7 +375,9 @@ export function ComparacaoOrgaos() {
           const baseKeysByExport = ['SEE', 'SES', 'SEINFRA'] as const
 
           const exportRadarData = baseRadarByYear.map((item) => {
-            const row: Record<string, number | string> = { subject: item.subject }
+            const row: Record<string, number | string> = {
+              subject: item.subject,
+            }
             orgaosToExport.forEach((orgao, index) => {
               const baseKey = baseKeysByExport[index % baseKeysByExport.length]
               const baseTotal =
@@ -405,7 +410,10 @@ export function ComparacaoOrgaos() {
         let imageBase64: string | undefined
         const element = document.getElementById('chart-perfil-gastos')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
@@ -422,7 +430,7 @@ export function ComparacaoOrgaos() {
       }
 
       if (selectedExportOptions.includes('detalhamentoOrgao')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
 
         comparativosByYear.forEach(({ year, data: compData }) => {
           compData.orgaos.slice(0, 5).forEach((orgao) => {
@@ -454,11 +462,31 @@ export function ComparacaoOrgaos() {
           columns: [
             { header: 'Órgão', key: 'sigla', width: 15 },
             { header: 'Nome', key: 'nome', width: 45 },
-            { header: 'Orçamento', key: 'orcamento', width: 25, isCurrency: true },
-            { header: 'Executado', key: 'executado', width: 25, isCurrency: true },
-            { header: 'Execução', key: 'execucao', width: 15, isPercentage: true },
+            {
+              header: 'Orçamento',
+              key: 'orcamento',
+              width: 25,
+              isCurrency: true,
+            },
+            {
+              header: 'Executado',
+              key: 'executado',
+              width: 25,
+              isCurrency: true,
+            },
+            {
+              header: 'Execução',
+              key: 'execucao',
+              width: 15,
+              isPercentage: true,
+            },
             { header: 'Pessoal', key: 'pessoal', width: 25, isCurrency: true },
-            { header: 'Invest.', key: 'investimento', width: 25, isCurrency: true },
+            {
+              header: 'Invest.',
+              key: 'investimento',
+              width: 25,
+              isCurrency: true,
+            },
             { header: 'Servidores', key: 'servidores', width: 15 },
             { header: 'Ano', key: 'ano', width: 10 },
           ],
@@ -467,7 +495,7 @@ export function ComparacaoOrgaos() {
       }
 
       if (selectedExportOptions.includes('drillDownOrgao')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
 
         const drillDownByYear = selectedOrgaoCode
           ? await Promise.all(
@@ -504,7 +532,12 @@ export function ComparacaoOrgaos() {
             { header: 'Órgão', key: 'orgao', width: 15 },
             { header: 'Classificação', key: 'classificacao', width: 20 },
             { header: 'Descrição', key: 'descricao', width: 50 },
-            { header: 'Total Empenhado', key: 'empenhado', width: 25, isCurrency: true },
+            {
+              header: 'Total Empenhado',
+              key: 'empenhado',
+              width: 25,
+              isCurrency: true,
+            },
             { header: 'Qtd Empenhos', key: 'qtd', width: 15 },
             { header: 'Ano', key: 'ano', width: 10 },
           ],
@@ -790,7 +823,10 @@ export function ComparacaoOrgaos() {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* Evolução Comparativa */}
-          <div id="chart-evolucao-comparativa" className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6">
+          <div
+            id="chart-evolucao-comparativa"
+            className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6"
+          >
             <div className="flex items-center gap-2 mb-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900">
@@ -863,7 +899,10 @@ export function ComparacaoOrgaos() {
           </div>
 
           {/* Radar Chart - Perfil de Gastos */}
-          <div id="chart-perfil-gastos" className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
+          <div
+            id="chart-perfil-gastos"
+            className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6"
+          >
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-gray-900">

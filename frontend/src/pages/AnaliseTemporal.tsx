@@ -148,11 +148,26 @@ export function AnaliseTemporal() {
       const tables: ExportTable[] = []
 
       if (selectedExportOptions.includes('indicadores')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         selectedExportYears.forEach((year) => {
-          data.push({ indicador: 'Crescimento anual médio', valor: '47,9%', descricao: 'Média dos últimos 5 anos', ano: year })
-          data.push({ indicador: 'Pico sazonal', valor: 'Janeiro', descricao: 'Índice sazonal de 116%', ano: year })
-          data.push({ indicador: 'Tendência 2026', valor: '+3,4%', descricao: 'Projeção de crescimento', ano: year })
+          data.push({
+            indicador: 'Crescimento anual médio',
+            valor: '47,9%',
+            descricao: 'Média dos últimos 5 anos',
+            ano: year,
+          })
+          data.push({
+            indicador: 'Pico sazonal',
+            valor: 'Janeiro',
+            descricao: 'Índice sazonal de 116%',
+            ano: year,
+          })
+          data.push({
+            indicador: 'Tendência 2026',
+            valor: '+3,4%',
+            descricao: 'Projeção de crescimento',
+            ano: year,
+          })
         })
 
         tables.push({
@@ -168,13 +183,17 @@ export function AnaliseTemporal() {
       }
 
       if (selectedExportOptions.includes('despesasTrimestrais')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         selectedExportYears.forEach((year) => {
           const yearKey = `ano${year}`
           MOCK_QUARTERLY.forEach((item) => {
             const value = Number(item[yearKey as keyof typeof item] ?? 0)
             if (value > 0) {
-              data.push({ trimestre: item.trimestre, despesa: value * 1_000_000, ano: year })
+              data.push({
+                trimestre: item.trimestre,
+                despesa: value * 1_000_000,
+                ano: year,
+              })
             }
           })
         })
@@ -182,7 +201,10 @@ export function AnaliseTemporal() {
         let imageBase64: string | undefined
         const element = document.getElementById('chart-despesas-trimestrais')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
@@ -198,7 +220,7 @@ export function AnaliseTemporal() {
       }
 
       if (selectedExportOptions.includes('crescimentoAnual')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         MOCK_ANNUAL_GROWTH.forEach((item) => {
           if (selectedExportYears.includes(item.ano as unknown as ExportYear)) {
             data.push({ ano: item.ano, crescimento: item.valor })
@@ -208,14 +230,22 @@ export function AnaliseTemporal() {
         let imageBase64: string | undefined
         const element = document.getElementById('chart-crescimento-anual')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
           title: 'Crescimento Anual',
           columns: [
             { header: 'Ano', key: 'ano', width: 20 },
-            { header: 'Crescimento', key: 'crescimento', width: 20, isPercentage: true },
+            {
+              header: 'Crescimento',
+              key: 'crescimento',
+              width: 20,
+              isPercentage: true,
+            },
           ],
           data,
           imageBase64,
@@ -223,7 +253,7 @@ export function AnaliseTemporal() {
       }
 
       if (selectedExportOptions.includes('sazonalidade')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         selectedExportYears.forEach((year) => {
           MOCK_SEASONALITY.forEach((item) => {
             data.push({ mes: item.mes, indice: item.indice, ano: year })
@@ -233,7 +263,10 @@ export function AnaliseTemporal() {
         let imageBase64: string | undefined
         const element = document.getElementById('chart-sazonalidade')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
@@ -249,13 +282,17 @@ export function AnaliseTemporal() {
       }
 
       if (selectedExportOptions.includes('comparativoMensal')) {
-        const data: Record<string, any>[] = []
+        const data: Record<string, unknown>[] = []
         selectedExportYears.forEach((year) => {
           const yearKey = `ano${year}`
           MOCK_MONTHLY_COMPARISON.forEach((item) => {
             const value = Number(item[yearKey as keyof typeof item] ?? 0)
             if (value > 0) {
-              data.push({ mes: item.mes, despesa: value * 1_000_000, ano: year })
+              data.push({
+                mes: item.mes,
+                despesa: value * 1_000_000,
+                ano: year,
+              })
             }
           })
         })
@@ -263,7 +300,10 @@ export function AnaliseTemporal() {
         let imageBase64: string | undefined
         const element = document.getElementById('chart-comparativo-mensal')
         if (element) {
-          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+          imageBase64 = await toPng(element, {
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+          })
         }
 
         tables.push({
@@ -293,17 +333,13 @@ export function AnaliseTemporal() {
     crescimentoAnualMedio:
       'Média de crescimento das despesas nos últimos anos.',
 
-    picoSazonal:
-      'Mês com histórico de maiores despesas.',
+    picoSazonal: 'Mês com histórico de maiores despesas.',
 
-    tendencia2026:
-      'Projeção do comportamento das despesas para 2026.',
+    tendencia2026: 'Projeção do comportamento das despesas para 2026.',
 
-    despesasTrimestrais:
-      'Total de despesas acumuladas por trimestre.',
+    despesasTrimestrais: 'Total de despesas acumuladas por trimestre.',
 
-    crescimentoAnual:
-      'Variação percentual das despesas entre os anos.',
+    crescimentoAnual: 'Variação percentual das despesas entre os anos.',
 
     indiceSazonalidade:
       'Comportamento mensal em relação à média do ano (Base 100).',
@@ -441,35 +477,35 @@ export function AnaliseTemporal() {
             )}
           </div>
 
-            {/* Botões Exportar */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => handleExport('excel')}
-                disabled={
-                  isExporting ||
-                  selectedExportOptions.length === 0 ||
-                  selectedExportYears.length === 0
-                }
-                className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#142F4B] px-4 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
-              >
-                <Download className="h-4 w-4" />
-                {isExporting ? 'Gerando...' : 'Excel'}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleExport('pdf')}
-                disabled={
-                  isExporting ||
-                  selectedExportOptions.length === 0 ||
-                  selectedExportYears.length === 0
-                }
-                className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#008C6C] px-4 text-sm font-semibold text-white transition hover:bg-[#007258] disabled:cursor-not-allowed disabled:bg-gray-400"
-              >
-                <Download className="h-4 w-4" />
-                {isExporting ? 'Gerando...' : 'PDF'}
-              </button>
-            </div>
+          {/* Botões Exportar */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleExport('excel')}
+              disabled={
+                isExporting ||
+                selectedExportOptions.length === 0 ||
+                selectedExportYears.length === 0
+              }
+              className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#142F4B] px-4 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              <Download className="h-4 w-4" />
+              {isExporting ? 'Gerando...' : 'Excel'}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleExport('pdf')}
+              disabled={
+                isExporting ||
+                selectedExportOptions.length === 0 ||
+                selectedExportYears.length === 0
+              }
+              className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#008C6C] px-4 text-sm font-semibold text-white transition hover:bg-[#007258] disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              <Download className="h-4 w-4" />
+              {isExporting ? 'Gerando...' : 'PDF'}
+            </button>
+          </div>
         </div>
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -511,7 +547,10 @@ export function AnaliseTemporal() {
         {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Despesas Trimestrais */}
-          <div id="chart-despesas-trimestrais" className="bg-white rounded-xl border border-gray-200 p-6">
+          <div
+            id="chart-despesas-trimestrais"
+            className="bg-white rounded-xl border border-gray-200 p-6"
+          >
             <div className="flex items-center gap-2 mb-1">
               <div className="mb-1 flex items-center gap-2">
                 <h3 className="font-semibold text-gray-900">
@@ -583,7 +622,10 @@ export function AnaliseTemporal() {
           </div>
 
           {/* Crescimento Anual */}
-          <div id="chart-crescimento-anual" className="bg-white rounded-xl border border-gray-200 p-6">
+          <div
+            id="chart-crescimento-anual"
+            className="bg-white rounded-xl border border-gray-200 p-6"
+          >
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-gray-900">
@@ -646,7 +688,10 @@ export function AnaliseTemporal() {
         </div>
 
         {/* Índice de Sazonalidade */}
-        <div id="chart-sazonalidade" className="bg-white rounded-xl border border-gray-200 p-6">
+        <div
+          id="chart-sazonalidade"
+          className="bg-white rounded-xl border border-gray-200 p-6"
+        >
           <div className="mb-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900">
@@ -706,7 +751,10 @@ export function AnaliseTemporal() {
         </div>
 
         {/* Comparativo Mensal por Ano */}
-        <div id="chart-comparativo-mensal" className="bg-white rounded-xl border border-gray-200 p-6">
+        <div
+          id="chart-comparativo-mensal"
+          className="bg-white rounded-xl border border-gray-200 p-6"
+        >
           <div className="mb-1">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-gray-900">
