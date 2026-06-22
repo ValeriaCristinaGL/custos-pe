@@ -14,7 +14,7 @@ export interface ExportColumn {
 export interface ExportTable {
   title: string
   columns: ExportColumn[]
-  data: Record<string, any>[]
+  data: Record<string, unknown>[]
   imageBase64?: string
 }
 
@@ -58,7 +58,9 @@ export async function exportToPdf(filename: string, tables: ExportTable[]) {
     })
 
     if (table.imageBase64) {
-      const finalY = (doc as any).lastAutoTable.finalY || 25
+      const finalY =
+        (doc as unknown as { lastAutoTable?: { finalY?: number } })
+          .lastAutoTable?.finalY || 25
       const pageHeight = doc.internal.pageSize.getHeight()
       const imgWidth = 180
       const imgHeight = 80
@@ -67,7 +69,14 @@ export async function exportToPdf(filename: string, tables: ExportTable[]) {
         doc.addPage()
         doc.addImage(table.imageBase64, 'PNG', 14, 20, imgWidth, imgHeight)
       } else {
-        doc.addImage(table.imageBase64, 'PNG', 14, finalY + 10, imgWidth, imgHeight)
+        doc.addImage(
+          table.imageBase64,
+          'PNG',
+          14,
+          finalY + 10,
+          imgWidth,
+          imgHeight
+        )
       }
     }
   })
@@ -83,7 +92,7 @@ export async function exportToExcel(filename: string, tables: ExportTable[]) {
     let sheetName = table.title.replace(/[\\/?*[\]]/g, '').slice(0, 31)
 
     let attempt = 1
-    let originalName = sheetName
+    const originalName = sheetName
     while (workbook.getWorksheet(sheetName)) {
       sheetName = `${originalName.slice(0, 28)}_${attempt}`
       attempt++
@@ -125,7 +134,7 @@ export async function exportToExcel(filename: string, tables: ExportTable[]) {
         base64: table.imageBase64,
         extension: 'png',
       })
-      
+
       const finalRow = table.data.length + 3
       worksheet.addImage(imageId, {
         tl: { col: 0, row: finalRow },
