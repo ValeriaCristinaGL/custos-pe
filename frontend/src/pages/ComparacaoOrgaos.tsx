@@ -15,7 +15,12 @@ import {
   Radar,
 } from 'recharts'
 import { TrendingUp, Info, Download, ChevronDown } from 'lucide-react'
-import * as XLSX from 'xlsx'
+import {
+  exportToExcel,
+  exportToPdf,
+  type ExportTable,
+} from '../services/ExportService'
+import { toPng } from 'html-to-image'
 import { DashboardHeader } from './Dashboard'
 import {
   getComparativo,
@@ -103,6 +108,7 @@ export function ComparacaoOrgaos() {
     ExportOption[]
   >([])
   const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -251,7 +257,7 @@ export function ComparacaoOrgaos() {
     return row
   })
 
-  async function handleExportExcel() {
+  async function handleExport(format: 'excel' | 'pdf') {
     if (
       selectedExportOptions.length === 0 ||
       selectedExportYears.length === 0
@@ -259,281 +265,262 @@ export function ComparacaoOrgaos() {
       return
     }
 
-    const rows: Array<Array<string | number>> = []
-    const currencyCells: string[] = []
-    const currencyFormat = '"R$" #,##0.00'
+    setIsExporting(true)
+    try {
+      const tables: ExportTable[] = []
 
-    const addEmptyLine = () => {
-      rows.push([])
-    }
-
-    const addTitle = (title: string) => {
-      rows.push([title])
-    }
-
-    const addCurrencyCell = (rowIndex: number, columnIndex: number) => {
-      const cellAddress = XLSX.utils.encode_cell({
-        r: rowIndex,
-        c: columnIndex,
-      })
-
-      currencyCells.push(cellAddress)
-    }
-
-    const comparativosByYear = await Promise.all(
-      selectedExportYears.map(async (year) => {
-        const data = await getComparativo(year)
-        return { year, data }
-      })
-    )
-
-    if (selectedExportOptions.includes('evolucaoComparativa')) {
-      addTitle('Evolução Comparativa')
-      rows.push(['Mês', 'Órgão', 'Despesa', 'Ano'])
-
-      comparativosByYear.forEach(({ year, data }) => {
-        const selectedOrgaoByYear =
-          data.orgaos.find(
-            (orgao) => orgao.codigoOrgao === selectedOrgaoCode
-          ) ?? data.orgaos[0]
-
-        const orgaosToExport = selectedOrgaoByYear
-          ? [
-              selectedOrgaoByYear,
-              ...data.orgaos
-                .filter(
-                  (orgao) =>
-                    orgao.codigoOrgao !== selectedOrgaoByYear.codigoOrgao
-                )
-                .slice(0, 2),
-            ]
-          : []
-
-        const baseEvolutionByYear = buildOrgaoEvolution(year)
-        const baseKeysByExport = ['SEE', 'SES', 'SEINFRA'] as const
-
-        const exportEvolutionData = baseEvolutionByYear.map((item) => {
-          const row: Record<string, number | string> = { mes: item.mes }
-
-          orgaosToExport.forEach((orgao, index) => {
-            const baseKey = baseKeysByExport[index % baseKeysByExport.length]
-
-            const baseTotal =
-              data.orgaos.find((entry) => entry.codigoOrgao === baseKey)
-                ?.totalEmpenhado ??
-              selectedOrgaoByYear?.totalEmpenhado ??
-              1
-
-            const scale = baseTotal > 0 ? orgao.totalEmpenhado / baseTotal : 1
-
-            row[orgao.siglaOrgao] = Math.round(item[baseKey] * scale)
-          })
-
-          return row
+      const comparativosByYear = await Promise.all(
+        selectedExportYears.map(async (year) => {
+          const data = await getComparativo(year)
+          return { year, data }
         })
+      )
 
-        exportEvolutionData.forEach((item) => {
-          orgaosToExport.forEach((orgao) => {
-            const value = Number(item[orgao.siglaOrgao] ?? 0)
-            const rowIndex = rows.length
+      if (selectedExportOptions.includes('evolucaoComparativa')) {
+        const data: Record<string, any>[] = []
 
-            rows.push([item.mes, orgao.siglaOrgao, value * 1_000_000, year])
-            addCurrencyCell(rowIndex, 2)
-          })
-        })
-      })
+        comparativosByYear.forEach(({ year, data: compData }) => {
+          const selectedOrgaoByYear =
+            compData.orgaos.find(
+              (orgao) => orgao.codigoOrgao === selectedOrgaoCode
+            ) ?? compData.orgaos[0]
 
-      addEmptyLine()
-    }
+          const orgaosToExport = selectedOrgaoByYear
+            ? [
+                selectedOrgaoByYear,
+                ...compData.orgaos
+                  .filter(
+                    (orgao) =>
+                      orgao.codigoOrgao !== selectedOrgaoByYear.codigoOrgao
+                  )
+                  .slice(0, 2),
+              ]
+            : []
 
-    if (selectedExportOptions.includes('perfilGastos')) {
-      addTitle('Perfil de Gastos')
-      rows.push(['Critério', 'Órgão', 'Valor', 'Ano'])
+          const baseEvolutionByYear = buildOrgaoEvolution(year)
+          const baseKeysByExport = ['SEE', 'SES', 'SEINFRA'] as const
 
-      comparativosByYear.forEach(({ year, data }) => {
-        const selectedOrgaoByYear =
-          data.orgaos.find(
-            (orgao) => orgao.codigoOrgao === selectedOrgaoCode
-          ) ?? data.orgaos[0]
-
-        const orgaosToExport = selectedOrgaoByYear
-          ? [
-              selectedOrgaoByYear,
-              ...data.orgaos
-                .filter(
-                  (orgao) =>
-                    orgao.codigoOrgao !== selectedOrgaoByYear.codigoOrgao
-                )
-                .slice(0, 2),
-            ]
-          : []
-
-        const baseRadarByYear = buildRadarData(year)
-        const baseKeysByExport = ['SEE', 'SES', 'SEINFRA'] as const
-
-        const exportRadarData = baseRadarByYear.map((item) => {
-          const row: Record<string, number | string> = { subject: item.subject }
-
-          orgaosToExport.forEach((orgao, index) => {
-            const baseKey = baseKeysByExport[index % baseKeysByExport.length]
-
-            const baseTotal =
-              data.orgaos.find((entry) => entry.codigoOrgao === baseKey)
-                ?.totalEmpenhado ??
-              selectedOrgaoByYear?.totalEmpenhado ??
-              1
-
-            const scale = baseTotal > 0 ? orgao.totalEmpenhado / baseTotal : 1
-
-            row[orgao.siglaOrgao] = clampValue(
-              Math.round(item[baseKey] * scale),
-              20,
-              100
-            )
-          })
-
-          return row
-        })
-
-        exportRadarData.forEach((item) => {
-          orgaosToExport.forEach((orgao) => {
-            rows.push([
-              item.subject,
-              orgao.siglaOrgao,
-              Number(item[orgao.siglaOrgao] ?? 0),
-              year,
-            ])
-          })
-        })
-      })
-
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('detalhamentoOrgao')) {
-      addTitle('Detalhamento por Órgão')
-      rows.push([
-        'Órgão',
-        'Nome do Órgão',
-        'Orçamento',
-        'Executado',
-        'Execução',
-        'Pessoal',
-        'Investimento',
-        'Servidores',
-        'Ano',
-      ])
-
-      comparativosByYear.forEach(({ year, data }) => {
-        data.orgaos.slice(0, 5).forEach((orgao) => {
-          const execPct =
-            orgao.totalEmpenhado > 0
-              ? (orgao.totalPago / orgao.totalEmpenhado) * 100
-              : 0
-
-          const pessoal = orgao.totalEmpenhado * 0.68
-          const investimento = orgao.totalEmpenhado * 0.1
-          const servidores = Math.round(orgao.totalEmpenhado / 150000)
-
-          const rowIndex = rows.length
-
-          rows.push([
-            orgao.siglaOrgao,
-            orgao.nomeOrgao,
-            orgao.totalEmpenhado,
-            orgao.totalPago,
-            `${execPct.toFixed(1)}%`,
-            pessoal,
-            investimento,
-            servidores,
-            year,
-          ])
-
-          addCurrencyCell(rowIndex, 2)
-          addCurrencyCell(rowIndex, 3)
-          addCurrencyCell(rowIndex, 5)
-          addCurrencyCell(rowIndex, 6)
-        })
-      })
-
-      addEmptyLine()
-    }
-
-    if (selectedExportOptions.includes('drillDownOrgao')) {
-      addTitle('Drill-down por órgão')
-      rows.push([
-        'Órgão',
-        'Classificação',
-        'Descrição',
-        'Total empenhado',
-        'Qtd. empenhos',
-        'Ano',
-      ])
-
-      const drillDownByYear = selectedOrgaoCode
-        ? await Promise.all(
-            selectedExportYears.map(async (year) => {
-              const data = await getEvolucao(selectedOrgaoCode, year)
-              return { year, data }
+          const exportEvolutionData = baseEvolutionByYear.map((item) => {
+            const row: Record<string, number | string> = { mes: item.mes }
+            orgaosToExport.forEach((orgao, index) => {
+              const baseKey = baseKeysByExport[index % baseKeysByExport.length]
+              const baseTotal =
+                compData.orgaos.find((entry) => entry.codigoOrgao === baseKey)
+                  ?.totalEmpenhado ??
+                selectedOrgaoByYear?.totalEmpenhado ??
+                1
+              const scale = baseTotal > 0 ? orgao.totalEmpenhado / baseTotal : 1
+              row[orgao.siglaOrgao] = Math.round(item[baseKey] * scale)
             })
-          )
-        : []
+            return row
+          })
 
-      drillDownByYear.forEach(({ year, data }) => {
-        const orgaoLabel =
-          comparativo?.orgaos.find(
-            (orgao) => orgao.codigoOrgao === selectedOrgaoCode
-          )?.siglaOrgao ??
-          selectedOrgaoCode ??
-          '-'
-
-        data.itens.forEach((item) => {
-          const rowIndex = rows.length
-
-          rows.push([
-            orgaoLabel,
-            item.classificacaoMcasp,
-            item.descricao,
-            item.totalEmpenhado,
-            item.quantidadeEmpenhos,
-            year,
-          ])
-
-          addCurrencyCell(rowIndex, 3)
+          exportEvolutionData.forEach((item) => {
+            orgaosToExport.forEach((orgao) => {
+              const value = Number(item[orgao.siglaOrgao] ?? 0)
+              data.push({
+                mes: item.mes,
+                orgao: orgao.siglaOrgao,
+                despesa: value * 1_000_000,
+                ano: year,
+              })
+            })
+          })
         })
-      })
 
-      addEmptyLine()
-    }
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-evolucao-comparativa')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
 
-    const workbook = XLSX.utils.book_new()
-    const worksheet = XLSX.utils.aoa_to_sheet(rows)
-
-    currencyCells.forEach((cellAddress) => {
-      if (worksheet[cellAddress]) {
-        worksheet[cellAddress].t = 'n'
-        worksheet[cellAddress].z = currencyFormat
+        tables.push({
+          title: 'Evolução Comparativa',
+          columns: [
+            { header: 'Mês', key: 'mes', width: 15 },
+            { header: 'Órgão', key: 'orgao', width: 20 },
+            { header: 'Despesa', key: 'despesa', width: 25, isCurrency: true },
+            { header: 'Ano', key: 'ano', width: 10 },
+          ],
+          data,
+          imageBase64,
+        })
       }
-    })
 
-    worksheet['!cols'] = [
-      { wch: 24 },
-      { wch: 36 },
-      { wch: 44 },
-      { wch: 22 },
-      { wch: 18 },
-      { wch: 22 },
-      { wch: 22 },
-      { wch: 16 },
-      { wch: 12 },
-    ]
+      if (selectedExportOptions.includes('perfilGastos')) {
+        const data: Record<string, any>[] = []
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório')
+        comparativosByYear.forEach(({ year, data: compData }) => {
+          const selectedOrgaoByYear =
+            compData.orgaos.find(
+              (orgao) => orgao.codigoOrgao === selectedOrgaoCode
+            ) ?? compData.orgaos[0]
 
-    XLSX.writeFile(
-      workbook,
-      `comparacao-orgaos-${selectedExportYears.join('-')}.xlsx`
-    )
+          const orgaosToExport = selectedOrgaoByYear
+            ? [
+                selectedOrgaoByYear,
+                ...compData.orgaos
+                  .filter(
+                    (orgao) =>
+                      orgao.codigoOrgao !== selectedOrgaoByYear.codigoOrgao
+                  )
+                  .slice(0, 2),
+              ]
+            : []
+
+          const baseRadarByYear = buildRadarData(year)
+          const baseKeysByExport = ['SEE', 'SES', 'SEINFRA'] as const
+
+          const exportRadarData = baseRadarByYear.map((item) => {
+            const row: Record<string, number | string> = { subject: item.subject }
+            orgaosToExport.forEach((orgao, index) => {
+              const baseKey = baseKeysByExport[index % baseKeysByExport.length]
+              const baseTotal =
+                compData.orgaos.find((entry) => entry.codigoOrgao === baseKey)
+                  ?.totalEmpenhado ??
+                selectedOrgaoByYear?.totalEmpenhado ??
+                1
+              const scale = baseTotal > 0 ? orgao.totalEmpenhado / baseTotal : 1
+              row[orgao.siglaOrgao] = clampValue(
+                Math.round(item[baseKey] * scale),
+                20,
+                100
+              )
+            })
+            return row
+          })
+
+          exportRadarData.forEach((item) => {
+            orgaosToExport.forEach((orgao) => {
+              data.push({
+                criterio: item.subject,
+                orgao: orgao.siglaOrgao,
+                valor: Number(item[orgao.siglaOrgao] ?? 0),
+                ano: year,
+              })
+            })
+          })
+        })
+
+        let imageBase64: string | undefined
+        const element = document.getElementById('chart-perfil-gastos')
+        if (element) {
+          imageBase64 = await toPng(element, { pixelRatio: 2, backgroundColor: '#ffffff' })
+        }
+
+        tables.push({
+          title: 'Perfil de Gastos',
+          columns: [
+            { header: 'Critério', key: 'criterio', width: 25 },
+            { header: 'Órgão', key: 'orgao', width: 20 },
+            { header: 'Pontuação', key: 'valor', width: 15 },
+            { header: 'Ano', key: 'ano', width: 10 },
+          ],
+          data,
+          imageBase64,
+        })
+      }
+
+      if (selectedExportOptions.includes('detalhamentoOrgao')) {
+        const data: Record<string, any>[] = []
+
+        comparativosByYear.forEach(({ year, data: compData }) => {
+          compData.orgaos.slice(0, 5).forEach((orgao) => {
+            const execPct =
+              orgao.totalEmpenhado > 0
+                ? (orgao.totalPago / orgao.totalEmpenhado) * 100
+                : 0
+
+            const pessoal = orgao.totalEmpenhado * 0.68
+            const investimento = orgao.totalEmpenhado * 0.1
+            const servidores = Math.round(orgao.totalEmpenhado / 150000)
+
+            data.push({
+              sigla: orgao.siglaOrgao,
+              nome: orgao.nomeOrgao,
+              orcamento: orgao.totalEmpenhado,
+              executado: orgao.totalPago,
+              execucao: execPct.toFixed(1),
+              pessoal,
+              investimento,
+              servidores,
+              ano: year,
+            })
+          })
+        })
+
+        tables.push({
+          title: 'Detalhamento por Órgão',
+          columns: [
+            { header: 'Órgão', key: 'sigla', width: 15 },
+            { header: 'Nome', key: 'nome', width: 45 },
+            { header: 'Orçamento', key: 'orcamento', width: 25, isCurrency: true },
+            { header: 'Executado', key: 'executado', width: 25, isCurrency: true },
+            { header: 'Execução', key: 'execucao', width: 15, isPercentage: true },
+            { header: 'Pessoal', key: 'pessoal', width: 25, isCurrency: true },
+            { header: 'Invest.', key: 'investimento', width: 25, isCurrency: true },
+            { header: 'Servidores', key: 'servidores', width: 15 },
+            { header: 'Ano', key: 'ano', width: 10 },
+          ],
+          data,
+        })
+      }
+
+      if (selectedExportOptions.includes('drillDownOrgao')) {
+        const data: Record<string, any>[] = []
+
+        const drillDownByYear = selectedOrgaoCode
+          ? await Promise.all(
+              selectedExportYears.map(async (year) => {
+                const resData = await getEvolucao(selectedOrgaoCode, year)
+                return { year, data: resData }
+              })
+            )
+          : []
+
+        drillDownByYear.forEach(({ year, data: dData }) => {
+          const orgaoLabel =
+            comparativo?.orgaos.find(
+              (orgao) => orgao.codigoOrgao === selectedOrgaoCode
+            )?.siglaOrgao ??
+            selectedOrgaoCode ??
+            '-'
+
+          dData.itens.forEach((item) => {
+            data.push({
+              orgao: orgaoLabel,
+              classificacao: item.classificacaoMcasp,
+              descricao: item.descricao,
+              empenhado: item.totalEmpenhado,
+              qtd: item.quantidadeEmpenhos,
+              ano: year,
+            })
+          })
+        })
+
+        tables.push({
+          title: 'Drill-down por Órgão',
+          columns: [
+            { header: 'Órgão', key: 'orgao', width: 15 },
+            { header: 'Classificação', key: 'classificacao', width: 20 },
+            { header: 'Descrição', key: 'descricao', width: 50 },
+            { header: 'Total Empenhado', key: 'empenhado', width: 25, isCurrency: true },
+            { header: 'Qtd Empenhos', key: 'qtd', width: 15 },
+            { header: 'Ano', key: 'ano', width: 10 },
+          ],
+          data,
+        })
+      }
+
+      const filename = `comparacao-orgaos-${selectedExportYears.join('-')}`
+      if (format === 'excel') {
+        await exportToExcel(filename, tables)
+      } else {
+        await exportToPdf(filename, tables)
+      }
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   return (
@@ -703,18 +690,35 @@ export function ComparacaoOrgaos() {
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={handleExportExcel}
-              disabled={
-                selectedExportOptions.length === 0 ||
-                selectedExportYears.length === 0
-              }
-              className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#142F4B] px-5 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
-            >
-              <Download className="h-4 w-4" />
-              Exportar
-            </button>
+            {/* Botões Exportar */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleExport('excel')}
+                disabled={
+                  isExporting ||
+                  selectedExportOptions.length === 0 ||
+                  selectedExportYears.length === 0
+                }
+                className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#142F4B] px-4 text-sm font-semibold text-white transition hover:bg-[#0f243a] disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                <Download className="h-4 w-4" />
+                {isExporting ? 'Gerando...' : 'Excel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExport('pdf')}
+                disabled={
+                  isExporting ||
+                  selectedExportOptions.length === 0 ||
+                  selectedExportYears.length === 0
+                }
+                className="cursor-pointer inline-flex h-9 items-center gap-2 rounded-lg bg-[#008C6C] px-4 text-sm font-semibold text-white transition hover:bg-[#007258] disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                <Download className="h-4 w-4" />
+                {isExporting ? 'Gerando...' : 'PDF'}
+              </button>
+            </div>
           </div>
         </div>
         {/* Órgão Cards */}
@@ -748,7 +752,7 @@ export function ComparacaoOrgaos() {
 
                         <InfoTooltip
                           label={`Informação sobre ${orgao.siglaOrgao}`}
-                          text={`Mostra um resumo das despesas de ${orgao.siglaOrgao}. Aqui você vê o valor total registrado para esse órgão e quanto desse valor já foi pago. Clique no card para analisar esse órgão com mais detalhes nos gráficos e tabelas abaixo.`}
+                          text={`Resumo das despesas de ${orgao.siglaOrgao}. Clique para detalhar nos gráficos abaixo.`}
                         />
                       </div>
                       <p className="text-xs text-gray-500">
@@ -786,7 +790,7 @@ export function ComparacaoOrgaos() {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* Evolução Comparativa */}
-          <div className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6">
+          <div id="chart-evolucao-comparativa" className="lg:col-span-3 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900">
@@ -795,14 +799,14 @@ export function ComparacaoOrgaos() {
 
                 <InfoTooltip
                   label="Informação sobre evolução comparativa"
-                  text="Mostra como as despesas dos órgãos mudaram ao longo dos meses. Esse gráfico ajuda a comparar se um órgão está gastando mais, menos ou seguindo um comportamento parecido com os outros."
+                  text="Comparação da evolução mensal das despesas entre os órgãos."
                 />
               </div>
             </div>
             <p className="text-sm text-gray-500 mb-4">
               Despesas por órgão ao longo dos anos (em milhões R$)
             </p>
-            <div className="h-70">
+            <div className="h-70 bg-white">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={evolutionData}
@@ -859,7 +863,7 @@ export function ComparacaoOrgaos() {
           </div>
 
           {/* Radar Chart - Perfil de Gastos */}
-          <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
+          <div id="chart-perfil-gastos" className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-gray-900">
@@ -868,14 +872,14 @@ export function ComparacaoOrgaos() {
 
                 <InfoTooltip
                   label="Informação sobre perfil de gastos"
-                  text="Mostra uma visão comparativa do comportamento de gastos dos órgãos selecionados. Quanto maior a área preenchida no gráfico, maior é a participação daquele órgão nos critérios analisados."
+                  text="Visão comparativa da participação de cada órgão nos critérios de gastos."
                 />
               </div>
               <p className="text-sm text-gray-500">
                 Análise multidimensional dos órgãos selecionados
               </p>
             </div>
-            <div className="h-62.5 mt-2">
+            <div className="h-62.5 mt-2 bg-white">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart
                   data={radarData}
@@ -935,7 +939,7 @@ export function ComparacaoOrgaos() {
 
               <InfoTooltip
                 label="Informação sobre detalhamento por órgão"
-                text="Mostra os principais dados de execução orçamentária por órgão, como orçamento registrado, valor executado, percentual de execução, gastos com pessoal, investimentos e quantidade estimada de servidores."
+                text="Visão geral da execução orçamentária por órgão."
               />
             </div>
             <p className="text-sm text-gray-500">
@@ -1046,7 +1050,7 @@ export function ComparacaoOrgaos() {
 
                 <InfoTooltip
                   label="Informação sobre drill-down por órgão"
-                  text="Mostra uma abertura mais detalhada das despesas do órgão selecionado. Aqui é possível entender melhor quais classificações de custo concentram os maiores valores."
+                  text="Detalhamento das despesas do órgão por classificação de custo."
                 />
               </div>
               <p className="text-sm text-gray-500">
