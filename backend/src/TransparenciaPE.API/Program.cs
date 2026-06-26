@@ -82,6 +82,13 @@ if (!app.Environment.IsEnvironment("Testing"))
                 await Task.Delay(delay);
             }
         }
+
+        // Seed com dados fictícios apenas em Development
+        if (app.Environment.IsDevelopment())
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<AppDbContext>>();
+            await DbSeeder.SeedAsync(dbContext, logger);
+        }
     }
 }
 

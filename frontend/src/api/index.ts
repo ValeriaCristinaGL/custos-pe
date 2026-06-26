@@ -107,10 +107,127 @@ function buildComparativoMock(year: number): ComparativoOrgaos {
 
 function buildDrillDownMock(codigoOrgao: string, year: number): DrillDown {
   const factor = yearFactor(year)
+  const orgaoInfo = MOCK_COMPARATIVO.orgaos.find(
+    (o) => o.codigoOrgao === codigoOrgao
+  )
+  const nomeOrgao = orgaoInfo ? orgaoInfo.nomeOrgao : 'Secretaria de Governo'
+  const total = orgaoInfo ? orgaoInfo.totalEmpenhado : 1000000000
+
+  // Gerar classificações dinâmicas baseadas no órgão selecionado
+  let baseItens = [
+    {
+      classificacaoMcasp: '3.1.90',
+      descricao: 'Pessoal e Encargos Sociais',
+      totalEmpenhado: Math.round(total * 0.65),
+      quantidadeEmpenhos: 42000,
+    },
+    {
+      classificacaoMcasp: '3.3.90',
+      descricao: 'Outras Despesas Correntes (Custeio)',
+      totalEmpenhado: Math.round(total * 0.22),
+      quantidadeEmpenhos: 18500,
+    },
+    {
+      classificacaoMcasp: '4.4.90',
+      descricao: 'Investimentos em Obras e Equipamentos',
+      totalEmpenhado: Math.round(total * 0.1),
+      quantidadeEmpenhos: 3200,
+    },
+    {
+      classificacaoMcasp: '3.3.50',
+      descricao: 'Transferências e Convênios',
+      totalEmpenhado: Math.round(total * 0.03),
+      quantidadeEmpenhos: 850,
+    },
+  ]
+
+  if (codigoOrgao === 'SES') {
+    baseItens = [
+      {
+        classificacaoMcasp: '3.1.90',
+        descricao: 'Vencimentos e Vantagens Fixas - Profissionais de Saúde',
+        totalEmpenhado: Math.round(total * 0.58),
+        quantidadeEmpenhos: 38000,
+      },
+      {
+        classificacaoMcasp: '3.3.90',
+        descricao: 'Aquisição de Medicamentos e Insumos Hospitalares',
+        totalEmpenhado: Math.round(total * 0.26),
+        quantidadeEmpenhos: 24500,
+      },
+      {
+        classificacaoMcasp: '4.4.90',
+        descricao: 'Reforma e Equipagem de Unidades Hospitalares',
+        totalEmpenhado: Math.round(total * 0.11),
+        quantidadeEmpenhos: 1800,
+      },
+      {
+        classificacaoMcasp: '3.3.50',
+        descricao: 'Repasses do SUS para Consórcios de Saúde',
+        totalEmpenhado: Math.round(total * 0.05),
+        quantidadeEmpenhos: 120,
+      },
+    ]
+  } else if (codigoOrgao === 'SEINFRA') {
+    baseItens = [
+      {
+        classificacaoMcasp: '4.4.90',
+        descricao: 'Obras de Infraestrutura Rodoviária e Hídrica',
+        totalEmpenhado: Math.round(total * 0.62),
+        quantidadeEmpenhos: 4200,
+      },
+      {
+        classificacaoMcasp: '3.3.90',
+        descricao: 'Manutenção Preventiva de Rodovias e Barragens',
+        totalEmpenhado: Math.round(total * 0.24),
+        quantidadeEmpenhos: 8400,
+      },
+      {
+        classificacaoMcasp: '3.1.90',
+        descricao: 'Pessoal e Encargos Sociais',
+        totalEmpenhado: Math.round(total * 0.11),
+        quantidadeEmpenhos: 1900,
+      },
+      {
+        classificacaoMcasp: '4.4.90',
+        descricao: 'Indenizações por Desapropriações de Obras',
+        totalEmpenhado: Math.round(total * 0.03),
+        quantidadeEmpenhos: 150,
+      },
+    ]
+  } else if (codigoOrgao === 'SDS') {
+    baseItens = [
+      {
+        classificacaoMcasp: '3.1.90',
+        descricao: 'Vencimentos de Policiais Militares e Civis',
+        totalEmpenhado: Math.round(total * 0.72),
+        quantidadeEmpenhos: 45000,
+      },
+      {
+        classificacaoMcasp: '3.3.90',
+        descricao: 'Locação, Manutenção de Viaturas e Combustível',
+        totalEmpenhado: Math.round(total * 0.17),
+        quantidadeEmpenhos: 12500,
+      },
+      {
+        classificacaoMcasp: '4.4.90',
+        descricao: 'Sistemas de Videomonitoramento, Rádios e Armamento',
+        totalEmpenhado: Math.round(total * 0.08),
+        quantidadeEmpenhos: 2100,
+      },
+      {
+        classificacaoMcasp: '3.3.90',
+        descricao: 'Reforma e Conservação de Delegacias e Quartéis',
+        totalEmpenhado: Math.round(total * 0.03),
+        quantidadeEmpenhos: 3500,
+      },
+    ]
+  }
+
   return {
-    ...MOCK_DRILLDOWN,
     codigoOrgao,
-    itens: MOCK_DRILLDOWN.itens.map((item, index) => {
+    nomeOrgao,
+    itens: baseItens.map((item, index) => {
       const itemFactor = clamp(factor + index * 0.03, 0.8, 1.4)
       return {
         ...item,
@@ -195,7 +312,7 @@ const MOCK_COMPARATIVO: ComparativoOrgaos = {
   orgaos: [
     {
       codigoOrgao: 'SEE',
-      nomeOrgao: 'Secretaria de Educação',
+      nomeOrgao: 'Secretaria de Educação e Esportes',
       siglaOrgao: 'SEE',
       totalEmpenhado: 13200000000,
       totalLiquidado: 12450000000,
@@ -203,7 +320,7 @@ const MOCK_COMPARATIVO: ComparativoOrgaos = {
     },
     {
       codigoOrgao: 'SES',
-      nomeOrgao: 'Secretaria de Saúde',
+      nomeOrgao: 'Secretaria Estadual de Saúde',
       siglaOrgao: 'SES',
       totalEmpenhado: 11500000000,
       totalLiquidado: 10800000000,
@@ -219,19 +336,11 @@ const MOCK_COMPARATIVO: ComparativoOrgaos = {
     },
     {
       codigoOrgao: 'SEINFRA',
-      nomeOrgao: 'Secretaria de Infraestrutura',
+      nomeOrgao: 'Secretaria de Infraestrutura e Recursos Hídricos',
       siglaOrgao: 'SEINFRA',
       totalEmpenhado: 4200000000,
       totalLiquidado: 3900000000,
       totalPago: 3600000000,
-    },
-    {
-      codigoOrgao: 'SEPLAG',
-      nomeOrgao: 'Secretaria de Planejamento',
-      siglaOrgao: 'SEPLAG',
-      totalEmpenhado: 3100000000,
-      totalLiquidado: 2900000000,
-      totalPago: 2750000000,
     },
     {
       codigoOrgao: 'SEFAZ',
@@ -251,34 +360,42 @@ const MOCK_COMPARATIVO: ComparativoOrgaos = {
     },
     {
       codigoOrgao: 'SDSCJ',
-      nomeOrgao: 'Sec. Des. Social, Criança e Juventude',
+      nomeOrgao: 'Secretaria de Desenvolvimento Social, Criança e Juventude',
       siglaOrgao: 'SDSCJ',
       totalEmpenhado: 1900000000,
       totalLiquidado: 1750000000,
       totalPago: 1600000000,
     },
     {
-      codigoOrgao: 'SECID',
-      nomeOrgao: 'Secretaria das Cidades',
-      siglaOrgao: 'SECID',
-      totalEmpenhado: 1700000000,
-      totalLiquidado: 1550000000,
-      totalPago: 1400000000,
-    },
-    {
-      codigoOrgao: 'SECTMA',
-      nomeOrgao: 'Sec. Ciência, Tecnologia e Meio Ambiente',
-      siglaOrgao: 'SECTMA',
+      codigoOrgao: 'SDEC',
+      nomeOrgao: 'Secretaria de Desenvolvimento Econômico',
+      siglaOrgao: 'SDEC',
       totalEmpenhado: 1400000000,
       totalLiquidado: 1300000000,
       totalPago: 1200000000,
+    },
+    {
+      codigoOrgao: 'DETRAN',
+      nomeOrgao: 'Departamento Estadual de Trânsito de PE',
+      siglaOrgao: 'DETRAN',
+      totalEmpenhado: 650000000,
+      totalLiquidado: 610000000,
+      totalPago: 580000000,
+    },
+    {
+      codigoOrgao: 'SECULT',
+      nomeOrgao: 'Secretaria de Cultura',
+      siglaOrgao: 'SECULT',
+      totalEmpenhado: 320000000,
+      totalLiquidado: 290000000,
+      totalPago: 270000000,
     },
   ],
 }
 
 const MOCK_DRILLDOWN: DrillDown = {
   codigoOrgao: 'SEE',
-  nomeOrgao: 'Secretaria de Educação',
+  nomeOrgao: 'Secretaria de Educação e Esportes',
   itens: [
     {
       classificacaoMcasp: '3.1.90',
@@ -373,19 +490,20 @@ export interface SeasonalityData {
 }
 
 export const MOCK_SEASONALITY: SeasonalityData[] = [
-  { mes: 'Jan', indice: 90 },
-  { mes: 'Fev', indice: 75 },
-  { mes: 'Mar', indice: 85 },
-  { mes: 'Abr', indice: 60 },
-  { mes: 'Mai', indice: 0 },
-  { mes: 'Jun', indice: 0 },
-  { mes: 'Jul', indice: 0 },
-  { mes: 'Ago', indice: 0 },
-  { mes: 'Set', indice: 0 },
-  { mes: 'Out', indice: 0 },
-  { mes: 'Nov', indice: 0 },
-  { mes: 'Dez', indice: 0 },
+  { mes: 'Jan', indice: 116 },
+  { mes: 'Fev', indice: 92 },
+  { mes: 'Mar', indice: 98 },
+  { mes: 'Abr', indice: 104 },
+  { mes: 'Mai', indice: 100 },
+  { mes: 'Jun', indice: 108 },
+  { mes: 'Jul', indice: 88 },
+  { mes: 'Ago', indice: 92 },
+  { mes: 'Set', indice: 96 },
+  { mes: 'Out', indice: 100 },
+  { mes: 'Nov', indice: 105 },
+  { mes: 'Dez', indice: 121 },
 ]
+
 
 export interface MonthlyComparison {
   mes: string
