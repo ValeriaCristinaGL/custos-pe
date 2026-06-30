@@ -45,10 +45,8 @@ public class TcePEDataClientTests
             .ReturnsAsync(responseMessage);
     }
 
-    // ─── Receitas ─────────────────────────────────────────────────────────
-
     [Fact]
-    public async Task GetReceitasAsync_DeserializesTceJsonFormat()
+    public async Task GetReceitasAsync_ReturnsReceitas_WhenApiReturnsTceJson()
     {
         // Arrange
         SetupHttpResponse(HttpStatusCode.OK, new
@@ -75,7 +73,7 @@ public class TcePEDataClientTests
     [Fact]
     public async Task GetReceitasAsync_ThrowsHttpRequestException_WhenApiReturnsServerError()
     {
-        // Arrange — GetReceitasAsync usa EnsureSuccessStatusCode, então lança exceção
+        // Arrange
         SetupHttpResponse(HttpStatusCode.InternalServerError);
 
         // Act & Assert
@@ -83,10 +81,8 @@ public class TcePEDataClientTests
             () => _client.GetReceitasAsync(2026));
     }
 
-    // ─── EmpenhosByOrgao ─────────────────────────────────────────────────
-
     [Fact]
-    public async Task GetEmpenhosByOrgaoAsync_DeserializesCorrectly()
+    public async Task GetEmpenhosByOrgaoAsync_ReturnsEmpenhos_WhenApiReturnsTceJson()
     {
         // Arrange
         SetupHttpResponse(HttpStatusCode.OK, new
@@ -126,7 +122,7 @@ public class TcePEDataClientTests
     [Fact]
     public async Task GetEmpenhosByOrgaoAsync_ReturnsEmpty_WhenApiReturnsError()
     {
-        // Arrange — métodos com verificação manual retornam lista vazia em caso de erro
+        // Arrange
         SetupHttpResponse(HttpStatusCode.NotFound);
 
         // Act
@@ -136,10 +132,8 @@ public class TcePEDataClientTests
         result.Should().NotBeNull().And.BeEmpty();
     }
 
-    // ─── Contratos ───────────────────────────────────────────────────────
-
     [Fact]
-    public async Task GetContratosAsync_DeserializesCorrectly()
+    public async Task GetContratosAsync_ReturnsContratos_WhenApiReturnsTceJson()
     {
         // Arrange
         SetupHttpResponse(HttpStatusCode.OK, new
@@ -185,8 +179,6 @@ public class TcePEDataClientTests
         // Assert
         result.Should().NotBeNull().And.BeEmpty();
     }
-
-    // ─── Orcamento ───────────────────────────────────────────────────────
 
     [Fact]
     public async Task GetOrcamentoAsync_ReturnsEmpty_WhenApiReturnsError()

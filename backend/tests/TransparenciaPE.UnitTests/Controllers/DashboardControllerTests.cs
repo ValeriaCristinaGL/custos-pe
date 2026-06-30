@@ -20,10 +20,8 @@ public class DashboardControllerTests
         _sut = new DashboardController(_mockService.Object, _mockLogger.Object);
     }
 
-    // ─── GetResumo ────────────────────────────────────────────────────────
-
     [Fact]
-    public async Task GetResumo_Returns200StatusCode()
+    public async Task GetResumo_ReturnsOkResult_WhenServiceReturnsResumo()
     {
         // Arrange
         _mockService.Setup(s => s.GetResumoAsync(null))
@@ -38,7 +36,7 @@ public class DashboardControllerTests
     }
 
     [Fact]
-    public async Task GetResumo_ReturnsDashboardResumoDtoAsBody()
+    public async Task GetResumo_ReturnsDashboardResumoDto_WhenServiceReturnsResumo()
     {
         // Arrange
         _mockService.Setup(s => s.GetResumoAsync(null))
@@ -53,7 +51,7 @@ public class DashboardControllerTests
     }
 
     [Fact]
-    public async Task GetResumo_ReturnsTotalEmpenhadoFromService()
+    public async Task GetResumo_ReturnsTotalEmpenhado_WhenServiceReturnsResumo()
     {
         // Arrange
         _mockService.Setup(s => s.GetResumoAsync(null))
@@ -67,26 +65,36 @@ public class DashboardControllerTests
         Assert.Equal(1_000_000m, returned!.TotalEmpenhado);
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData(2025)]
-    public async Task GetResumo_InvokesServiceWithProvidedYear(int? ano)
+    [Fact]
+    public async Task GetResumo_InvokesServiceWithNullYear_WhenAnoIsNull()
     {
         // Arrange
-        _mockService.Setup(s => s.GetResumoAsync(ano))
+        _mockService.Setup(s => s.GetResumoAsync(null))
             .ReturnsAsync(new DashboardResumoDto());
 
         // Act
-        await _sut.GetResumo(ano);
+        await _sut.GetResumo(null);
 
         // Assert
-        _mockService.Verify(s => s.GetResumoAsync(ano), Times.Once);
+        _mockService.Verify(s => s.GetResumoAsync(null), Times.Once);
     }
 
-    // ─── GetComparativo ───────────────────────────────────────────────────
+    [Fact]
+    public async Task GetResumo_InvokesServiceWithProvidedYear_WhenAnoIsProvided()
+    {
+        // Arrange
+        _mockService.Setup(s => s.GetResumoAsync(2025))
+            .ReturnsAsync(new DashboardResumoDto());
+
+        // Act
+        await _sut.GetResumo(2025);
+
+        // Assert
+        _mockService.Verify(s => s.GetResumoAsync(2025), Times.Once);
+    }
 
     [Fact]
-    public async Task GetComparativo_Returns200StatusCode()
+    public async Task GetComparativo_ReturnsOkResult_WhenServiceReturnsComparativo()
     {
         // Arrange
         _mockService.Setup(s => s.GetComparativoOrgaosAsync(2025))
@@ -101,7 +109,7 @@ public class DashboardControllerTests
     }
 
     [Fact]
-    public async Task GetComparativo_ReturnsComparativoOrgaosDtoAsBody()
+    public async Task GetComparativo_ReturnsComparativoOrgaosDto_WhenServiceReturnsComparativo()
     {
         // Arrange
         _mockService.Setup(s => s.GetComparativoOrgaosAsync(2025))
@@ -116,7 +124,7 @@ public class DashboardControllerTests
     }
 
     [Fact]
-    public async Task GetComparativo_ReturnsAnoFromService()
+    public async Task GetComparativo_ReturnsAno_WhenServiceReturnsComparativo()
     {
         // Arrange
         _mockService.Setup(s => s.GetComparativoOrgaosAsync(2025))
@@ -130,10 +138,8 @@ public class DashboardControllerTests
         Assert.Equal(2025, returned!.Ano);
     }
 
-    // ─── GetEvolucao ──────────────────────────────────────────────────────
-
     [Fact]
-    public async Task GetEvolucao_Returns200StatusCode()
+    public async Task GetEvolucao_ReturnsOkResult_WhenServiceReturnsDrillDown()
     {
         // Arrange
         _mockService.Setup(s => s.GetDrillDownAsync("001", null))
@@ -148,7 +154,7 @@ public class DashboardControllerTests
     }
 
     [Fact]
-    public async Task GetEvolucao_ReturnsDrillDownDtoAsBody()
+    public async Task GetEvolucao_ReturnsDrillDownDto_WhenServiceReturnsDrillDown()
     {
         // Arrange
         _mockService.Setup(s => s.GetDrillDownAsync("001", null))
@@ -163,7 +169,7 @@ public class DashboardControllerTests
     }
 
     [Fact]
-    public async Task GetEvolucao_ReturnsCodigoOrgaoFromService()
+    public async Task GetEvolucao_ReturnsCodigoOrgao_WhenServiceReturnsDrillDown()
     {
         // Arrange
         _mockService.Setup(s => s.GetDrillDownAsync("001", null))
@@ -177,20 +183,31 @@ public class DashboardControllerTests
         Assert.Equal("001", returned!.CodigoOrgao);
     }
 
-    [Theory]
-    [InlineData("001", null)]
-    [InlineData("002", 2025)]
-    public async Task GetEvolucao_InvokesServiceWithProvidedParameters(string codigoOrgao, int? ano)
+    [Fact]
+    public async Task GetEvolucao_InvokesServiceWithNullYear_WhenAnoIsNull()
     {
         // Arrange
-        _mockService.Setup(s => s.GetDrillDownAsync(codigoOrgao, ano))
-            .ReturnsAsync(new DrillDownDto { CodigoOrgao = codigoOrgao });
+        _mockService.Setup(s => s.GetDrillDownAsync("001", null))
+            .ReturnsAsync(new DrillDownDto { CodigoOrgao = "001" });
 
         // Act
-        await _sut.GetEvolucao(codigoOrgao, ano);
+        await _sut.GetEvolucao("001", null);
 
         // Assert
-        _mockService.Verify(s => s.GetDrillDownAsync(codigoOrgao, ano), Times.Once);
+        _mockService.Verify(s => s.GetDrillDownAsync("001", null), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetEvolucao_InvokesServiceWithProvidedParameters_WhenAnoIsProvided()
+    {
+        // Arrange
+        _mockService.Setup(s => s.GetDrillDownAsync("002", 2025))
+            .ReturnsAsync(new DrillDownDto { CodigoOrgao = "002" });
+
+        // Act
+        await _sut.GetEvolucao("002", 2025);
+
+        // Assert
+        _mockService.Verify(s => s.GetDrillDownAsync("002", 2025), Times.Once);
     }
 }
-

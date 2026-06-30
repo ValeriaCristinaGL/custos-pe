@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using FluentAssertions;
 using Xunit;
 
-namespace TransparenciaPE.UnitTests.Conventions;
+namespace TransparenciaPE.IntegrationTests.Conventions;
 
 public class TestNamingConventionTests
 {
@@ -12,7 +12,7 @@ public class TestNamingConventionTests
         RegexOptions.Compiled);
 
     [Fact]
-    public void TestMethods_FollowNamingConvention_WhenDeclaredInUnitAssembly()
+    public void TestMethods_FollowNamingConvention_WhenDeclaredInIntegrationAssembly()
     {
         var invalidTestNames = typeof(TestNamingConventionTests).Assembly
             .GetTypes()

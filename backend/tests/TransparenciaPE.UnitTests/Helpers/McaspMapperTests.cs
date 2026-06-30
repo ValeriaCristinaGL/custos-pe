@@ -6,25 +6,60 @@ namespace TransparenciaPE.UnitTests.Helpers;
 public class McaspMapperTests
 {
     [Theory]
-    // Pessoal e Encargos Sociais (prefixo 3.1)
     [InlineData("3.1.90.11", "Pessoal e Encargos Sociais")]
     [InlineData("3.1.00.00", "Pessoal e Encargos Sociais")]
-    // Custeio (prefixo 3.3)
+    public void MapToClassificacao_ReturnsPessoalEncargos_WhenNaturezaStartsWith31(string natureza, string expected)
+    {
+        // Act
+        var result = McaspMapper.MapToClassificacao(natureza, string.Empty);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("3.3.90.30", "Custeio")]
     [InlineData("3.3.90.39", "Custeio")]
-    // Investimentos (prefixo 4.4)
+    public void MapToClassificacao_ReturnsCusteio_WhenNaturezaStartsWith33(string natureza, string expected)
+    {
+        // Act
+        var result = McaspMapper.MapToClassificacao(natureza, string.Empty);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("4.4.90.51", "Investimentos")]
     [InlineData("4.4.90.61", "Investimentos")]
-    // Outros — prefixos não mapeados
+    public void MapToClassificacao_ReturnsInvestimentos_WhenNaturezaStartsWith44(string natureza, string expected)
+    {
+        // Act
+        var result = McaspMapper.MapToClassificacao(natureza, string.Empty);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("3.2.90.00", "Outros")]
     [InlineData("4.5.90.52", "Outros")]
     [InlineData("4.6.90.71", "Outros")]
     [InlineData("5.0.00.00", "Outros")]
     [InlineData("10.0.00.00", "Outros")]
-    // Entradas inválidas/vazias
+    public void MapToClassificacao_ReturnsOutros_WhenNaturezaPrefixIsUnknown(string natureza, string expected)
+    {
+        // Act
+        var result = McaspMapper.MapToClassificacao(natureza, string.Empty);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("", "Outros")]
     [InlineData("   ", "Outros")]
-    public void MapToClassificacao_ReturnsCorrectClassification(string natureza, string expected)
+    public void MapToClassificacao_ReturnsOutros_WhenNaturezaIsBlank(string natureza, string expected)
     {
         // Act
         var result = McaspMapper.MapToClassificacao(natureza, string.Empty);

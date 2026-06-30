@@ -68,22 +68,35 @@ public class DashboardServiceTests
     }
 
     [Fact]
-    public async Task GetResumoAsync_PassesYearParameterToQueryService()
+    public async Task GetResumoAsync_PassesYearParameter_WhenYearIsProvided()
     {
         // Arrange
-        var queryResult = new DashboardResumoResult { TotalEmpenhado = 500_000m };
-        _mockQueryService.Setup(q => q.GetResumoAsync(2025)).ReturnsAsync(queryResult);
+        _mockQueryService.Setup(q => q.GetResumoAsync(2025))
+            .ReturnsAsync(new DashboardResumoResult());
 
         // Act
-        var result = await _sut.GetResumoAsync(2025);
+        await _sut.GetResumoAsync(2025);
 
         // Assert
-        Assert.Equal(500_000m, result.TotalEmpenhado);
         _mockQueryService.Verify(q => q.GetResumoAsync(2025), Times.Once);
     }
 
     [Fact]
-    public async Task GetComparativoOrgaosAsync_ReturnsOrgaoList()
+    public async Task GetComparativoOrgaosAsync_ReturnsAno_WhenYearIsProvided()
+    {
+        // Arrange
+        _mockQueryService.Setup(q => q.GetComparativoOrgaosAsync(2025))
+            .ReturnsAsync(new List<ComparativoOrgaoResult>());
+
+        // Act
+        var result = await _sut.GetComparativoOrgaosAsync(2025);
+
+        // Assert
+        Assert.Equal(2025, result.Ano);
+    }
+
+    [Fact]
+    public async Task GetComparativoOrgaosAsync_ReturnsOrgaos_WhenDataExists()
     {
         // Arrange
         var queryResults = new List<ComparativoOrgaoResult>
@@ -98,12 +111,25 @@ public class DashboardServiceTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(2025, result.Ano);
         Assert.Equal(2, result.Orgaos.Count());
     }
 
     [Fact]
-    public async Task GetDrillDownAsync_ReturnsHierarchicalData()
+    public async Task GetDrillDownAsync_ReturnsCodigoOrgao_WhenCodigoOrgaoIsProvided()
+    {
+        // Arrange
+        _mockQueryService.Setup(q => q.GetDrillDownAsync("001", null))
+            .ReturnsAsync(new List<DrillDownResult>());
+
+        // Act
+        var result = await _sut.GetDrillDownAsync("001");
+
+        // Assert
+        Assert.Equal("001", result.CodigoOrgao);
+    }
+
+    [Fact]
+    public async Task GetDrillDownAsync_ReturnsItens_WhenDataExists()
     {
         // Arrange
         var queryResults = new List<DrillDownResult>
@@ -117,7 +143,6 @@ public class DashboardServiceTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("001", result.CodigoOrgao);
         Assert.Single(result.Itens);
     }
 }

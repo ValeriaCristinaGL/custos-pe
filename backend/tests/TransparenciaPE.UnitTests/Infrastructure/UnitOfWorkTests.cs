@@ -8,7 +8,7 @@ namespace TransparenciaPE.UnitTests.Infrastructure;
 public class UnitOfWorkTests
 {
     [Fact]
-    public void UnitOfWork_ExposesConfiguredRepositories()
+    public void UnitOfWork_ExposesConfiguredRepositories_WhenCreated()
     {
         using var context = InMemoryDbContextFactory.Create();
         var empenhoRepository = new EmpenhoRepository(context);
@@ -43,7 +43,7 @@ public class UnitOfWorkTests
     }
 
     [Fact]
-    public void Dispose_DisposesDbContext()
+    public void Dispose_DisposesDbContext_WhenCalled()
     {
         var context = InMemoryDbContextFactory.Create();
         var empenhoRepository = new EmpenhoRepository(context);
